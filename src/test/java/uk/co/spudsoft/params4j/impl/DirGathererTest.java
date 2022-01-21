@@ -70,11 +70,11 @@ public class DirGathererTest {
     
     AtomicBoolean called = new AtomicBoolean();
     
-    assertTrue(p4j.notifyOfChanges(() -> {
+    assertTrue(p4j.notifyOfChanges(p -> {
       called.set(true);
     }));
     
-    assertTrue(p4j.notifyOfChanges(() -> {
+    assertTrue(p4j.notifyOfChanges(p -> {
       called.set(true);
     }));
     

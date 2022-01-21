@@ -4,6 +4,7 @@
  */
 package uk.co.spudsoft.params4j;
 
+import java.util.function.Consumer;
 import uk.co.spudsoft.params4j.impl.Params4JFactoryImpl;
 
 /**
@@ -20,6 +21,6 @@ public interface Params4J<P> {
   
   P gatherParameters();
   
-  boolean notifyOfChanges(Runnable handler);
+  boolean notifyOfChanges(Consumer<P> handler);
     
 }

@@ -6,15 +6,24 @@ package uk.co.spudsoft.params4j.impl;
 
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.co.spudsoft.params4j.Params4J;
 import uk.co.spudsoft.params4j.Params4JSpi;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -22,21 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
  */
 public class SecretsGathererTest {
   
-  @Test
-  public void testGatherParameters() throws Exception {
-    Params4JSpi p4j = (Params4JSpi) Params4J.<DummyParameters>factory()
-            .withConstructor(() -> new DummyParameters())
-            .withCustomJsonModule(new SimpleModule("pointless"))
-            .create();
-    
-    assertThat(p4j.getProblemHandler(), instanceOf(DefaultParametersErrorHandler.class));
-    
-    SecretsGatherer<DummyParameters> gatherer = new SecretsGatherer<>(new File(Helpers.getResourcePath("/secrets")).toPath(), 100, 100, 4, StandardCharsets.UTF_8);
-    DummyParameters dp = gatherer.gatherParameters(p4j, new DummyParameters());
-    assertEquals(23, dp.getValue());
-    assertEquals("user", dp.getChild().getUsername());
-    assertEquals("pass", dp.getChild().getPassword());
-  }
+  private static final Logger logger = LoggerFactory.getLogger(SecretsGathererTest.class);
   
   @Test
   public void testEmptyDir() throws Exception {
@@ -53,4 +48,62 @@ public class SecretsGathererTest {
     assertNull(dp.getChild());
   }
   
+  private void writeToFile(File file, String contents) throws IOException {
+    try (OutputStream stream = new FileOutputStream(file)) {
+      stream.write(contents.getBytes(StandardCharsets.UTF_8));
+    }
+  }
+  
+  @Test
+  public void testGatherChangingParameters() throws Exception {
+    SecretsGatherer<DummyParameters> gatherer = new SecretsGatherer<>(new File(Helpers.getResourcePath("/secrets")).toPath(), 100, 100, 4, StandardCharsets.UTF_8);
+
+    Params4J<DummyParameters> p4j = new Params4JFactoryImpl<DummyParameters>()
+            .withConstructor(() -> new DummyParameters())
+            .withGatherer(gatherer)
+            .create();
+    
+    DummyParameters dp = p4j.gatherParameters();
+    assertEquals(23, dp.getValue());
+    assertEquals("user", dp.getChild().getUsername());
+    assertEquals("pass", dp.getChild().getPassword());
+    
+    AtomicBoolean called = new AtomicBoolean();
+    
+    // Only one of these two should be called
+    assertTrue(p4j.notifyOfChanges(p -> {
+      assertFalse(called.get());
+      called.set(true);
+      assertEquals(23, p.getValue());
+      assertEquals("new-user", p.getChild().getUsername());
+      assertEquals("new-pass", p.getChild().getPassword());
+    }));
+    
+    assertTrue(p4j.notifyOfChanges(p -> {
+      assertFalse(called.get());
+      called.set(true);
+      assertEquals(23, p.getValue());
+      assertEquals("new-user", p.getChild().getUsername());
+      assertEquals("new-pass", p.getChild().getPassword());
+    }));
+        
+    writeToFile(new File("target/test-classes/secrets/child/username"), "new-user");
+    writeToFile(new File("target/test-classes/secrets/child/password"), "new-pass");
+    logger.debug("Updated file written");
+    
+    long start = System.currentTimeMillis();
+    while(!called.get()) {
+      if (System.currentTimeMillis() > start + 70000) {
+        throw new TimeoutException();
+      }
+      Thread.sleep(100);
+    }
+    
+    dp = p4j.gatherParameters();
+    assertEquals(23, dp.getValue());
+    assertEquals("new-user", dp.getChild().getUsername());
+    assertEquals("new-pass", dp.getChild().getPassword());
+    
+    
+  }
 }

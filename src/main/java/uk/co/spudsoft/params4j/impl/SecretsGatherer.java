@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.co.spudsoft.params4j.ParameterGatherer;
 import uk.co.spudsoft.params4j.Params4JSpi;
 
@@ -28,6 +30,8 @@ import uk.co.spudsoft.params4j.Params4JSpi;
 */
 public class SecretsGatherer<P> implements ParameterGatherer<P> {
 
+  private static final Logger logger = LoggerFactory.getLogger(SecretsGatherer.class);
+  
   private final Path root;
   private final int fileSizeLimit;
   private final int fileCountLimit;
@@ -44,9 +48,16 @@ public class SecretsGatherer<P> implements ParameterGatherer<P> {
     
   @Override
   public P gatherParameters(Params4JSpi spi, P base) throws IOException {
-    ObjectNode node = SecretsLoader.gather(spi.getJsonMapper(), root, fileSizeLimit, fileCountLimit, fileDepthLimit, charset);
+    ObjectNode node = SecretsLoader.gather(spi.getJsonMapper(), root, fileSizeLimit, fileCountLimit, fileDepthLimit, charset,
+            dir -> {
+              try {
+                spi.watch(dir);
+              } catch(IOException ex) {
+                logger.warn("Failed to establish watch on {}: ", dir, ex);
+              }
+            });
 
-    if ((node != null) && !node.isEmpty()) {
+    if (!node.isEmpty()) {
       ObjectReader reader = spi.getJsonMapper().readerForUpdating(base);
       base = reader.readValue(node);
     }

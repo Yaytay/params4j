@@ -48,7 +48,7 @@ public class FileWatcher {
   }
 
   public void watch(Path path) throws IOException {
-    if (watcher != null) {
+    if (watcher != null && !watchKeys.containsKey(path)) {
       WatchKey key = path.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
       watchKeys.put(path, key);
     }

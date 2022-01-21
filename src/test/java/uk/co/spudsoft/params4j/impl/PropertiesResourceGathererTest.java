@@ -28,8 +28,8 @@ public class PropertiesResourceGathererTest {
     assertEquals("first", dp.getList().get(0));
     assertEquals("second", dp.getList().get(1));
     assertEquals("2022-01-10T17:10", dp.getLocalDateTime().toString());
-    assertFalse(p4j.notifyOfChanges(() -> {}));
-    assertFalse(p4j.notifyOfChanges(() -> {}));
+    assertFalse(p4j.notifyOfChanges(p -> {}));
+    assertFalse(p4j.notifyOfChanges(p -> {}));
   }
 
   @Test

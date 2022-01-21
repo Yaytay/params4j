@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
@@ -21,6 +22,8 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import org.slf4j.Logger;
@@ -46,7 +49,8 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
   private final ObjectMapper jsonMapper;
   private final ObjectMapper yamlMapper;
   private final FileWatcher fileWatcher;
-  private Runnable changeHappenedHandler;
+  private Consumer<P> changeHappenedHandler;
+  private final AtomicReference<ObjectNode> lastValue = new AtomicReference<>();
   
   private JavaPropsMapper createPropsMapper() {
     JavaPropsMapper mapper = JavaPropsMapper.builder()
@@ -170,17 +174,25 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
         logger.warn("Failed to process: ", ex);
       }
     }
+    lastValue.set(jsonMapper.convertValue(value, ObjectNode.class));
     return value;
   }
 
   @Override
-  public boolean notifyOfChanges(Runnable handler) {
+  public boolean notifyOfChanges(Consumer<P> handler) {
     changeHappenedHandler = handler;
     return fileWatcher.start();
   }
     
   private void changeNotificationHandler() {
-    changeHappenedHandler.run();
+    synchronized (lastValue) {
+      P newValue = gatherParameters();
+      ObjectNode newNode = jsonMapper.convertValue(newValue, ObjectNode.class);
+      if (newNode.equals(lastValue.get())) {
+        lastValue.set(newNode);
+        changeHappenedHandler.accept(newValue);
+      }
+    }
   }
   
 }

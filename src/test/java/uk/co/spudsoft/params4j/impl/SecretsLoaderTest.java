@@ -30,7 +30,7 @@ public class SecretsLoaderTest {
   public void testGather() throws Exception {
     ObjectMapper mapper = new ObjectMapper();
     Path root = new File(Helpers.getResourcePath("/secrets")).toPath();
-    ObjectNode result = SecretsLoader.gather(mapper, root, 100, 100, 4, StandardCharsets.UTF_8);
+    ObjectNode result = SecretsLoader.gather(mapper, root, 100, 100, 4, StandardCharsets.UTF_8, null);
     assertNotNull(result);
     logger.debug("Result: {}", result);
     assertThat(result.has(".hidden"), is(false));
