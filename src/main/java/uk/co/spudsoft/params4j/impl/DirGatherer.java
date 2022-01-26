@@ -37,6 +37,7 @@ public class DirGatherer<P> implements ParameterGatherer<P> {
     
     if (dir.isDirectory()) {
       File[] files = dir.listFiles();
+      Arrays.sort(files);  // To ensure consistent behaviour across systems
       for (FileType type : types) {
         for (File file : files) {
           for (String extension : type.getGatherer().extensions()) {
