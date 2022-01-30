@@ -24,6 +24,10 @@ so Params4J takes the approach of forcing all parameters to be defined in a sing
 This does not mean that the structure is necessarily flat, nor that it is necessary to pass around all the parameters within your code.
 Fields within the parameters object can themselves be POJOs representing a subset of the configuration.
 
+Note that whilst Params4J will gather command line arguments it is not intended to be used for typical command line apps - there are better tools for that.
+Params4J is aimed at services with complex configuration.
+The support for command line arguments is aimed at providing a high priority mechanism for tweaking individual parameters.
+
 # Getting Started
 
 1. Define the parameters class structure that you want to use.

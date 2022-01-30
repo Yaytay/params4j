@@ -17,6 +17,7 @@ public class DummyParameters {
   private LocalDateTime localDateTime;
   private List<String> list;
   private DummyChildParameter child;
+  private Boolean check;
 
   public int getValue() {
     return value;
@@ -49,5 +50,13 @@ public class DummyParameters {
   public void setChild(DummyChildParameter child) {
     this.child = child;
   }
-  
+
+  public Boolean getCheck() {
+    return check;
+  }
+
+  public void setCheck(Boolean check) {
+    this.check = check;
+  }
+    
 }

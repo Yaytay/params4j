@@ -146,16 +146,19 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
         for (T entry : entries) {
           Object keyObject = keyGetter.apply(entry);
           if (keyObject instanceof String) {
-            String key = (String) keyObject;
-            if (key.startsWith(propertyPrefix)) {
-              Object value = valueGetter.apply(entry);
-              if (value instanceof String) {
-                key = key.substring(propertyPrefix.length());
-                writer.append(key)
-                    .append(" = ")
-                    .append((String) value)
-                    .append("\r\n");
-              }
+            String castKey = (String) keyObject;
+            String key = null;
+            if (propertyPrefix == null || propertyPrefix.isEmpty()) {
+              key = castKey;
+            } else if (castKey.startsWith(propertyPrefix)) {
+              key = castKey.substring(propertyPrefix.length());
+            }
+            Object value = valueGetter.apply(entry);
+            if (value instanceof String) {
+              writer.append(key)
+                  .append(" = ")
+                  .append((String) value)
+                  .append("\r\n");
             }
           }
         }
