@@ -12,6 +12,7 @@ import uk.co.spudsoft.params4j.Params4J;
 import uk.co.spudsoft.params4j.Params4JSpi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  *
@@ -32,17 +33,22 @@ public class EnvironmentVariablesGathererTest {
     env.put("PREFIX_LIST[1]", "second");
     env.put("PREFIX_WRONG", "wrong");
     env.put("ignored", "ignored");
-    EnvironmentVariablesGatherer<DummyParameters> gatherer = new EnvironmentVariablesGatherer<>(env, "prefix.");
+    EnvironmentVariablesGatherer<DummyParameters> gatherer = new EnvironmentVariablesGatherer<>(env, "prefix.", true);
     DummyParameters dp = gatherer.gatherParameters(p4j, new DummyParameters());
     assertEquals(17, dp.getValue());
     assertEquals("first", dp.getList().get(0));
     assertEquals("second", dp.getList().get(1));
     
-    gatherer = new EnvironmentVariablesGatherer<>(env, "prefix");
+    gatherer = new EnvironmentVariablesGatherer<>(env, "prefix", true);
     dp = gatherer.gatherParameters(p4j, new DummyParameters());
     assertEquals(17, dp.getValue());
     assertEquals("first", dp.getList().get(0));
     assertEquals("second", dp.getList().get(1));    
+    
+    gatherer = new EnvironmentVariablesGatherer<>(env, "prefix", false);
+    dp = gatherer.gatherParameters(p4j, new DummyParameters());
+    assertEquals(0, dp.getValue());
+    assertNull(dp.getList());
   }
   
 }
