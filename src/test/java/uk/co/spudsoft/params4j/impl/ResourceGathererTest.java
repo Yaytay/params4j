@@ -5,6 +5,7 @@
 package uk.co.spudsoft.params4j.impl;
 
 import org.junit.jupiter.api.Test;
+import uk.co.spudsoft.params4j.FileType;
 import uk.co.spudsoft.params4j.Params4J;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,11 +15,11 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
  *
  * @author jtalbut
  */
-public class PropertiesResourceGathererTest {
+public class ResourceGathererTest {
   
   @Test
   public void testGatherParameters() throws Exception {
-    PropertiesResourceGatherer<DummyParameters> gatherer = new PropertiesResourceGatherer<>("/test1.properties");
+    ResourceGatherer<DummyParameters> gatherer = new ResourceGatherer<>("/test1.properties", FileType.Properties);
     Params4J<DummyParameters> p4j = new Params4JFactoryImpl<DummyParameters>()
             .withConstructor(() -> new DummyParameters())
             .withGatherer(gatherer)
@@ -34,7 +35,7 @@ public class PropertiesResourceGathererTest {
 
   @Test
   public void testIgnoreBadIntParameter() throws Exception {
-    PropertiesResourceGatherer<DummyParameters> gatherer = new PropertiesResourceGatherer<>("/test2.properties");
+    ResourceGatherer<DummyParameters> gatherer = new ResourceGatherer<>("/test2.properties", FileType.Properties);
     Params4J<DummyParameters> p4j = new Params4JFactoryImpl<DummyParameters>()
             .withConstructor(() -> new DummyParameters())
             .withGatherer(gatherer)

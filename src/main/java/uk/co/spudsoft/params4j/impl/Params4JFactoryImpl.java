@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
+import uk.co.spudsoft.params4j.FileType;
 import uk.co.spudsoft.params4j.ParameterGatherer;
 import uk.co.spudsoft.params4j.Params4J;
 import uk.co.spudsoft.params4j.Params4JFactory;
@@ -74,6 +75,11 @@ public class Params4JFactoryImpl<P> implements Params4JFactory<P> {
     return this;
   }
 
+  @Override
+  public Params4JFactory<P> withResourceGatherer(String resource, FileType fileType) {
+    return withGatherer(new ResourceGatherer<>(resource, fileType));
+  }
+  
   @Override
   public Params4J<P> create() {
     return new Params4JImpl<>(constructor

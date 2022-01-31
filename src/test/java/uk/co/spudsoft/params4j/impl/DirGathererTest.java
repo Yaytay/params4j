@@ -4,6 +4,7 @@
  */
 package uk.co.spudsoft.params4j.impl;
 
+import uk.co.spudsoft.params4j.FileType;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;

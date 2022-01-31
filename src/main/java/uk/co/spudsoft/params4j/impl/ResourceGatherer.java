@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import uk.co.spudsoft.params4j.FileType;
 import uk.co.spudsoft.params4j.ParameterGatherer;
 import uk.co.spudsoft.params4j.Params4JSpi;
 
@@ -18,20 +19,22 @@ import uk.co.spudsoft.params4j.Params4JSpi;
  * 
  * @param <P> The type of the parameters object.
  */
-public class PropertiesResourceGatherer<P> implements ParameterGatherer<P> {
+public class ResourceGatherer<P> implements ParameterGatherer<P> {
   
-  private static final Logger logger = LoggerFactory.getLogger(PropertiesResourceGatherer.class);
+  private static final Logger logger = LoggerFactory.getLogger(ResourceGatherer.class);
 
   private final String resource;
+  private final FileType type;
 
-  public PropertiesResourceGatherer(String resource) {
+  public ResourceGatherer(String resource, FileType fileType) {
     this.resource = resource;
+    this.type = fileType;
   }
 
   @Override
   public P gatherParameters(Params4JSpi spi, P base) throws IOException {
     
-    ObjectReader reader = spi.getPropsMapper().readerForUpdating(base);
+    ObjectReader reader = type.getObjectMapper(spi).readerForUpdating(base);
     
     try (InputStream stream = this.getClass().getResourceAsStream(resource)) {
       return reader.readValue(stream);

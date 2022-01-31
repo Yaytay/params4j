@@ -26,6 +26,9 @@ public interface Params4JFactory<P> {
   Params4JFactory<P> withCustomJsonModule(com.fasterxml.jackson.databind.Module module);
   Params4JFactory<P> withYamlMapper(ObjectMapper yamlMapper);
   
+  Params4JFactory<P> withResourceGatherer(String resource, FileType fileType);
+  
+  
   Params4J<P> create();
   
 }
