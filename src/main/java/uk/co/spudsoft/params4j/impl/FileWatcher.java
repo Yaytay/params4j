@@ -21,7 +21,12 @@ import static java.nio.file.StandardWatchEventKinds.ENTRY_DELETE;
 import static java.nio.file.StandardWatchEventKinds.ENTRY_MODIFY;
 
 /**
- *
+ * A convenience class for performing file watches on multiple dirs with a delay after each change to allow batches of changes to complete before being processed.
+ * 
+ * Changes to files often come in multiple operations and a quick file watcher can end up either performing unnecessary processing or processing inconsistent files.
+ * To avoid this FileWatcher introduces a small delay (2s) after any file notifications before processing the change - if another change comes in during the delay the timer
+ * restarts - files have to be stable for 2s.
+ * 
  * @author jtalbut
  */
 public class FileWatcher {
@@ -29,13 +34,17 @@ public class FileWatcher {
   private static final Logger logger = LoggerFactory.getLogger(FileWatcher.class);
 
   private static final int NOTIFICATION_DELAY_S = 2;
-  private static final int DEFAULT_DELAY_S = 60;
+  private static final int DEFAULT_DELAY_S = 3600;
   
   private final AtomicReference<Thread> threadRef = new AtomicReference<>();
   private final WatchService watcher;
   private final Runnable callback;
   private Map<Path, WatchKey> watchKeys = new HashMap<>();
 
+  /**
+   * Constructor.
+   * @param callback The Runnable that will be called when any of the watched paths have changed and the changes have stabilized.
+   */
   public FileWatcher(Runnable callback) {
     WatchService tempWatchService = null;
     try {
@@ -47,6 +56,11 @@ public class FileWatcher {
     this.callback = callback;
   }
 
+  /**
+   * Add a path to the list of paths being watched.
+   * @param path The path to add to the list of watched paths.
+   * @throws IOException if something goes wrong.
+   */
   public void watch(Path path) throws IOException {
     if (watcher != null && !watchKeys.containsKey(path)) {
       WatchKey key = path.register(watcher, ENTRY_CREATE, ENTRY_DELETE, ENTRY_MODIFY);
@@ -54,6 +68,15 @@ public class FileWatcher {
     }
   }
 
+  /**
+   * Start monitoring files.
+   * 
+   * Do not call this method more than once - it will create multiple threads that do the same thing.
+   * 
+   * Monitoring will only begin if at least one watch path has been set to watch.
+   * 
+   * @return true if monitoring started.
+   */
   public boolean start() {
     if (!watchKeys.isEmpty()) {
       if (threadRef.get() == null) {

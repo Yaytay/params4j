@@ -34,17 +34,17 @@ public class DirGatherer<P> implements ParameterGatherer<P> {
   private static final Logger logger = LoggerFactory.getLogger(DirGatherer.class);
   
   private final File dir;
-  private final List<FileType> types;
+  private final List<FileType> fileTypes;
 
   /**
    * Constructor.
    * @param dir The directory that is to be scanned and monitored.
    *            Note that sub directories are not scanned.
-   * @param types The file types that are to be looked for in the directory.
+   * @param fileTypes The file types that are to be looked for in the directory.
    */
-  public DirGatherer(File dir, FileType... types) {
+  public DirGatherer(File dir, FileType... fileTypes) {
     this.dir = dir;
-    this.types = Arrays.asList(types).stream().distinct().collect(Collectors.toList());    
+    this.fileTypes = Arrays.asList(fileTypes).stream().distinct().collect(Collectors.toList());    
   }
 
   @Override
@@ -53,7 +53,7 @@ public class DirGatherer<P> implements ParameterGatherer<P> {
     if (dir.isDirectory()) {
       File[] files = dir.listFiles();
       Arrays.sort(files);  // To ensure consistent behaviour across systems
-      for (FileType type : types) {
+      for (FileType type : fileTypes) {
         for (File file : files) {
           for (String extension : type.getExtensions()) {
             if (file.exists() && file.getName().endsWith(extension)) {
