@@ -10,8 +10,6 @@ import org.junit.jupiter.api.Test;
 import uk.co.spudsoft.params4j.Params4J;
 import uk.co.spudsoft.params4j.Params4JSpi;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 /**
@@ -26,8 +24,6 @@ public class SystemPropertiesGathererTest {
             .withConstructor(() -> new DummyParameters())
             .withCustomJsonModule(new SimpleModule("pointless"))
             .create();
-    
-    assertThat(p4j.getProblemHandler(), instanceOf(DefaultParametersErrorHandler.class));
     
     Properties props = new Properties();
     props.put("prefix.value", "17");

@@ -43,7 +43,7 @@ public class SecretsGathererTest {
             .withCustomJsonModule(new SimpleModule("pointless"))
             .create();
 
-    assertThat(p4j.getProblemHandler(), instanceOf(DefaultParametersErrorHandler.class));
+    assertThat(((Params4JImpl) p4j).getProblemHandler(), instanceOf(DefaultParametersErrorHandler.class));
 
     SecretsGatherer<DummyParameters> gatherer = new SecretsGatherer<>(new File(Helpers.getResourcePath("/nosecrets")).toPath(), 100, 100, 4, StandardCharsets.UTF_8);
     DummyParameters dp = gatherer.gatherParameters(p4j, new DummyParameters());

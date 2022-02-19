@@ -26,7 +26,7 @@ public class Params4JFactoryImplTest {
             .withConstructor(() -> new DummyParameters())
             .withProblemHandler(dph)
             .create();
-    assertSame(dph, p4j.getProblemHandler());
+    assertSame(dph, ((Params4JImpl) p4j).getProblemHandler());
   }
 
   @Test

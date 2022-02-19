@@ -28,31 +28,31 @@ public class DefaultParametersErrorHandler extends DeserializationProblemHandler
 
   @Override
   public Object handleUnexpectedToken(DeserializationContext ctxt, JavaType targetType, JsonToken t, JsonParser p, String failureMsg) throws IOException {
-    logger.error("Unexpected token: {} at {}: {}", targetType, buildLocation(ctxt.getParser()), failureMsg);
+    logger.warn("Unexpected token: {} at {}: {}", targetType, buildLocation(ctxt.getParser()), failureMsg);
     return null;
   }
 
   @Override
   public boolean handleUnknownProperty(DeserializationContext ctxt, JsonParser p, JsonDeserializer<?> deserializer, Object beanOrClass, String propertyName) throws IOException {
-    logger.error("Unknown property: {} at {} with value {}", propertyName, buildLocation(ctxt.getParser()), p.readValueAsTree());
+    logger.warn("Unknown property: {} at {} with value {}", propertyName, buildLocation(ctxt.getParser()), p.readValueAsTree());
     return true; 
   }
 
   @Override
   public Object handleWeirdNativeValue(DeserializationContext ctxt, JavaType targetType, Object valueToConvert, JsonParser p) throws IOException {
-    logger.error("Unprocessable native value : {} \"{}\": Cannot convert to {}", buildLocation(ctxt.getParser()), targetType, valueToConvert, targetType);
+    logger.warn("Unprocessable native value : {} \"{}\": Cannot convert to {}", buildLocation(ctxt.getParser()), targetType, valueToConvert, targetType);
     return null;
   }
 
   @Override
   public Object handleWeirdNumberValue(DeserializationContext ctxt, Class<?> targetType, Number valueToConvert, String failureMsg) throws IOException {
-    logger.error("Unprocessable number value : {} \"{}\": {}", buildLocation(ctxt.getParser()), targetType, valueToConvert, failureMsg);
+    logger.warn("Unprocessable number value : {} \"{}\": {}", buildLocation(ctxt.getParser()), targetType, valueToConvert, failureMsg);
     return null;
   }
 
   @Override
   public Object handleWeirdStringValue(DeserializationContext ctxt, Class<?> targetType, String valueToConvert, String failureMsg) throws IOException {
-    logger.error("Unprocessable string value : {} \"{}\": {}", buildLocation(ctxt.getParser()), valueToConvert, failureMsg);
+    logger.warn("Unprocessable string value : {} \"{}\": {}", buildLocation(ctxt.getParser()), valueToConvert, failureMsg);
     return null;
   }
   

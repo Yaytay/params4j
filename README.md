@@ -46,4 +46,22 @@ The support for command line arguments is aimed at providing a high priority mec
             .create();
 
     DummyParameters dp = p4j.gatherParameters();
+
+    // Monitor for changes
+    p4j.notifyOfChanges(updatedParams -> {
+      // Do something with params here (possibly a graceful shutdown so Kubernetes will restart with new values).
+    });
 ```
+
+Logging is all via slf4j.
+At TRACE level it can be really quite verbose, which can help when it isn't processing the files you think it should.
+Failures are usually logged at WARN level and processing carries on around the error.
+
+# Building
+
+It's a standard maven project, just build it with:
+```sh
+mvn clean install
+```
+
+There are minimal dependencies, at runtime it's jackson and slf4j, but there are a lot of plugins.

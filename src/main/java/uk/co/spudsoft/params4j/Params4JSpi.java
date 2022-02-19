@@ -5,7 +5,6 @@
 package uk.co.spudsoft.params4j;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import java.io.IOException;
 import java.nio.file.Path;
@@ -14,18 +13,37 @@ import java.util.function.Function;
 
 /**
  * Service provider interface for Params4J.
+ * 
+ * An instance of this interface will be passed to gatherers.
+ * This is primarily for sharing mappers and the watch mechanism between gatherers.
+ * 
  * @author jtalbut
  */
 public interface Params4JSpi {
-  
-  DeserializationProblemHandler getProblemHandler();
-  
+
+  /**
+   * Get the configured properties mapper.
+   * @return the configured properties mapper.
+   */
   JavaPropsMapper getPropsMapper();
   
+  /**
+   * Get the configured JSON mapper.
+   * @return the configured JSON mapper.
+   */
   ObjectMapper getJsonMapper();
   
+  /**
+   * Get the configured YAML mapper.
+   * @return the configured YAML mapper.
+   */
   ObjectMapper getYamlMapper();
   
+  /**
+   * Add a path to the list of watch paths.
+   * @param path The path to be watched.
+   * @throws IOException if something goes wrong.
+   */
   void watch(Path path) throws IOException;
   
   /**

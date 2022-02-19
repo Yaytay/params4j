@@ -91,6 +91,17 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     return mapper;
   }
   
+  /**
+   * Constructor.
+   * 
+   * @param constructor Supplier of objects of type P.
+   * @param gatherers The gatherers that will be used to set values on the object provided by the Supplier.
+   * @param problemHandler The handler that will be used to report any problems parsing files.
+   * @param propsMapper The props mapper that is made available to the gatherers via the Params4JSpi.
+   * @param jsonMapper The json mapper that is made available to the gatherers via the Params4JSpi.
+   * @param customJsonModules The custom JSON modules that are added to the default JSON mapper (if one is not passed in).
+   * @param yamlMapper The yaml mapper that is made available to the gatherers via the Params4JSpi.
+   */
   public Params4JImpl(Supplier<P> constructor
           , List<ParameterGatherer<P>> gatherers
           , DeserializationProblemHandler problemHandler
@@ -110,7 +121,13 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     this.fileWatcher = new FileWatcher(this::changeNotificationHandler);
   }
 
-  @Override
+  /**
+   * Get the configured problem handler.
+   * 
+   * This is primarily for test and debug purposes.
+   * 
+   * @return the configured problem handler.
+   */
   public DeserializationProblemHandler getProblemHandler() {
     return problemHandler;
   }

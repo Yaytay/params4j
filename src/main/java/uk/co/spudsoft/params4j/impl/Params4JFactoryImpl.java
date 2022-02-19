@@ -9,6 +9,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import java.io.File;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -84,6 +86,11 @@ public class Params4JFactoryImpl<P> implements Params4JFactory<P> {
   @Override
   public Params4JFactory<P> withDirGatherer(File dir, FileType... fileTypes) {
     return withGatherer(new DirGatherer<>(dir, fileTypes));
+  }
+
+  @Override
+  public Params4JFactory<P> withSecretsGatherer(Path root, int fileSizeLimit, int fileCountLimit, int fileDepthLimit, Charset charset) {
+    return withGatherer(new SecretsGatherer<>(root, fileSizeLimit, fileCountLimit, fileDepthLimit, charset));
   }
   
   @Override
