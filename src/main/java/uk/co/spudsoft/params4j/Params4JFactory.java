@@ -140,6 +140,86 @@ public interface Params4JFactory<P> {
   
 
   /**
+   * Convenience method for adding a {@link uk.co.spudsoft.params4j.impl.EnvironmentVariablesGatherer} to the Params4J instance.
+   *
+   * Note that on Linux (which include docker on Windows) shells usually have constraints on environment variable names.
+   * Specifically names can only consist of letters, digits and the underscore.
+   * Furthermore lowercase variable names should be used for local variables, not one that are passed between processes.
+   * 
+   * Given that params4j expects keys like "prefix.list[1]" this can be a problem.
+   * Typically docker and kubernetes do not enforce constraints on the environment variable keys, but if your container
+   * uses a shell script to bootstrap your service then it probably is affected.
+   * 
+   * This class takes two steps to workaround these limitations:
+   * 1. Any underscores in environment variable key names are replaced with a dot (".").
+   * 2. Optionally, all keys can be converted to lower case (using the default locale).
+   * 
+   * If this not enough to enable an environment variable to be used for a given value then another approach will have to be found.
+   * In particular list values ("list[1]") are not going to work as environment variables if they have to processed by a shell.
+   * 
+   * To avoid trying to process all environment variables as parameters the namePrefix can be used to filter environment variables.
+   * If the namePrefix is supplied (is not null or empty) only environment variables that begin with the prefix will be considered.
+   * The prefix will be removed before mapping variables to the parameters object.
+   * The prefix is always considered to have a trailing dot ("."), this does not have to be specified in the namePrefix argument.
+   * 
+   * 
+   * Equivalent to
+   * <pre>
+   * return withGatherer(new EnvironmentVariablesGatherer&lt;>(namePrefix, toLowerCase));
+   * </pre>
+   * 
+   * @param namePrefix The prefix that can be used to filter environment variables.
+   * @param toLowerCase If true all environment variable names will be converted to lower case before passing to Jackson.
+   * @return this.
+   */
+  Params4JFactory<P> withEnvironmentVariablesGatherer(String namePrefix, boolean toLowerCase);
+  
+
+  /**
+   * Convenience method for adding a {@link uk.co.spudsoft.params4j.impl.SystemPropertiesGatherer} to the Params4J instance.
+   *
+   * To avoid trying to process all environment variables as parameters the namePrefix can be used to filter environment variables.
+   * If the namePrefix is supplied (is not null or empty) only environment variables that begin with the prefix will be considered.
+   * The prefix will be removed before mapping variables to the parameters object.
+   * The prefix is always considered to have a trailing dot ("."), this does not have to be specified in the namePrefix argument.
+   * 
+   * 
+   * Equivalent to
+   * <pre>
+   * return withGatherer(new SystemPropertiesGatherer&lt;>(namePrefix));
+   * </pre>
+   * 
+   * @param namePrefix The prefix that can be used to filter environment variables.
+   * @return this.
+   */
+  Params4JFactory<P> withSystemPropertiesGatherer(String namePrefix);
+  
+
+  /**
+   * Convenience method for adding a {@link uk.co.spudsoft.params4j.impl.CommandLineArgumentsGatherer} to the Params4J instance.
+   *
+   * Arguments are parsed by whatever shell is in use and should be escaped appropriately.
+   * Each string in the args[] array should be a single key/value pair separated by "=".
+   * Any arguments that do not contain the equals character will be treated as being "=true";
+   * 
+   * To avoid trying to process all arguments as parameters the namePrefix can be used to filter them.
+   * If the namePrefix is supplied (is not null or empty) only environment variables that begin with the prefix will be considered.
+   * The prefix will be removed before mapping variables to the parameters object.
+   * The prefix is always considered to have a trailing dot ("."), this does not have to be specified in the namePrefix argument.
+   * Use of the namePrefix is less useful on command line arguments than on environment variables or system properties, but it often makes sense to include it for consistency. 
+   * 
+   * Equivalent to
+   * <pre>
+   * return withGatherer(new CommandLineArgumentsGatherer&lt;>(args, namePrefix));
+   * </pre>
+   * 
+   * @param args The arguments passed in to the main() method.
+   * @param namePrefix The prefix that can be used to filter environment variables.
+   * @return this.
+   */
+  Params4JFactory<P> withCommandLineArgumentsGatherer(String args[], String namePrefix);
+  
+  /**
    * Convenience method for adding a {@link uk.co.spudsoft.params4j.impl.SecretsGatherer} to the Params4J instance.
    *
    * The {@link uk.co.spudsoft.params4j.impl.SecretsGatherer} scans a directory hierarchy and adds any files found to the parameters.

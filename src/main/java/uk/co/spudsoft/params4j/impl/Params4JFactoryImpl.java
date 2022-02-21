@@ -89,6 +89,22 @@ public class Params4JFactoryImpl<P> implements Params4JFactory<P> {
   }
 
   @Override
+  public Params4JFactory<P> withEnvironmentVariablesGatherer(String namePrefix, boolean toLowerCase) {
+    return withGatherer(new EnvironmentVariablesGatherer<>(namePrefix, toLowerCase));
+  }
+
+  @Override
+  public Params4JFactory<P> withSystemPropertiesGatherer(String namePrefix) {
+    return withGatherer(new SystemPropertiesGatherer<>(namePrefix));
+  }
+
+  @Override
+  public Params4JFactory<P> withCommandLineArgumentsGatherer(String[] args, String namePrefix) {
+    return withGatherer(new CommandLineArgumentsGatherer<>(args, namePrefix));
+  }
+  
+  
+  @Override
   public Params4JFactory<P> withSecretsGatherer(Path root, int fileSizeLimit, int fileCountLimit, int fileDepthLimit, Charset charset) {
     return withGatherer(new SecretsGatherer<>(root, fileSizeLimit, fileCountLimit, fileDepthLimit, charset));
   }
