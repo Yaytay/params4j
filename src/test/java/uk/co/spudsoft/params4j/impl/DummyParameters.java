@@ -6,11 +6,13 @@ package uk.co.spudsoft.params4j.impl;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import uk.co.spudsoft.params4j.JavadocCapture;
 
 /**
  *
  * @author jtalbut
  */
+@JavadocCapture
 public class DummyParameters {
   
   private int value;
