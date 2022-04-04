@@ -6,12 +6,17 @@ package commentcap;
 
 import java.io.File;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 import javax.swing.Box;
 import uk.co.spudsoft.params4j.Comment;
 import uk.co.spudsoft.params4j.JavadocCapture;
 
 /**
- *
+ * Test and demonstration class for the capabilities of Params4J documentation.
+ * 
+ * In case it is not obvious the documentation on the members of this class are total nonsense.
+ * 
  * @author jtalbut
  */
 @JavadocCapture
@@ -29,6 +34,12 @@ public class Parameters {
   private DataSource auditDataSource;
   // LocalDateTime is terminal, but should have a specific default value
   private LocalDateTime when = LocalDateTime.of(1971, 06, 05, 14, 0);
+  // A kay/value pair parameter
+  private Map<String, String> translations;
+  // A kay/object pair parameters
+  private Map<String, Credentials> logins;
+  // An array parameter
+  private List<String> names;
 
   /**
    * alien value that cannot be documented further in this codebase
@@ -128,6 +139,37 @@ public class Parameters {
   public void setWhen(LocalDateTime when) {
     this.when = when;
   }
-  
-  
+
+  public Map<String, String> getTranslations() {
+    return translations;
+  }
+
+  /**
+   * translations from one word to another
+   * @param translations 
+   */
+  public void setTranslations(Map<String, String> translations) {
+    this.translations = translations;
+  }
+
+  public List<String> getNames() {
+    return names;
+  }
+
+  /**
+   * names that are recognised by the process
+   * @param names 
+   */
+  public void setNames(List<String> names) {
+    this.names = names;
+  }
+
+  public Map<String, Credentials> getLogins() {
+    return logins;
+  }
+
+  public void setLogins(Map<String, Credentials> logins) {
+    this.logins = logins;
+  }
+
 }

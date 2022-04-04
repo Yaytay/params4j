@@ -64,7 +64,12 @@ public class JavadocCapturer extends AbstractProcessor {
   
   private void writeDocProperties(PackageElement packageElement, Element classElement, Properties commentProps) {
     try {
-      FileObject fo = processingEnv.getFiler().createResource(StandardLocation.CLASS_OUTPUT, packageElement.getQualifiedName(), classElement.getSimpleName() + "-doc.properties", classElement);
+      FileObject fo = processingEnv.getFiler().createResource(
+              StandardLocation.CLASS_OUTPUT
+              , packageElement.getQualifiedName()
+              , classElement.getSimpleName() + "-doc.properties"
+              , classElement
+      );
       try (OutputStream out = fo.openOutputStream()) {
         commentProps.store(out, "Documentation properties for " + ((TypeElement) classElement).getQualifiedName());
       }
@@ -95,7 +100,7 @@ public class JavadocCapturer extends AbstractProcessor {
       setterName = setterName.substring(3);
     }
     if (Character.isUpperCase(setterName.codePointAt(0))) {
-      setterName = Character.toString(Character.toLowerCase(setterName.codePointAt(0))) + setterName.substring(1);
+      setterName = Character.toString(Character.toLowerCase(setterName.codePointAt(0))) + setterName.substring(setterName.offsetByCodePoints(0, 1));
     }
     return setterName;
   }
@@ -111,7 +116,7 @@ public class JavadocCapturer extends AbstractProcessor {
     if (comment.endsWith(".")) {
       comment = comment.substring(0, comment.length() - 1);
     }
-    return comment;
+    return comment.trim();
   }
   
   private void generateCommentProperties(Set<String> elements, Element element) {

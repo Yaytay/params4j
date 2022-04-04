@@ -103,7 +103,7 @@ public class JavadocCapturerTest {
     try ( InputStream stream = cls.getResourceAsStream("/commentcap/Parameters-doc.properties")) {
       props.load(stream);
     }
-    assertThat(props.size(), equalTo(6));
+    assertThat(props.size(), equalTo(8));
     assertThat(props.get("auditDataSource"), equalTo("datasource used for recording activity"));
     assertThat(props.get("baseConfigPath"), equalTo("path to the root of the configuration files"));
     for (Object key : props.keySet()) {
@@ -120,7 +120,7 @@ public class JavadocCapturerTest {
     for (ConfigurationProperty cp : docs) {
       logger.info("Configuration property: {}", OBJECT_MAPPER.writeValueAsString(cp));
     }
-    assertThat(docs, hasSize(14));
+    assertThat(docs, hasSize(16));
   }
 
 }

@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -343,60 +345,112 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     for (Method method : clazz.getMethods()) {
       if (method.getParameters().length == 1 && method.getName().startsWith("set")) {
         Parameter parameter = method.getParameters()[0];
-        String name = JavadocCapturer.setterNameToVariableName(method.getName());
-        Object defaultValue = getValue(defaultInstance, method.getName());
-        String parameterTypeName = parameter.getType().getName();
-        boolean undocumented = typeIsIn(undocumentedClasses, parameterTypeName);
         
-        if (parameter.getType().isPrimitive() || undocumented || TERMINAL_TYPES.contains(parameterTypeName) || typeIsIn(terminalClasses, parameterTypeName)) {          
-          String propName = propertyStates.stream().map(ps -> ps.name).collect(Collectors.joining("."));
-          if (propName != null && !propName.isEmpty()) {
-            propName = propName + ".";
-          }
-          propName = propName + name;
-          
-          String newComment = null;
-          if (method.isAnnotationPresent(Comment.class)) {
-            newComment = method.getAnnotation(Comment.class).value();
-          }
-          if (newComment == null || newComment.isEmpty()) {
-            newComment = classDocProperties.getProperty(name);
-          }
-          String comment = propertyStates.stream().map(ps -> ps.comment).filter(c -> c != null).collect(Collectors.joining(", "));
-          if (newComment != null && !newComment.isEmpty()) {
-            if (classDocProperties.containsKey(name)) {
-              if (comment != null && !comment.isEmpty()) {
-                comment = comment + ", " + newComment;
-              } else {
-                comment = newComment;
-              }
-            }
-          }
-          ConfigurationProperty prop = ConfigurationProperty.builder()
-                  .canBeEnvVar(!cannotBeEnvVar(propName))
-                  .undocumented(undocumented)
-                  .comment(comment)
-                  .defaultValue(defaultValue == null ? null : defaultValue.toString())
-                  .name(prefix == null ? propName : prefix + propName)
-                  .type(parameter.getType())
-                  .build();
-          properties.add(prop);
+        Class<?> fieldType = parameter.getType();
+        String fieldName = JavadocCapturer.setterNameToVariableName(method.getName());
+        Object defaultValue = getValue(defaultInstance, method.getName());
+
+        documentField(properties
+                , docProperties
+                , classDocProperties
+                , prefix
+                , propertyStates
+                , terminalClasses
+                , undocumentedClasses
+                , parameter
+                , method
+                , fieldName
+                , fieldType
+                , defaultValue
+        );
+      }
+    }
+  }
+
+  private void documentField(
+          List<ConfigurationProperty> properties
+          , Map<String, Properties> docProperties
+          , Properties classDocProperties
+          , String prefix
+          , Stack<PropertyState> propertyStates
+          , List<Pattern> terminalClasses
+          , List<Pattern> undocumentedClasses         
+          , Parameter parameter
+          , Method method
+          , String fieldName
+          , Class<?> fieldType
+          , Object defaultValue
+    ) throws SecurityException {
+    
+    String fieldTypeName = fieldType.getCanonicalName();
+    boolean undocumented = typeIsIn(undocumentedClasses, fieldTypeName);
+    if (fieldType.isPrimitive() || undocumented || TERMINAL_TYPES.contains(fieldTypeName) || typeIsIn(terminalClasses, fieldTypeName)) {
+      outputTerminalField(propertyStates, fieldName, method, classDocProperties, undocumented, defaultValue, prefix, parameter, properties);
+    } else if (Map.class.isAssignableFrom(fieldType)) {
+      Type[] actualTypeArguments = ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments();
+      if (actualTypeArguments.length == 2) {
+        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), method, fieldType);
+        propertyStates.push(ps);
+        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, parameter, method, "<xxx>", (Class) actualTypeArguments[1], null);
+        propertyStates.pop();
+      }
+    } else if (List.class.isAssignableFrom(fieldType)) {
+      Type[] actualTypeArguments = ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments();
+      if (actualTypeArguments.length == 1) {
+        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), method, fieldType);
+        propertyStates.push(ps);
+        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, parameter, method, "[<n>]", (Class) actualTypeArguments[0], null);
+        propertyStates.pop();
+      }      
+    } else {
+      boolean found = false;
+      for (PropertyState ps : propertyStates) {
+        if (ps.clazz == fieldType) {
+          found = true;
+        }
+      }
+      if (!found) {
+        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), method, fieldType);
+        propertyStates.push(ps);
+        walkSetters(properties, docProperties, prefix, defaultValue, fieldType, propertyStates, terminalClasses, undocumentedClasses);
+        propertyStates.pop();
+      }
+    }
+  }
+
+  private void outputTerminalField(Stack<PropertyState> propertyStates, String name, Method method, Properties classDocProperties, boolean undocumented, Object defaultValue, String prefix, Parameter parameter, List<ConfigurationProperty> properties) {
+    String propName = propertyStates.stream().map(ps -> ps.name).collect(Collectors.joining("."));
+    if (propName != null && !propName.isEmpty() && !name.startsWith("[")) {
+      propName = propName + ".";
+    }
+    propName = propName + name;
+    
+    String newComment = null;
+    if (method.isAnnotationPresent(Comment.class)) {
+      newComment = method.getAnnotation(Comment.class).value();
+    }
+    if (newComment == null || newComment.isEmpty()) {
+      newComment = classDocProperties.getProperty(name);
+    }
+    String comment = propertyStates.stream().map(ps -> ps.comment).filter(c -> c != null).collect(Collectors.joining(", "));
+    if (newComment != null && !newComment.isEmpty()) {
+      if (classDocProperties.containsKey(name)) {
+        if (comment != null && !comment.isEmpty()) {
+          comment = comment + ", " + newComment;
         } else {
-          boolean found = false;
-          for (PropertyState ps : propertyStates) {
-            if (ps.clazz == clazz) {
-              found = true;
-            }
-          }
-          if (!found) {
-            PropertyState ps = new PropertyState(name, classDocProperties.getProperty(name), method, clazz);
-            propertyStates.push(ps);          
-            walkSetters(properties, docProperties, prefix, defaultValue, parameter.getType(), propertyStates, terminalClasses, undocumentedClasses);
-            propertyStates.pop();
-          }
+          comment = newComment;
         }
       }
     }
+    ConfigurationProperty prop = ConfigurationProperty.builder()
+            .canBeEnvVar(!cannotBeEnvVar(propName))
+            .undocumented(undocumented)
+            .comment(comment)
+            .defaultValue(defaultValue == null ? null : defaultValue.toString())
+            .name(prefix == null ? propName : prefix + propName)
+            .type(parameter.getType())
+            .build();
+    properties.add(prop);
   }
   
 }
