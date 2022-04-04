@@ -16,17 +16,25 @@
  */
 package uk.co.spudsoft.params4j.impl;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Properties;
+import java.util.stream.Collectors;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileObject;
 import javax.tools.StandardJavaFileManager;
@@ -43,6 +51,7 @@ import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -121,6 +130,28 @@ public class JavadocCapturerTest {
       logger.info("Configuration property: {}", OBJECT_MAPPER.writeValueAsString(cp));
     }
     assertThat(docs, hasSize(19));
+    // Convert from array to map because the order isn't stable with reflection
+    Map<String, ConfigurationProperty> docsMap = docs.stream().collect(Collectors.toMap(cp -> cp.name, cp -> cp));
+    
+    Map<String, ConfigurationProperty> expectedDocsAsJson = loadExpectedDocsAsJson();
+    assertEquals(docsMap.size(), expectedDocsAsJson.size());
+    for (Entry<String, ConfigurationProperty> entry : expectedDocsAsJson.entrySet()) {
+      assertTrue(docsMap.containsKey(entry.getKey()), "Fields does not include " + entry.getKey());
+      assertEquals(OBJECT_MAPPER.convertValue(entry.getValue(), ObjectNode.class), OBJECT_MAPPER.convertValue(docsMap.get(entry.getKey()), ObjectNode.class));
+    }
   }
+  
+  private Map<String, ConfigurationProperty> loadExpectedDocsAsJson() throws IOException {
+    Map<String, ConfigurationProperty> map = new HashMap<>();
+    try (InputStream stream = getClass().getResourceAsStream("/commentcap-expected.json")) {      
+      ArrayNode array = OBJECT_MAPPER.readValue(stream, ArrayNode.class);
+      for (JsonNode node : array) {
+        ConfigurationProperty cp = OBJECT_MAPPER.convertValue(node, ConfigurationProperty.class);
+        map.put(cp.name, cp);
+      }
+    }
+    return map;
+  }
+  
 
 }

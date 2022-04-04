@@ -16,10 +16,15 @@
  */
 package uk.co.spudsoft.params4j;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import java.util.Objects;
+
 /**
  * Documentation for a single property found by reflecting the Parameters class.
  * @author jtalbut
  */
+@JsonDeserialize(builder = ConfigurationProperty.Builder.class)
 public class ConfigurationProperty {
   
   public final Class<?> type;
@@ -29,6 +34,7 @@ public class ConfigurationProperty {
   public final String comment;
   public final String defaultValue;
 
+  @JsonPOJOBuilder(buildMethodName = "build", withPrefix = "")
   public static class Builder {
 
     private Class<?> type;
@@ -37,7 +43,7 @@ public class ConfigurationProperty {
     private boolean undocumented;
     private String comment;
     private String defaultValue;
-
+  
     private Builder() {
     }
 
@@ -89,5 +95,46 @@ public class ConfigurationProperty {
     this.defaultValue = defaultValue;
   }
 
+  @Override
+  public int hashCode() {
+    int hash = 3;
+    hash = 71 * hash + Objects.hashCode(this.type);
+    hash = 71 * hash + Objects.hashCode(this.name);
+    hash = 71 * hash + (this.canBeEnvVar ? 1 : 0);
+    hash = 71 * hash + (this.undocumented ? 1 : 0);
+    hash = 71 * hash + Objects.hashCode(this.comment);
+    hash = 71 * hash + Objects.hashCode(this.defaultValue);
+    return hash;
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    if (this == obj) {
+      return true;
+    }
+    if (obj == null) {
+      return false;
+    }
+    if (getClass() != obj.getClass()) {
+      return false;
+    }
+    final ConfigurationProperty other = (ConfigurationProperty) obj;
+    if (this.canBeEnvVar != other.canBeEnvVar) {
+      return false;
+    }
+    if (this.undocumented != other.undocumented) {
+      return false;
+    }
+    if (!Objects.equals(this.name, other.name)) {
+      return false;
+    }
+    if (!Objects.equals(this.comment, other.comment)) {
+      return false;
+    }
+    if (!Objects.equals(this.defaultValue, other.defaultValue)) {
+      return false;
+    }
+    return Objects.equals(this.type, other.type);
+  }
   
 }

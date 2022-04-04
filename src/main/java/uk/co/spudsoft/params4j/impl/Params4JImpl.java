@@ -385,7 +385,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     String fieldTypeName = fieldType.getCanonicalName();
     boolean undocumented = typeIsIn(undocumentedClasses, fieldTypeName);
     if (fieldType.isPrimitive() || undocumented || TERMINAL_TYPES.contains(fieldTypeName) || typeIsIn(terminalClasses, fieldTypeName)) {
-      outputTerminalField(propertyStates, fieldName, method, classDocProperties, undocumented, defaultValue, prefix, parameter, properties);
+      outputTerminalField(propertyStates, fieldName, method, classDocProperties, undocumented, defaultValue, prefix, fieldType, properties);
     } else if (Map.class.isAssignableFrom(fieldType)) {
       Type[] actualTypeArguments = ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments();
       if (actualTypeArguments.length == 2) {
@@ -418,7 +418,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     }
   }
 
-  private void outputTerminalField(Stack<PropertyState> propertyStates, String name, Method method, Properties classDocProperties, boolean undocumented, Object defaultValue, String prefix, Parameter parameter, List<ConfigurationProperty> properties) {
+  private void outputTerminalField(Stack<PropertyState> propertyStates, String name, Method method, Properties classDocProperties, boolean undocumented, Object defaultValue, String prefix, Class type, List<ConfigurationProperty> properties) {
     String propName = propertyStates.stream().map(ps -> ps.name).collect(Collectors.joining("."));
     if (propName != null && !propName.isEmpty() && !name.startsWith("[")) {
       propName = propName + ".";
@@ -448,7 +448,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
             .comment(comment)
             .defaultValue(defaultValue == null ? null : defaultValue.toString())
             .name(prefix == null ? propName : prefix + propName)
-            .type(parameter.getType())
+            .type(type)
             .build();
     properties.add(prop);
   }
