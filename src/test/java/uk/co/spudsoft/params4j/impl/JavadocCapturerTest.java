@@ -120,7 +120,7 @@ public class JavadocCapturerTest {
     for (ConfigurationProperty cp : docs) {
       logger.info("Configuration property: {}", OBJECT_MAPPER.writeValueAsString(cp));
     }
-    assertThat(docs, hasSize(16));
+    assertThat(docs, hasSize(19));
   }
 
 }
