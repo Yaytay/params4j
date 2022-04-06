@@ -23,6 +23,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
@@ -112,9 +113,10 @@ public class JavadocCapturerTest {
     try ( InputStream stream = cls.getResourceAsStream("/commentcap/Parameters-doc.properties")) {
       props.load(stream);
     }
-    assertThat(props.size(), equalTo(8));
+    assertThat(props.size(), equalTo(9));
     assertThat(props.get("auditDataSource"), equalTo("datasource used for recording activity"));
     assertThat(props.get("baseConfigPath"), equalTo("path to the root of the configuration files"));
+    assertThat(props.get("logins"), equalTo("login for a system"));
     for (Object key : props.keySet()) {
       assertThat(key, instanceOf(String.class));
       // No entries for setters in File object
@@ -127,7 +129,7 @@ public class JavadocCapturerTest {
     List<ConfigurationProperty> docs = (List<ConfigurationProperty>) testDocsClass.getMethod("getDocs").invoke(object);
     assertNotNull(docs);
     for (ConfigurationProperty cp : docs) {
-      logger.info("Configuration property: {}", OBJECT_MAPPER.writeValueAsString(cp));
+      logger.trace("Configuration property: {}", OBJECT_MAPPER.writeValueAsString(cp));
     }
     assertThat(docs, hasSize(19));
     // Convert from array to map because the order isn't stable with reflection
@@ -139,6 +141,9 @@ public class JavadocCapturerTest {
       assertTrue(docsMap.containsKey(entry.getKey()), "Fields does not include " + entry.getKey());
       assertEquals(OBJECT_MAPPER.convertValue(entry.getValue(), ObjectNode.class), OBJECT_MAPPER.convertValue(docsMap.get(entry.getKey()), ObjectNode.class));
     }
+    
+    Method testProcessArgs = testDocsClass.getMethod("testProcessArgs");
+    testProcessArgs.invoke(object);
   }
   
   private Map<String, ConfigurationProperty> loadExpectedDocsAsJson() throws IOException {

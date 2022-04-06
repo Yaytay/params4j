@@ -8,9 +8,9 @@ import java.io.File;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import javax.swing.Box;
 import uk.co.spudsoft.params4j.Comment;
 import uk.co.spudsoft.params4j.JavadocCapture;
+import uk.co.spudsoft.params4j.impl.HtmlAnchorElement;
 
 /**
  * Test and demonstration class for the capabilities of Params4J documentation.
@@ -24,19 +24,21 @@ public class Parameters {
 
   // Demonstrate an alien member that cannot be set using a single string value
   // and that we do not want to document all the internal members of.
-  private Box alien;
+  private HtmlAnchorElement alien;
   // Demonstrate an alien member that has a specific custom comment.
-  private Box documentedAlien;
+  private HtmlAnchorElement documentedAlien;
   private boolean exitOnRun;
   // File has setReadable(boolean) which should not be documented
   private File baseConfigPath;
   // DataSource has nested setters, which should be documented.
-  private DataSource auditDataSource;
+  private DataSource auditDataSource = new DataSource();
   // LocalDateTime is terminal, but should have a specific default value
   private LocalDateTime when = LocalDateTime.of(1971, 06, 05, 14, 0);
-  // A kay/value pair parameter
+  // A key/value pair parameter
   private Map<String, String> translations;
-  // A kay/object pair parameters
+  /**
+   * The login for a system.
+   */
   private Map<String, Credentials> logins;
   // An array parameter
   private List<String> names;
@@ -45,7 +47,7 @@ public class Parameters {
    * alien value that cannot be documented further in this codebase
    * @return an alien value that cannot be documented further in this codebase
    */
-  public Box getAlien() {
+  public HtmlAnchorElement getAlien() {
     return alien;
   }
 
@@ -53,7 +55,7 @@ public class Parameters {
    * alien value that cannot be documented further in this codebase
    * @param alien alien value that cannot be documented further in this codebase
    */
-  public void setAlien(Box alien) {
+  public void setAlien(HtmlAnchorElement alien) {
     this.alien = alien;
   }
 
@@ -61,16 +63,17 @@ public class Parameters {
    * alien value that cannot be documented further in this codebase
    * @return an alien value that cannot be documented further in this codebase
    */
-  public Box getDocumentedAlien() {
+  public HtmlAnchorElement getDocumentedAlien() {
     return documentedAlien;
   }
 
   /**
    * alien value that cannot be documented further in this codebase
+   * Note that the URL in the comment is wrong, can't use an actual HTMLAnchorElement because they are interfaces.
    * @param documentedAlien alien value that cannot be documented further in this codebase
    */
-  @Comment("configure the alien properties as documented at https://docs.oracle.com/en/java/javase/17/docs/api/java.desktop/javax/swing/Box.html")
-  public void setDocumentedAlien(Box documentedAlien) {
+  @Comment("configure the alien properties as documented at https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html")
+  public void setDocumentedAlien(HtmlAnchorElement documentedAlien) {
     this.documentedAlien = documentedAlien;
   }
   

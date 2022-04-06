@@ -34,6 +34,9 @@ public class ConfigurationProperty {
   public final String comment;
   public final String defaultValue;
 
+  /**
+   * Builder.
+   */
   @JsonPOJOBuilder(buildMethodName = "build", withPrefix = "")
   public static class Builder {
 

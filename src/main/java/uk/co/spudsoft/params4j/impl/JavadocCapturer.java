@@ -53,7 +53,7 @@ public class JavadocCapturer extends AbstractProcessor {
       if (annotation.getQualifiedName().toString().equals(JavadocCapture.class.getName())) {
         for (Element e : re.getElementsAnnotatedWith(annotation)) {
           if (e.getKind() == ElementKind.CLASS) {
-            generateCommentProperties(new HashSet<>(), e);
+            generateCommentProperties(new HashSet<>(), (TypeElement) e);
           }
         }
       }
@@ -62,7 +62,7 @@ public class JavadocCapturer extends AbstractProcessor {
     return true;
   }
   
-  private void writeDocProperties(PackageElement packageElement, Element classElement, Properties commentProps) {
+  private void writeDocProperties(PackageElement packageElement, TypeElement classElement, Properties commentProps) {
     try {
       FileObject fo = processingEnv.getFiler().createResource(
               StandardLocation.CLASS_OUTPUT
@@ -71,7 +71,7 @@ public class JavadocCapturer extends AbstractProcessor {
               , classElement
       );
       try (OutputStream out = fo.openOutputStream()) {
-        commentProps.store(out, "Documentation properties for " + ((TypeElement) classElement).getQualifiedName());
+        commentProps.store(out, "Documentation properties for " + classElement.getQualifiedName());
       }
       processingEnv.getMessager().printMessage(Diagnostic.Kind.OTHER, "Output written to " + fo.toUri());
     } catch(IOException ex) {
@@ -119,39 +119,45 @@ public class JavadocCapturer extends AbstractProcessor {
     return comment.trim();
   }
   
-  private void generateCommentProperties(Set<String> elements, Element element) {
-    ElementKind kind = element.getKind();
+  private void generateCommentProperties(Set<String> elements, TypeElement element) {
     Properties commentProps = new Properties();
-    if (kind == ElementKind.CLASS) {
-      if (elements.add(((TypeElement) element).getQualifiedName().toString())) {
-        for (Element child : element.getEnclosedElements()) {
-          if (child.getKind() == ElementKind.METHOD) {
-            ExecutableElement method = (ExecutableElement) child;
-            String childName = child.getSimpleName().toString();
-            if (method.getParameters().size() == 1 && childName.startsWith("set")) {
-              VariableElement parameter = method.getParameters().get(0);
-              DeclaredType parameterClass = null;
-              if (parameter.asType() instanceof DeclaredType) {
-                parameterClass = (DeclaredType) parameter.asType();
-              }
-
-              String variableName = setterNameToVariableName(childName);
-              String docComment = tidyComment(processingEnv.getElementUtils().getDocComment(method));
-              if (docComment != null && !docComment.isEmpty()) {
-                commentProps.put(variableName, docComment);
-              }
-
-              if (parameterClass != null) {
-                generateCommentProperties(elements, parameterClass.asElement());
-              }              
+    if (elements.add(element.getQualifiedName().toString())) {
+      for (Element child : element.getEnclosedElements()) {
+        String childName = child.getSimpleName().toString();
+        if (child.getKind() == ElementKind.FIELD) {
+          if (!commentProps.containsKey(childName)) {
+            // Add javadocs on fields, but only if the setter hasn't already written the comment
+            String docComment = tidyComment(processingEnv.getElementUtils().getDocComment(child));
+            if (docComment != null && !docComment.isEmpty()) {
+              commentProps.put(childName, docComment);
             }
-          } else if (child.getKind() == ElementKind.CLASS) {
-            generateCommentProperties(elements, child);
           }
+        } else if (child.getKind() == ElementKind.METHOD) {
+          ExecutableElement method = (ExecutableElement) child;
+          if (method.getParameters().size() == 1 && childName.startsWith("set")) {
+            VariableElement parameter = method.getParameters().get(0);
+            DeclaredType parameterClass = null;
+            if (parameter.asType() instanceof DeclaredType) {
+              parameterClass = (DeclaredType) parameter.asType();
+            }
+
+            String variableName = setterNameToVariableName(childName);
+            String docComment = tidyComment(processingEnv.getElementUtils().getDocComment(method));
+            if (docComment != null && !docComment.isEmpty()) {
+              // Javadocs on setters take precedence over Javadocs on fields.
+              commentProps.put(variableName, docComment);
+            }
+
+            if (parameterClass != null) {
+              generateCommentProperties(elements, (TypeElement) parameterClass.asElement());
+            }              
+          }
+        } else if (child.getKind() == ElementKind.CLASS) {
+          generateCommentProperties(elements, (TypeElement) child);
         }
-        if (!commentProps.isEmpty()) {
-          writeDocProperties(getPackage(element), element, commentProps);
-        }
+      }
+      if (!commentProps.isEmpty()) {
+        writeDocProperties(getPackage(element), element, commentProps);
       }
     }
   }
