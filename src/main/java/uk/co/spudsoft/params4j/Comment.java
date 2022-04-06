@@ -34,7 +34,7 @@ public @interface Comment {
   
   /**
    * Get the comment that should be applied to the annotated element.
-   * @return 
+   * @return the comment that should be applied to the annotated element
    */
   String value();
   

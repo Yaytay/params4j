@@ -27,11 +27,40 @@ import java.util.Objects;
 @JsonDeserialize(builder = ConfigurationProperty.Builder.class)
 public class ConfigurationProperty {
   
+  /**
+   * The Java class representing the property.
+   */
   public final Class<?> type;
+  /**
+   * The name of the property.
+   * If the name contains [&lt;n>] it represents a list of items and may be repeated as many times as desired with &lt;n> being replaced by a monotonically increasing integer starting at zero.
+   * If the name contains &lt;xxx> it represents a map of items and may be repeated as many times as desired with &lt;xxx> being replaced by a string.
+   */
   public final String name;
+  /**
+   * If true this property cannot be represented as an environment variable.
+   * Lists cannot be represented as environment variables because the '[' and ']' characters are not permitted in environment variables in a Linux shell.
+   * It may still be possible to specify this property as an environment variable as long as no Unix-like shell is required to process it.
+   */
   public final boolean canBeEnvVar;
+  /**
+   * If true this property cannot be specified as is, but requires additional child values to be specified.
+   * The child values are not documented here, the {@link Comment} annotation should be used for undocumented classes to provide instructions on where to find their details.
+   */
   public final boolean undocumented;
+  /**
+   * The calculated documentation for this property.
+   * The calculated documentation for a field is found (in order) from:
+   * 1. The {@link Comment} annotation.
+   * 2. Javadoc comments on the setter.
+   * 3. Javadoc comments on the field with the same name as the property.
+   * When handling nested properties the documentation of the full hierarchy of fields is concatentated together.
+   */
   public final String comment;
+  /**
+   * The default value for this property.
+   * This will only be found if the full path to the field is instantiated by default constructors.
+   */
   public final String defaultValue;
 
   /**
