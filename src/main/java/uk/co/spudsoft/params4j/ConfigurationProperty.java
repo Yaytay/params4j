@@ -79,41 +79,80 @@ public class ConfigurationProperty {
     private Builder() {
     }
 
+    /**
+     * Set the Java class representing the property.
+     * @param value the Java class representing the property.
+     * @return this
+     */
     public Builder type(final Class<?> value) {
       this.type = value;
       return this;
     }
 
+    /**
+     * Set the name of the property.
+     * @param value the name of the property.
+     * @return this
+     */
     public Builder name(final String value) {
       this.name = value;
       return this;
     }
 
+    /**
+     * Set whether the property can be represented by an env var. 
+     * @param value whether the property can be represented by an env var.
+     * @return this
+     */
     public Builder canBeEnvVar(final boolean value) {
       this.canBeEnvVar = value;
       return this;
     }
 
+    /**
+     * Set whether the property represent an undocumented class of properties.
+     * If the property does represent an undocumented class of properties the comment should link to the documentation for that class.
+     * @param value whether the property represent an undocumented class of properties.
+     * @return this
+     */
     public Builder undocumented(final boolean value) {
       this.undocumented = value;
       return this;
     }
 
+    /**
+     * Set the calculated documentation for this property.
+     * @param value calculated documentation for this property.
+     * @return this
+     */
     public Builder comment(final String value) {
       this.comment = value;
       return this;
     }
 
+    /**
+     * Set the default value for this property.
+     * @param value default value for this property.
+     * @return this
+     */
     public Builder defaultValue(final String value) {
       this.defaultValue = value;
       return this;
     }
 
+    /**
+     * Construct a new {@link ConfigurationProperty} instance.
+     * @return a new {@link ConfigurationProperty} instance.
+     */
     public ConfigurationProperty build() {
       return new uk.co.spudsoft.params4j.ConfigurationProperty(type, name, canBeEnvVar, undocumented, comment, defaultValue);
     }
   }
 
+  /**
+   * Construct a {@link Builder} instance.
+   * @return a newly constructed {@link Builder} instance.
+   */
   public static ConfigurationProperty.Builder builder() {
     return new ConfigurationProperty.Builder();
   }
