@@ -26,6 +26,8 @@ jobs:
       uses: whelk-io/maven-settings-xml-action@v20
       with:
         servers: '[{ "id": "github", "username": "yaytay", "password": "${{ secrets.GITHUB_TOKEN }}" }]'      
+    - name: Check git state
+      run: git status
     - name: Build with Maven
       run: mvn -B clean install --file pom.xml
     - name: Deploy with Maven
