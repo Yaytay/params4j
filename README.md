@@ -57,6 +57,60 @@ Logging is all via slf4j.
 At TRACE level it can be really quite verbose, which can help when it isn't processing the files you think it should.
 Failures are usually logged at WARN level and processing carries on around the error.
 
+# Documenting
+
+One of the problems with having a large number of parameters that can be configured in many different ways is that it can be difficult to tell your users what those parameters are.
+Params4J can help with this, as long as your Parameters objects use bean-style getters and setters.
+
+The Params4J.getDocumentation method to use reflection to walk through the Parameters class(es) building documentation.
+Each property found produces a ConfigurationProperty object that provides the argument name (without any prefix), basic details of the parameter type, and a simple comment as to the purpose of the parameter.
+The comment is built hierarchically - so, for example, the property 'auditDataSource.user.username' combines (CSV) the comments from the auditDataSource setter, the user setter and the username setter.
+The comments on each setter come from:
+1. The Comment annotation.
+2. Javadoc comments on the setter.
+3. Javadoc comments on the field with the same name as the property.
+
+Javadoc comments are captured at compile time by the JavadocCapturer AnnotationProcessor.
+The JavadocCapturer does nothing unless there is a class element in the compile tree with a JavadocCapture annotation.
+Starting from that class (and recursively walking through any referenced classes) the processor takes any fields and setters and puts the first line of the javadoc into a properties file alongside the class.
+
+The JavadocCapture process can only work for classes actually being compiled at the time the annotation processor runs, so any classes pulled in from external Jars will be undocumented and untouched.
+When getDocumentation is run it will walk through the third party classes and will add them to the known parameters unless it is explicitly instructed not to.
+This can result in a large number of undocumented parameters being listed in your documentation.
+To work around this provide a Comment annotation on the setter that sets the third party class (pointing the user to external documentation) and exclude the third party class from being walked using the undocumentedClasses argument to getDocumentation.
+
+The getDocumentation method does not actually do any output, you may want something different from me.
+The TestDocs class (which is a resource so it can be compiled with the JavadocCapturer AnnotationProcessor) contains a sample for preparing output for a command line:
+```java
+    Params4J<Parameters> params4j = Params4J.<Parameters>factory().withConstructor(() -> new Parameters()).create();
+    docs = params4j.getDocumentation(new Parameters(), "--", null, Arrays.asList(Pattern.compile(".*\\.Html.*")));
+    
+    int maxNameLen = docs.stream().map(p -> p.name.length()).max(Integer::compare).get();
+    
+    StringBuilder usageBuilder = new StringBuilder();
+    for (ConfigurationProperty prop : docs) {
+      usageBuilder.append("    ")
+              .append(prop.name)
+              .append(" ".repeat(maxNameLen + 1 - prop.name.length()))
+              .append(prop.comment)
+              .append('\n');
+
+      String typeName = prop.type.getSimpleName();
+      usageBuilder.append("        ")
+              .append(typeName);
+      
+      if (prop.defaultValue != null) {
+        usageBuilder.append(" ".repeat(typeName.length() + 4 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
+                .append("default: ")
+                .append(prop.defaultValue);
+      }
+      usageBuilder.append('\n');
+    }
+    logger.debug("Usage:\n{}", usageBuilder);
+```
+
+There will undoubtedly be constructs that the documentation gathering mechanism cannot handle, please file issues when you have one (preferably with a PR that modifies the classes under commentcap).
+
 # Building
 
 It's a standard maven project, just build it with:

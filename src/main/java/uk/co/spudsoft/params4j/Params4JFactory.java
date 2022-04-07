@@ -27,7 +27,7 @@ public interface Params4JFactory<P> {
    * <P>
    * It is permissible to reuse an existing instance, but Params4J will not make any effort to "clear it out", only values set by the gatherers will be altered.
    * This would mean that if a single instance is used and a configuration option is removed that value would retain its previous value.
-   * <P>
+   * 
    * @param supplier Supplier of the parameters object that Params4J will set.
    * @return this.
    */
@@ -37,7 +37,7 @@ public interface Params4JFactory<P> {
    * Base method for configuring Params4J to use a gatherer.
    * <P>
    * Gatherers will be processed in the order they are added to the Params4J object.
-   * <P>
+   * 
    * @param gatherer The gatherer to use.
    * @return this.
    */
@@ -51,7 +51,7 @@ public interface Params4JFactory<P> {
    * <P>
    * Note that the problem handler is only used when constructing the default mappers, if the default mappers are not used then
    * the object passed in here will not be used.
-   * <P>
+   * 
    * @param problemHandler The problem handler to use.
    * @return this.
    */
@@ -62,7 +62,7 @@ public interface Params4JFactory<P> {
    * <P>
    * Calling this method is optional, if not called the default props mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createPropsMapper() Params4JImpl.createPropsMapper}.
    * Note that the props mapper is used when processing system properties and environment variables as well as properties files.
-   * <P>
+   * 
    * @param propsMapper The props mapper to use.
    * @return this.
    */
@@ -72,7 +72,7 @@ public interface Params4JFactory<P> {
    * Set a custom Jackson object mapper.
    * <P>
    * Calling this method is optional, if not called the default object mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createJsonMapper(java.util.List) Params4JImpl.createJsonMapper}.
-   * <P>
+   * 
    * @param jsonMapper The object mapper to use.
    * @return this.
    */
@@ -85,7 +85,7 @@ public interface Params4JFactory<P> {
    * Modules will be added in the order that this method is called.
    * <P>
    * If a custom object mapper is used (via {@link #withJsonMapper(com.fasterxml.jackson.databind.ObjectMapper)}) then this method will not achieve anything.
-   * <P>
+   * 
    * @param module The jackson module to add to the default object mapper.
    * @return this.
    */
@@ -98,7 +98,7 @@ public interface Params4JFactory<P> {
    * <P>
    * Note that a YAML mapper is just an instance of ObjectMapper with a YAMLFactory.
    * If an ordinary JSON mapper is passed in to this method it will not parse YAML files correctly.
-   * <P>
+   * 
    * @param yamlMapper The object mapper to use for processing YAML files.
    * @return this.
    */
@@ -113,7 +113,7 @@ public interface Params4JFactory<P> {
    * <pre>
    * return withGatherer(new ResourceGatherer&lt;>(resource, fileType));
    * </pre>
-   * <P>
+   * 
    * @param resource The resource to be gathered.
    * @param fileType The type of file pointed to by the resource.
    * @return this.
@@ -131,7 +131,7 @@ public interface Params4JFactory<P> {
    * <pre>
    * return withGatherer(new DirGatherer$lt;>(dir, fileTypes));
    * </pre>
-   * <P>
+   * 
    * @param dir The directory containing files to be gathered.
    * @param fileTypes The types of files to be checked in the dir.
    * @return this.
@@ -167,7 +167,7 @@ public interface Params4JFactory<P> {
    * <pre>
    * return withGatherer(new EnvironmentVariablesGatherer&lt;>(namePrefix, toLowerCase));
    * </pre>
-   * <P>
+   * 
    * @param namePrefix The prefix that can be used to filter environment variables.
    * @param toLowerCase If true all environment variable names will be converted to lower case before passing to Jackson.
    * @return this.
@@ -212,7 +212,7 @@ public interface Params4JFactory<P> {
    * <pre>
    * return withGatherer(new CommandLineArgumentsGatherer&lt;>(args, namePrefix));
    * </pre>
-   * <P>
+   * 
    * @param args The arguments passed in to the main() method.
    * @param namePrefix The prefix that can be used to filter environment variables.
    * @return this.
@@ -238,7 +238,7 @@ public interface Params4JFactory<P> {
    * <pre>
    * return withGatherer(new SecretsGatherer$lt;>(root, fileSizeLimit, fileCountLimit, fileDepthLimit, charset));
    * </pre>
-   * <P>
+   * 
    * @param root The base path from which to start searching, typically something like "/etc/[service name]/conf.d"
    * @param fileSizeLimit The maximum size of file to attempt to load.
    * The recommendation is to set this to slightly larger than your standard secret length.
@@ -253,7 +253,7 @@ public interface Params4JFactory<P> {
   
   /**
    * Factory method for creating a new instance of Params4J&lt;P>.
-   * <P>
+   * 
    * @return a new instance of Params4J&lt;P>
    */
   Params4J<P> create();

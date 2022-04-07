@@ -92,7 +92,13 @@ public class JavadocCapturer extends AbstractProcessor {
     }
   }
 
-  public static String setterNameToVariableName(String setterName) {
+  /**
+   * Convert the name of a setter to the name of the field.
+   * Strips "set" from the beginning and lowercases the following character.
+   * @param setterName The name of the bean field setter.
+   * @return The name of setter with "set" removed and with a leading lowercase character.
+   */
+  static String setterNameToVariableName(String setterName) {
     if (setterName == null) {
       return null;
     }

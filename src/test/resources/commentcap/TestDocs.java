@@ -48,37 +48,28 @@ public class TestDocs {
     Params4J<Parameters> params4j = Params4J.<Parameters>factory().withConstructor(() -> new Parameters()).create();
     docs = params4j.getDocumentation(new Parameters(), "--", null, Arrays.asList(Pattern.compile(".*\\.Html.*")));
     
-    int maxNameLen = 0;
-    for (ConfigurationProperty prop : docs) {
-      maxNameLen = prop.name.length() > maxNameLen ? prop.name.length() : maxNameLen;
-    }
+    int maxNameLen = docs.stream().map(p -> p.name.length()).max(Integer::compare).get();
     
     StringBuilder usageBuilder = new StringBuilder();
     for (ConfigurationProperty prop : docs) {
-      usageBuilder.append("    ").append(prop.name);
-      appendSpaces(usageBuilder, maxNameLen + 1 - prop.name.length());
-      usageBuilder.append(prop.comment).append('\n');
+      usageBuilder.append("    ")
+              .append(prop.name)
+              .append(" ".repeat(maxNameLen + 1 - prop.name.length()))
+              .append(prop.comment)
+              .append('\n');
 
       String typeName = prop.type.getSimpleName();
-      usageBuilder.append("        ").append(typeName);
+      usageBuilder.append("        ")
+              .append(typeName);
       
       if (prop.defaultValue != null) {
-        if (typeName.length() + 4 > maxNameLen) {
-          usageBuilder.append(' ');          
-        } else {
-          appendSpaces(usageBuilder, maxNameLen - 3 - typeName.length());          
-        }
-        usageBuilder.append("default: ").append(prop.defaultValue);
+        usageBuilder.append(" ".repeat(typeName.length() + 4 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
+                .append("default: ")
+                .append(prop.defaultValue);
       }
       usageBuilder.append('\n');
     }
     logger.debug("Usage:\n{}", usageBuilder);
-  }
-
-  private void appendSpaces(StringBuilder usageBuilder, int count) {
-    for (int i = 0; i < count; ++i) {
-      usageBuilder.append(' ');
-    }
   }
 
   public List<ConfigurationProperty> getDocs() {
