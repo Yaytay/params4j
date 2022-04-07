@@ -30,5 +30,9 @@ jobs:
       run: git status
     - name: Build with Maven
       run: mvn -B clean install --file pom.xml
+    - uses: actions/delete-package-versions@v3
+      with: 
+        min-versions-to-keep: 10
+        delete-only-pre-release-versions: "true" 
     - name: Deploy with Maven
       run: mvn -B -D skipTests deploy --file pom.xml
