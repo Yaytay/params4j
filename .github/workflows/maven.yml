@@ -5,7 +5,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ master ]
+    branches: [ '*' ]
   pull_request:
     branches: [ master ]
 
@@ -20,9 +20,20 @@ jobs:
       uses: actions/setup-java@v2
       with:
         java-version: '17'
-        distribution: 'temurin'
+        distribution: 'zulu'
         cache: maven
+    - name: Generate settings.xml for Maven Builds
+      uses: whelk-io/maven-settings-xml-action@v20
+      with:
+        servers: '[{ "id": "github", "username": "yaytay", "password": "${{ secrets.GITHUB_TOKEN }}" }]'      
+    - name: Check git state
+      run: git status
     - name: Build with Maven
-      run: mvn -B clean package --file pom.xml
+      run: mvn -B clean install --file pom.xml
+    - uses: actions/delete-package-versions@v3
+      with: 
+        package-name: 'uk.co.spudsoft.params4j'
+        min-versions-to-keep: 10
+        delete-only-pre-release-versions: "true" 
     - name: Deploy with Maven
-      run: mvn -B deploy --file pom.xml
+      run: mvn -B -D skipTests deploy --file pom.xml
