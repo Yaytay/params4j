@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-java@v2
       with:
         java-version: '17'
-        distribution: 'temurin'
+        distribution: 'zulu'
         cache: maven
     - name: Generate settings.xml for Maven Builds
       uses: whelk-io/maven-settings-xml-action@v20
