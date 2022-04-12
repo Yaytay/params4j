@@ -182,7 +182,8 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
   }
   
   @Override
-  public <T> byte[] prepareProperties(Collection<T> entries
+  public <T> byte[] prepareProperties(String name
+          , Collection<T> entries
           , Function<T, Object> keyGetter
           , Function<T, Object> valueGetter
           , String propertyPrefix
@@ -192,13 +193,16 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
         for (T entry : entries) {
           try {
             String key = getKeyAsPrefixedString(keyGetter, entry, propertyPrefix);
-            String value = (String) valueGetter.apply(entry);
-            writer.append(key)
-                .append(" = ")
-                .append(value)
-                .append("\r\n");
+            if (key != null) {
+              String value = (String) valueGetter.apply(entry);
+              logger.trace("{}: {} = {}", name, key, value);
+              writer.append(key)
+                  .append(" = ")
+                  .append(value)
+                  .append("\r\n");
+            }
           } catch(ClassCastException ex) {
-            logger.warn("Unable to get key or value as a string from {}", entry);
+            logger.warn("{} unable to get key or value as a string from {}", name, entry);
           }
         }
       }

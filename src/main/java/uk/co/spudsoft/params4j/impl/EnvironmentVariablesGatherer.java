@@ -77,7 +77,7 @@ public class EnvironmentVariablesGatherer<P> implements ParameterGatherer<P> {
   public P gatherParameters(Params4JSpi spi, P base) throws IOException {
     ObjectReader reader = spi.getPropsMapper().readerForUpdating(base);
     return reader.readValue(
-            spi.prepareProperties(map.entrySet(), Entry::getKey, Entry::getValue, namePrefix)
+            spi.prepareProperties("Environment variables", map.entrySet(), Entry::getKey, Entry::getValue, namePrefix)
     );            
   }
 

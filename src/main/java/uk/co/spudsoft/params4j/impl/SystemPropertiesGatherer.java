@@ -53,7 +53,7 @@ public class SystemPropertiesGatherer<P> implements ParameterGatherer<P> {
   public P gatherParameters(Params4JSpi spi, P base) throws IOException {
     ObjectReader reader = spi.getPropsMapper().readerForUpdating(base);
     return reader.readValue(
-            spi.prepareProperties(props.entrySet(), Entry::getKey, Entry::getValue, propertyPrefix)
+            spi.prepareProperties("System properties", props.entrySet(), Entry::getKey, Entry::getValue, propertyPrefix)
     );            
   }
 

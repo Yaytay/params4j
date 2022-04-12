@@ -56,6 +56,7 @@ public interface Params4JSpi {
    * Any non-String values will be filtered out.
    * 
    * @param <T> The type of the entries - typically Map::Entry.
+   * @param name The name of the source of the properties, only used for logging.
    * @param entries The collection of entries to be processed.
    * @param keyGetter Function to extract the key from an entry - any non-string values will be ignored.
    * @param valueGetter Function to extract the value from an entry - any non-string values will be ignored.
@@ -64,10 +65,11 @@ public interface Params4JSpi {
    * @return A newly created properties file as a byte array.
    * @throws IOException if something goes wrong.
    */
-  <T> byte[] prepareProperties(Collection<T> entries,
-       Function<T, Object> keyGetter,
-       Function<T, Object> valueGetter,
-       String propertyPrefix
+  <T> byte[] prepareProperties(String name,
+          Collection<T> entries,
+          Function<T, Object> keyGetter,
+          Function<T, Object> valueGetter,
+          String propertyPrefix
   ) throws IOException;
   
 }

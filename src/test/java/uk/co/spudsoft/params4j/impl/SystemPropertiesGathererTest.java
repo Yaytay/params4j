@@ -41,7 +41,11 @@ public class SystemPropertiesGathererTest {
     dp = gatherer.gatherParameters(p4j, new DummyParameters());
     assertEquals(17, dp.getValue());
     assertEquals("first", dp.getList().get(0));
-    assertEquals("second", dp.getList().get(1));    
+    assertEquals("second", dp.getList().get(1));
+    
+    gatherer = new SystemPropertiesGatherer<>(System.getProperties(), "prefix.");
+    dp = gatherer.gatherParameters(p4j, new DummyParameters());
+    assertEquals(0, dp.getValue());
   }
   
 }
