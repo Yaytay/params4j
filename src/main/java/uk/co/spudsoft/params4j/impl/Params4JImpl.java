@@ -18,6 +18,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStreamWriter;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
@@ -258,6 +260,25 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
             ;
   }
   
+  private Object getValue(Object object, Field field) {
+    if (object == null || field ==  null) {
+      return null;
+    }
+    try {
+      if (field.canAccess(object)) {
+        return field.get(object);        
+      } else {
+        field.setAccessible(true);
+        Object value = field.get(object);        
+        field.setAccessible(false);
+        return value;
+      }
+    } catch(Throwable ex) {
+      logger.debug("Failed to get {} from {}: {}", field, object, ex.getMessage());
+      return null;
+    }
+  }
+  
   private Object getValue(Object object, String setterName) {
     if (object == null || setterName ==  null || setterName.length() < 4) {
       return null;
@@ -278,7 +299,6 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
       return null;
     }
     try {
-      // Get the value of property1
       return method.invoke(object);
     } catch(Throwable ex) {
       logger.debug("Failed to execute {}.{} on {}: {}", object.getClass().getSimpleName(), method, object, ex.getMessage());
@@ -324,13 +344,11 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
   private static class PropertyState {
     final String name;
     final String comment;
-    final Method setter;
     final Class<?> clazz;
 
-    PropertyState(String name, String comment, Method setter, Class<?> clazz) {
+    PropertyState(String name, String comment, Class<?> clazz) {
       this.name = name;
       this.comment = comment;
-      this.setter = setter;
       this.clazz = clazz;
     }        
   }
@@ -346,6 +364,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
           , List<Pattern> undocumentedClasses
   ) throws SecurityException {
     Properties classDocProperties = loadDocProperties(docProperties, clazz);
+    Set<String> propsDone = new HashSet<>();
     for (Method method : clazz.getMethods()) {
       if (method.getParameters().length == 1 && method.getName().startsWith("set")) {
         Parameter parameter = method.getParameters()[0];
@@ -354,6 +373,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
         String fieldName = JavadocCapturer.setterNameToVariableName(method.getName());
         Object defaultValue = getValue(defaultInstance, method.getName());
 
+        propsDone.add(fieldName);
         documentField(properties
                 , docProperties
                 , classDocProperties
@@ -361,11 +381,32 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
                 , propertyStates
                 , terminalClasses
                 , undocumentedClasses
-                , parameter
                 , method
                 , fieldName
                 , fieldType
                 , defaultValue
+                , () -> (ParameterizedType) parameter.getParameterizedType()
+        );
+      }
+    }
+    for (Field field : clazz.getDeclaredFields()) {
+      Class<?> fieldType = field.getType();
+      String fieldName = field.getName();      
+      Object defaultValue = getValue(defaultInstance, field);
+
+      if (!propsDone.contains(fieldName)) {
+        documentField(properties
+                , docProperties
+                , classDocProperties
+                , prefix
+                , propertyStates
+                , terminalClasses
+                , undocumentedClasses
+                , field
+                , fieldName
+                , fieldType
+                , defaultValue
+                , () -> (ParameterizedType) field.getGenericType()
         );
       }
     }
@@ -378,32 +419,33 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
           , String prefix
           , Stack<PropertyState> propertyStates
           , List<Pattern> terminalClasses
-          , List<Pattern> undocumentedClasses         
-          , Parameter parameter
-          , Method method
+          , List<Pattern> undocumentedClasses
+          , AnnotatedElement annotatedElement
           , String fieldName
           , Class<?> fieldType
           , Object defaultValue
+          , Supplier<ParameterizedType> parameterizedTypeGetter
     ) throws SecurityException {
     
     String fieldTypeName = fieldType.getCanonicalName();
     boolean undocumented = typeIsIn(undocumentedClasses, fieldTypeName);
     if (fieldType.isPrimitive() || undocumented || TERMINAL_TYPES.contains(fieldTypeName) || typeIsIn(terminalClasses, fieldTypeName)) {
-      outputTerminalField(propertyStates, fieldName, method, classDocProperties, undocumented, defaultValue, prefix, fieldType, properties);
+      outputTerminalField(propertyStates, fieldName, annotatedElement, classDocProperties, undocumented, defaultValue, prefix, fieldType, properties);
     } else if (Map.class.isAssignableFrom(fieldType)) {
-      Type[] actualTypeArguments = ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments();
+      
+      Type[] actualTypeArguments = parameterizedTypeGetter.get().getActualTypeArguments();
       if (actualTypeArguments.length == 2) {
-        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), method, fieldType);
+        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);
         propertyStates.push(ps);
-        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, parameter, method, "<xxx>", (Class) actualTypeArguments[1], null);
+        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, annotatedElement, "<xxx>", (Class) actualTypeArguments[1], null, parameterizedTypeGetter);
         propertyStates.pop();
       }
     } else if (List.class.isAssignableFrom(fieldType)) {
-      Type[] actualTypeArguments = ((ParameterizedType) parameter.getParameterizedType()).getActualTypeArguments();
+      Type[] actualTypeArguments = parameterizedTypeGetter.get().getActualTypeArguments();
       if (actualTypeArguments.length == 1) {
-        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), method, fieldType);
+        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);
         propertyStates.push(ps);
-        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, parameter, method, "[<n>]", (Class) actualTypeArguments[0], null);
+        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, annotatedElement, "[<n>]", (Class) actualTypeArguments[0], null, parameterizedTypeGetter);
         propertyStates.pop();
       }      
     } else {
@@ -414,7 +456,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
         }
       }
       if (!found) {
-        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), method, fieldType);
+        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);
         propertyStates.push(ps);
         walkSetters(properties, docProperties, prefix, defaultValue, fieldType, propertyStates, terminalClasses, undocumentedClasses);
         propertyStates.pop();
@@ -422,7 +464,17 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     }
   }
 
-  private void outputTerminalField(Stack<PropertyState> propertyStates, String name, Method method, Properties classDocProperties, boolean undocumented, Object defaultValue, String prefix, Class type, List<ConfigurationProperty> properties) {
+  private void outputTerminalField(
+          Stack<PropertyState> propertyStates
+          , String name
+          , AnnotatedElement element
+          , Properties classDocProperties
+          , boolean undocumented
+          , Object defaultValue
+          , String prefix
+          , Class<?> type
+          , List<ConfigurationProperty> properties
+  ) {
     String propName = propertyStates.stream().map(ps -> ps.name).collect(Collectors.joining("."));
     if (propName != null && !propName.isEmpty() && !name.startsWith("[")) {
       propName = propName + ".";
@@ -430,8 +482,8 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     propName = propName + name;
     
     String newComment = null;
-    if (method.isAnnotationPresent(Comment.class)) {
-      newComment = method.getAnnotation(Comment.class).value();
+    if (element.isAnnotationPresent(Comment.class)) {
+      newComment = element.getAnnotation(Comment.class).value();
     }
     if (newComment == null || newComment.isEmpty()) {
       newComment = classDocProperties.getProperty(name);

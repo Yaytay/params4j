@@ -31,7 +31,7 @@ public class Parameters {
   // File has setReadable(boolean) which should not be documented
   private File baseConfigPath;
   // DataSource has nested setters, which should be documented.
-  private DataSource auditDataSource = new DataSource();
+  private DataSource auditDataSource = DataSource.builder().build();
   // LocalDateTime is terminal, but should have a specific default value
   private LocalDateTime when = LocalDateTime.of(1971, 06, 05, 14, 0);
   // A key/value pair parameter

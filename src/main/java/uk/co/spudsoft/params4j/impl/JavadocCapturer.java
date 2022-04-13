@@ -138,6 +138,15 @@ public class JavadocCapturer extends AbstractProcessor {
               commentProps.put(childName, docComment);
             }
           }
+          
+          DeclaredType parameterClass = null;
+          VariableElement variable = (VariableElement) child;
+          if (variable.asType() instanceof DeclaredType) {
+            parameterClass = (DeclaredType) variable.asType();
+          }
+          if (parameterClass != null) {
+            generateCommentProperties(elements, (TypeElement) parameterClass.asElement());
+          }                          
         } else if (child.getKind() == ElementKind.METHOD) {
           ExecutableElement method = (ExecutableElement) child;
           if (method.getParameters().size() == 1 && childName.startsWith("set")) {
