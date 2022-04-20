@@ -11,6 +11,7 @@ import uk.co.spudsoft.params4j.Params4J;
 import uk.co.spudsoft.params4j.Params4JSpi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  *
@@ -46,6 +47,22 @@ public class SystemPropertiesGathererTest {
     gatherer = new SystemPropertiesGatherer<>(System.getProperties(), "prefix.");
     dp = gatherer.gatherParameters(p4j, new DummyParameters());
     assertEquals(0, dp.getValue());
+  }
+  
+  
+  @Test
+  public void testEmpty() throws Exception {
+    Params4JSpi p4j = (Params4JSpi) Params4J.<DummyParameters>factory()
+            .withConstructor(() -> new DummyParameters())
+            .withCustomJsonModule(new SimpleModule("pointless"))
+            .create();
+    
+    Properties props = new Properties();
+    SystemPropertiesGatherer<DummyParameters> gatherer = new SystemPropertiesGatherer<>(props, "prefix.");
+    DummyParameters dp = gatherer.gatherParameters(p4j, new DummyParameters());
+    assertEquals(0, dp.getValue());
+    assertNull(dp.getList());
+    assertNull(dp.getCheck());
   }
   
 }

@@ -51,4 +51,20 @@ public class EnvironmentVariablesGathererTest {
     assertNull(dp.getList());
   }
   
+  
+  @Test
+  public void testEmpty() throws Exception {
+    Params4JSpi p4j = (Params4JSpi) Params4J.<DummyParameters>factory()
+            .withConstructor(() -> new DummyParameters())
+            .withCustomJsonModule(new SimpleModule("pointless"))
+            .create();
+    
+    Map<String, String> env = new HashMap<>();
+    EnvironmentVariablesGatherer<DummyParameters> gatherer = new EnvironmentVariablesGatherer<>(env, "prefix.", true);
+    DummyParameters dp = gatherer.gatherParameters(p4j, new DummyParameters());
+    assertEquals(0, dp.getValue());
+    assertNull(dp.getList());
+    assertNull(dp.getCheck());
+  }
+  
 }

@@ -25,7 +25,7 @@ import uk.co.spudsoft.params4j.Params4JSpi;
  */
 public class SystemPropertiesGatherer<P> implements ParameterGatherer<P> {
 
-  private final Properties props;
+  private final Properties sysProps;
   private final String propertyPrefix;
   
   /**
@@ -45,16 +45,20 @@ public class SystemPropertiesGatherer<P> implements ParameterGatherer<P> {
    * @param namePrefix The prefix to use to filter out system properties that should not be considered.
    */
   public SystemPropertiesGatherer(Properties props,  String namePrefix) {
-    this.props = props;
+    this.sysProps = props;
     this.propertyPrefix = namePrefix;
   }
   
   @Override
   public P gatherParameters(Params4JSpi spi, P base) throws IOException {
     ObjectReader reader = spi.getPropsMapper().readerForUpdating(base);
-    return reader.readValue(
-            spi.prepareProperties("System properties", props.entrySet(), Entry::getKey, Entry::getValue, propertyPrefix)
-    );            
+    byte[] props = spi.prepareProperties("System properties", sysProps.entrySet(), Entry::getKey, Entry::getValue, propertyPrefix);
+    if (props.length > 0) {
+      return reader.readValue(props);
+    } else {
+      return base;
+    }
+       
   }
 
 }

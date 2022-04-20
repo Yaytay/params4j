@@ -10,6 +10,8 @@ import uk.co.spudsoft.params4j.Params4J;
 import uk.co.spudsoft.params4j.Params4JSpi;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  *
@@ -29,6 +31,7 @@ public class CommandLineArgumentsGathererTest {
       , "list[0]=first"
       , "list[1]=second"
       , "wrong=wrong"
+      , "check"
     };
     
     CommandLineArgumentsGatherer<DummyParameters> gatherer = new CommandLineArgumentsGatherer<>(args, null);
@@ -36,5 +39,20 @@ public class CommandLineArgumentsGathererTest {
     assertEquals(17, dp.getValue());
     assertEquals("first", dp.getList().get(0));
     assertEquals("second", dp.getList().get(1));
+    assertTrue(dp.getCheck());
+  }  
+  
+  @Test
+  public void testEmpty() throws Exception {
+    Params4JSpi p4j = (Params4JSpi) Params4J.<DummyParameters>factory()
+            .withConstructor(() -> new DummyParameters())
+            .withCustomJsonModule(new SimpleModule("pointless"))
+            .create();
+    
+    CommandLineArgumentsGatherer<DummyParameters> gatherer = new CommandLineArgumentsGatherer<>(new String[0], null);
+    DummyParameters dp = gatherer.gatherParameters(p4j, new DummyParameters());
+    assertEquals(0, dp.getValue());
+    assertNull(dp.getList());
+    assertNull(dp.getCheck());
   }  
 }

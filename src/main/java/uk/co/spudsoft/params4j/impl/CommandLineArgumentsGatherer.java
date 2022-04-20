@@ -61,9 +61,13 @@ public class CommandLineArgumentsGatherer<P> implements ParameterGatherer<P> {
   @Override
   public P gatherParameters(Params4JSpi spi, P base) throws IOException {
     ObjectReader reader = spi.getPropsMapper().readerForUpdating(base);
-    return reader.readValue(
-            spi.prepareProperties("Command line arguments", args.entrySet(), Entry::getKey, Entry::getValue, namePrefix)
-    );            
+    byte[] props = spi.prepareProperties("Command line arguments", args.entrySet(), Entry::getKey, Entry::getValue, namePrefix);
+    if (props.length > 0) {
+      return reader.readValue(props);
+    } else {
+      return base;
+    }
+    
   }
 
 }
