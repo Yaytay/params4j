@@ -45,7 +45,7 @@ public enum FileType {
    * 
    * The specification for JSON files if <a href="https://www.json.org/json-en.html">here</a>.
    * The Jackson handling of json files is defined <a href="https://github.com/FasterXML/jackson">here</a>.
-   * The specific configuration of the ObjectMapper used by Params4J can be found in {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createJsonMapper(java.util.List)}.
+   * The specific configuration of the ObjectMapper used by Params4J can be found in {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createJsonMapper(java.util.List,java.util.List)}.
    * 
    */
   Json(Arrays.asList(".json"), Params4JSpi::getJsonMapper)

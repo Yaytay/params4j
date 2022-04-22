@@ -27,13 +27,14 @@ import uk.co.spudsoft.params4j.Params4JFactory;
  * @param <P> The type of the parameters object.
 */
 public class Params4JFactoryImpl<P> implements Params4JFactory<P> {
-
+  
   private Supplier<P> constructor;
   private List<ParameterGatherer<P>> gatherers = new ArrayList<>();
   private DeserializationProblemHandler problemHandler;
   private JavaPropsMapper propsMapper;
   private ObjectMapper jsonMapper;
   private List<com.fasterxml.jackson.databind.Module> customJsonModules = new ArrayList<>();
+  private List<MixIn> mixIns = new ArrayList<>();
   private ObjectMapper yamlMapper;
   
   @Override
@@ -72,6 +73,12 @@ public class Params4JFactoryImpl<P> implements Params4JFactory<P> {
     return this;
   }
 
+  @Override
+  public Params4JFactory<P> withMixIn(Class<?> target, Class<?> mixinSource) {
+    this.mixIns.add(new MixIn(target, mixinSource));
+    return this;
+  }
+  
   @Override
   public Params4JFactory<P> withYamlMapper(ObjectMapper yamlMapper) {
     this.yamlMapper = yamlMapper;
@@ -117,6 +124,7 @@ public class Params4JFactoryImpl<P> implements Params4JFactory<P> {
             , propsMapper
             , jsonMapper
             , customJsonModules
+            , mixIns
             , yamlMapper
     );
   }

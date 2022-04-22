@@ -23,6 +23,7 @@ public class ResourceGathererTest {
     Params4J<DummyParameters> p4j = new Params4JFactoryImpl<DummyParameters>()
             .withConstructor(() -> new DummyParameters())
             .withGatherer(gatherer)
+            .withMixIn(String.class, MixIn.class) // This does nothing useful
             .create();
     DummyParameters dp = p4j.gatherParameters();
     assertEquals(17, dp.getValue());

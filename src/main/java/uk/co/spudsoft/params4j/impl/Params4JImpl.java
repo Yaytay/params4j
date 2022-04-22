@@ -105,12 +105,17 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     return mapper;
   }
   
-  private ObjectMapper createJsonMapper(List<com.fasterxml.jackson.databind.Module> customJsonModules) {
+  private ObjectMapper createJsonMapper(List<com.fasterxml.jackson.databind.Module> customJsonModules, List<MixIn> mixIns) {
     ObjectMapper mapper = new ObjectMapper();
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     if (customJsonModules != null) {
       for (com.fasterxml.jackson.databind.Module module : customJsonModules) {
         mapper.registerModule(module);
+      }
+    }
+    if (mixIns != null) {
+      for (MixIn mixIn : mixIns) {
+        mapper.addMixIn(mixIn.target, mixIn.source);
       }
     }
     mapper.registerModule(new JavaTimeModule());
@@ -131,6 +136,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
    * @param propsMapper The props mapper that is made available to the gatherers via the Params4JSpi.
    * @param jsonMapper The json mapper that is made available to the gatherers via the Params4JSpi.
    * @param customJsonModules The custom JSON modules that are added to the default JSON mapper (if one is not passed in).
+   * @param mixIns The custom MixIns that are added to the default JSON mapper (if one is not passed in).
    * @param yamlMapper The yaml mapper that is made available to the gatherers via the Params4JSpi.
    */
   public Params4JImpl(Supplier<P> constructor
@@ -139,6 +145,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
           , JavaPropsMapper propsMapper
           , ObjectMapper jsonMapper
           , List<com.fasterxml.jackson.databind.Module> customJsonModules
+          , List<MixIn> mixIns
           , ObjectMapper yamlMapper
   ) {
     Objects.requireNonNull(constructor, "A valid supplier must be set on the factory");
@@ -147,7 +154,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     this.gatherers = gatherers;
     this.problemHandler = Objects.requireNonNullElseGet(problemHandler, () -> new DefaultParametersErrorHandler());
     this.propsMapper = Objects.requireNonNullElseGet(propsMapper, () -> createPropsMapper());
-    this.jsonMapper = Objects.requireNonNullElseGet(jsonMapper, () -> createJsonMapper(customJsonModules));
+    this.jsonMapper = Objects.requireNonNullElseGet(jsonMapper, () -> createJsonMapper(customJsonModules, mixIns));
     this.yamlMapper = Objects.requireNonNullElseGet(yamlMapper, () -> createYamlMapper());
     this.fileWatcher = new FileWatcher(this::changeNotificationHandler);
   }

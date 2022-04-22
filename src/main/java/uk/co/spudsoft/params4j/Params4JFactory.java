@@ -71,7 +71,7 @@ public interface Params4JFactory<P> {
   /**
    * Set a custom Jackson object mapper.
    * <P>
-   * Calling this method is optional, if not called the default object mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createJsonMapper(java.util.List) Params4JImpl.createJsonMapper}.
+   * Calling this method is optional, if not called the default object mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createJsonMapper(java.util.List,java.util.List) Params4JImpl.createJsonMapper}.
    * 
    * @param jsonMapper The object mapper to use.
    * @return this.
@@ -81,7 +81,7 @@ public interface Params4JFactory<P> {
   /**
    * Set a custom Jackson module to use with the default object mapper.
    * <P>
-   * Calling this method is optional, if not called the default object mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createJsonMapper(java.util.List) Params4JImpl#createJsonMapper} with no custom modules.
+   * Calling this method is optional, if not called the default object mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createJsonMapper(java.util.List,java.util.List) Params4JImpl#createJsonMapper} with no custom modules.
    * Modules will be added in the order that this method is called.
    * <P>
    * If a custom object mapper is used (via {@link #withJsonMapper(com.fasterxml.jackson.databind.ObjectMapper)}) then this method will not achieve anything.
@@ -90,6 +90,22 @@ public interface Params4JFactory<P> {
    * @return this.
    */
   Params4JFactory<P> withCustomJsonModule(com.fasterxml.jackson.databind.Module module);
+
+  /**
+   * Adds a custom MixIn class to the default object mapper.
+   * <P>
+   * Calling this method is optional, if not called the default object mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createJsonMapper(java.util.List,java.util.List) Params4JImpl#createJsonMapper} with no custom MixIns.
+   * MixIns will be added in the order that this method is called.
+   * <P>
+   * See {@link com.fasterxml.jackson.databind.ObjectMapper#addMixIn(java.lang.Class, java.lang.Class)} for details of MixIns.
+   * <P>
+   * If a custom object mapper is used (via {@link #withJsonMapper(com.fasterxml.jackson.databind.ObjectMapper)}) then this method will not achieve anything.
+   * 
+   * @param target Class (or interface) whose annotations to effectively override
+   * @param mixinSource Class (or interface) whose annotations are to be "added" to target's annotations, overriding as necessary
+   * @return this.
+   */
+  Params4JFactory<P> withMixIn(Class<?> target, Class<?> mixinSource);
 
   /**
    * Set a custom Jackson YAML mapper.
