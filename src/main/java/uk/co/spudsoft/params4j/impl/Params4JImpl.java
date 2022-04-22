@@ -83,30 +83,24 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     return Collections.unmodifiableSet(tt);
   }
   
-  private JavaPropsMapper createPropsMapper() {
+  private JavaPropsMapper createPropsMapper(List<com.fasterxml.jackson.databind.Module> customJsonModules, List<MixIn> mixIns) {
     JavaPropsMapper mapper = JavaPropsMapper.builder()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
-            .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-            .addModule(new JavaTimeModule())
-            .addHandler(problemHandler)
-            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true)
-            .defaultMergeable(Boolean.TRUE)
             .build();
-    return mapper;
+    return configureObjectMapper(mapper, customJsonModules, mixIns);
   }
   
-  private ObjectMapper createYamlMapper() {
+  private ObjectMapper createYamlMapper(List<com.fasterxml.jackson.databind.Module> customJsonModules, List<MixIn> mixIns) {
     ObjectMapper mapper = new ObjectMapper(new YAMLFactory());
-    mapper.setDefaultMergeable(Boolean.TRUE);
-    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
-    mapper.addHandler(problemHandler);
-    mapper.registerModule(new JavaTimeModule());
-    mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-    return mapper;
+    return configureObjectMapper(mapper, customJsonModules, mixIns);
   }
   
   private ObjectMapper createJsonMapper(List<com.fasterxml.jackson.databind.Module> customJsonModules, List<MixIn> mixIns) {
     ObjectMapper mapper = new ObjectMapper();
+    return configureObjectMapper(mapper, customJsonModules, mixIns);
+  }
+  
+  private <T extends ObjectMapper> T configureObjectMapper(T mapper, List<com.fasterxml.jackson.databind.Module> customJsonModules, List<MixIn> mixIns) {
     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);
     if (customJsonModules != null) {
       for (com.fasterxml.jackson.databind.Module module : customJsonModules) {
@@ -153,9 +147,9 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     this.constructor = constructor;
     this.gatherers = gatherers;
     this.problemHandler = Objects.requireNonNullElseGet(problemHandler, () -> new DefaultParametersErrorHandler());
-    this.propsMapper = Objects.requireNonNullElseGet(propsMapper, () -> createPropsMapper());
+    this.propsMapper = Objects.requireNonNullElseGet(propsMapper, () -> createPropsMapper(customJsonModules, mixIns));
     this.jsonMapper = Objects.requireNonNullElseGet(jsonMapper, () -> createJsonMapper(customJsonModules, mixIns));
-    this.yamlMapper = Objects.requireNonNullElseGet(yamlMapper, () -> createYamlMapper());
+    this.yamlMapper = Objects.requireNonNullElseGet(yamlMapper, () -> createYamlMapper(customJsonModules, mixIns));
     this.fileWatcher = new FileWatcher(this::changeNotificationHandler);
   }
 

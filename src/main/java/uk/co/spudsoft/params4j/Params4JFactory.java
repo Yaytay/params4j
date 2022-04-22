@@ -60,7 +60,7 @@ public interface Params4JFactory<P> {
   /**
    * Set a custom Jackson properties mapper.
    * <P>
-   * Calling this method is optional, if not called the default props mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createPropsMapper() Params4JImpl.createPropsMapper}.
+   * Calling this method is optional, if not called the default props mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createPropsMapper(java.util.List, java.util.List) Params4JImpl.createPropsMapper}.
    * Note that the props mapper is used when processing system properties and environment variables as well as properties files.
    * 
    * @param propsMapper The props mapper to use.
@@ -110,7 +110,7 @@ public interface Params4JFactory<P> {
   /**
    * Set a custom Jackson YAML mapper.
    * <P>
-   * Calling this method is optional, if not called the default object mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createYamlMapper() Params4JImpl.createYamlMapper}.
+   * Calling this method is optional, if not called the default object mapper is created by {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createYamlMapper(java.util.List, java.util.List) Params4JImpl.createYamlMapper}.
    * <P>
    * Note that a YAML mapper is just an instance of ObjectMapper with a YAMLFactory.
    * If an ordinary JSON mapper is passed in to this method it will not parse YAML files correctly.
