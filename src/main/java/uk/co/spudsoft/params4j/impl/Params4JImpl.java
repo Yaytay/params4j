@@ -204,7 +204,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
                   .append(value)
                   .append("\r\n");
             }
-          } catch(ClassCastException ex) {
+          } catch (ClassCastException ex) {
             logger.warn("{} unable to get key or value as a string from {}", name, entry);
           }
         }
@@ -230,7 +230,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     for (ParameterGatherer<P> gatherer : gatherers) {
       try {
         value = gatherer.gatherParameters(this, value);
-      } catch(Throwable ex) {
+      } catch (Throwable ex) {
         logger.warn("Failed to process: ", ex);
       }
     }
@@ -274,7 +274,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
         field.setAccessible(false);
         return value;
       }
-    } catch(Throwable ex) {
+    } catch (Throwable ex) {
       logger.debug("Failed to get {} from {}: {}", field, object, ex.getMessage());
       return null;
     }
@@ -287,12 +287,12 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     Method method = null;
     try {
       method = object.getClass().getMethod("get" + setterName.substring(3));
-    } catch(NoSuchMethodException ex) {
+    } catch (NoSuchMethodException ex) {
     }
     if (method == null) {
       try {
         method = object.getClass().getMethod("is" + setterName.substring(3));
-      } catch(NoSuchMethodException ex) {
+      } catch (NoSuchMethodException ex) {
       }
     }
     if (method == null) {
@@ -301,7 +301,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     }
     try {
       return method.invoke(object);
-    } catch(Throwable ex) {
+    } catch (Throwable ex) {
       logger.debug("Failed to execute {}.{} on {}: {}", object.getClass().getSimpleName(), method, object, ex.getMessage());
       return null;
     }
@@ -315,7 +315,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
         props = new Properties();
         props.load(stream);
         docProperties.put(type.getCanonicalName(), props);
-      } catch(Throwable ex) {
+      } catch (Throwable ex) {
       }
     }
     return props;

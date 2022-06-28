@@ -123,19 +123,13 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>4.4.0</version>
+      <version>4.6.1</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.hamcrest</groupId>
       <artifactId>hamcrest</artifactId>
       <version>2.2</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.13.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -170,7 +164,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.10.0</version>
+        <version>2.11.0</version>
         <executions>
           <execution>
             <id>display-plugin-updates</id>
@@ -263,7 +257,7 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.6.0.0</version>
+        <version>4.7.0.0</version>
         <configuration>
           <fork>false</fork>
           <effort>Max</effort>
@@ -313,7 +307,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>10.1</version>
+            <version>10.3.1</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -321,7 +315,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.0.0-M6</version>
+        <version>3.0.0-M7</version>
         <configuration>
           <forkCount>${forkCount}</forkCount>
           <reuseForks>true</reuseForks>
@@ -344,7 +338,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-failsafe-plugin</artifactId>
-        <version>3.0.0-M6</version>
+        <version>3.0.0-M7</version>
         <executions>
           <execution>
             <goals>
@@ -429,7 +423,7 @@
       <plugin>
         <groupId>org.owasp</groupId>
         <artifactId>dependency-check-maven</artifactId>
-        <version>7.0.4</version>
+        <version>7.1.1</version>
         <configuration>
           <failBuildOnCVSS>8</failBuildOnCVSS>
           <failOnError>false</failOnError>
@@ -483,7 +477,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.3.2</version>
+        <version>3.4.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -520,7 +514,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>3.2.2</version>
+        <version>3.3.0</version>
       </plugin>
 
     </plugins>
@@ -531,7 +525,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.7</version>
+        <version>0.8.8</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -606,13 +600,6 @@
                 <goals>
                   <goal>sign</goal>
                 </goals>
-                <configuration>
-                  <keyname>Jim E. Talbut</keyname>
-                  <gpgArguments>
-                    <arg>--pinentry-mode</arg>
-                    <arg>loopback</arg>
-                  </gpgArguments>
-                </configuration>
               </execution>
             </executions>
           </plugin>

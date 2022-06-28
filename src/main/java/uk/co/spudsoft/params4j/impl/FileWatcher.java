@@ -49,7 +49,7 @@ public class FileWatcher {
     WatchService tempWatchService = null;
     try {
       tempWatchService = FileSystems.getDefault().newWatchService();
-    } catch(IOException ex) {
+    } catch (IOException ex) {
       logger.error("Failed to create watch service, configuration changes will not be noticed: ", ex);              
     }
     this.watcher = tempWatchService;

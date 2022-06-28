@@ -74,7 +74,7 @@ public class JavadocCapturer extends AbstractProcessor {
         commentProps.store(out, "Documentation properties for " + classElement.getQualifiedName());
       }
       processingEnv.getMessager().printMessage(Diagnostic.Kind.OTHER, "Output written to " + fo.toUri());
-    } catch(IOException ex) {
+    } catch (IOException ex) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, "Unable to write to resource file: " + ex.getMessage());
     }
   }

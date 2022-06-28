@@ -1,6 +1,10 @@
 # Parameters For Java
 
-[![License](https://img.shields.io/github/license/yaytay/params4j)]
+[![Latest release](https://img.shields.io/github/release/yaytay/params4j.svg)](https://github.com/yaytay/params4j/latest)
+[![License](https://img.shields.io/github/license/yaytay/params4j)](https://github.com/yaytay/params4j/blob/master/LICENCE.md)
+[![Issues](https://img.shields.io/github/issues/yaytay/params4j)](https://github.com/yaytay/params4j/issues)
+[![Build Status](https://github.com/yaytay/params4j/actions/workflows/buildtest.yml/badge.svg)](https://github.com/Yaytay/streaming-xlsx-writer/actions/workflows/buildtest.yml)
+[![CodeCov](https://codecov.io/gh/Yaytay/streaming-xlsx-writer/branch/main/graph/badge.svg?token=ACHVK20T9Q)](https://codecov.io/gh/Yaytay/streaming-xlsx-writer)
 
 Parameters for Java is a small library for collating parameters to Java daemons.
 

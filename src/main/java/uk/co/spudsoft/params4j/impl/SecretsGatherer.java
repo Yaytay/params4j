@@ -69,7 +69,7 @@ public class SecretsGatherer<P> implements ParameterGatherer<P> {
     SecretsWalker visitor = new SecretsWalker(root, spi.getJsonMapper(), fileSizeLimit, fileCountLimit, charset, dir -> {
               try {
                 spi.watch(dir);
-              } catch(IOException ex) {
+              } catch (IOException ex) {
                 logger.warn("Failed to establish watch on {}: ", dir, ex);
               }
             });

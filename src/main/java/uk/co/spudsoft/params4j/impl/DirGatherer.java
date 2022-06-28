@@ -63,7 +63,7 @@ public class DirGatherer<P> implements ParameterGatherer<P> {
                 try (InputStream stream = new FileInputStream(file)) {
                   base = reader.readValue(stream);
                 }
-              } catch(Throwable ex) {
+              } catch (Throwable ex) {
                 logger.error("Failed to process file {}: ", file, ex);
               }
             }
