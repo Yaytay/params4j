@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FileType.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Parameters for Java</a> &gt; <a href="index.source.html" class="el_package">uk.co.spudsoft.params4j</a> &gt; <span class="el_source">FileType.java</span></div><h1>FileType.java</h1><pre class="source lang-java linenums">/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package uk.co.spudsoft.params4j;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Function;
+
+/**
+ *
+ * @author jtalbut
+ */
+<span class="fc" id="L16">public enum FileType {</span>
+  
+  /**
+   * Values are read from a properties file.
+   * 
+   * The format of the properties file is defined &lt;a href=&quot;https://docs.oracle.com/javase/10/docs/api/java/util/Properties.html#load(java.io.Reader)&quot;&gt;here&lt;/a&gt;.
+   * The Jackson handling of properties files is defined &lt;a href=&quot;https://fasterxml.github.io/jackson-dataformats-text/javadoc/properties/2.9/com/fasterxml/jackson/dataformat/javaprop/JavaPropsMapper.html&quot;&gt;here&lt;/a&gt;
+   * The specific configuration of the JavaPropsMapper used by Params4J can be found in {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createPropsMapper(java.util.List, java.util.List)}.
+   * 
+   * @see &lt;a href=&quot;https://fasterxml.github.io/jackson-dataformats-text/javadoc/properties/2.9/com/fasterxml/jackson/dataformat/javaprop/JavaPropsMapper.html&quot;&gt;JavaPropsMapper&lt;/a&gt;
+   * @see &lt;a href=&quot;https://docs.oracle.com/javase/10/docs/api/java/util/Properties.html#load(java.io.Reader)&quot;&gt;Properties::load(java.io.Reader)&lt;/a&gt;
+   */
+<span class="fc" id="L28">  Properties(Arrays.asList(&quot;.properties&quot;), Params4JSpi::getPropsMapper)</span>
+  , 
+  /**
+   * Values are read from a yaml file.
+   * 
+   * The specification for YAML files is &lt;a href=&quot;https://yaml.org/spec/&quot;&gt;here&lt;/a&gt;.
+   * The Jackson handling of yaml files is defined &lt;a href=&quot;https://github.com/FasterXML/jackson-dataformats-text/tree/2.14/yaml&quot;&gt;here&lt;/a&gt;.
+   * The specific configuration of the ObjectMapper used by Params4J can be found in {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createYamlMapper(java.util.List, java.util.List)}.
+   * 
+   * @see &lt;a href=&quot;https://yaml.org/spec/&quot;&gt;YAML spec&lt;/a&gt;
+   * @see &lt;a href=&quot;https://github.com/FasterXML/jackson-dataformats-text/tree/2.14/yaml&quot;&gt;jackson-dataformats-test/yaml&lt;/a&gt;
+   * 
+   */
+<span class="fc" id="L41">  Yaml(Arrays.asList(&quot;.yaml&quot;, &quot;.yml&quot;), Params4JSpi::getYamlMapper)</span>
+  , 
+  /**
+   * Values are read from a JSON file.
+   * 
+   * The specification for JSON files if &lt;a href=&quot;https://www.json.org/json-en.html&quot;&gt;here&lt;/a&gt;.
+   * The Jackson handling of json files is defined &lt;a href=&quot;https://github.com/FasterXML/jackson&quot;&gt;here&lt;/a&gt;.
+   * The specific configuration of the ObjectMapper used by Params4J can be found in {@link uk.co.spudsoft.params4j.impl.Params4JImpl#createJsonMapper(java.util.List, java.util.List)}.
+   * 
+   */
+<span class="fc" id="L51">  Json(Arrays.asList(&quot;.json&quot;), Params4JSpi::getJsonMapper)</span>
+
+  ;
+  
+  private final List&lt;String&gt; extensions;
+  private final Function&lt;Params4JSpi, ObjectMapper&gt; objectMapGetter;
+
+  /**
+   * Get the list of ends of file names that indicate this file type.
+   * @return the list of filename extensions that indicate this file type.
+   */
+  public List&lt;String&gt; getExtensions() {
+<span class="fc" id="L63">    return extensions;</span>
+  }
+  
+  /**
+   * Get the ObjectMapper to use for files of this type.
+   * @param spi The service provider interface that contains references to the different ObjectMappers.
+   * @return An ObjectMapper able to process this file type.
+   */
+  public ObjectMapper getObjectMapper(Params4JSpi spi) {
+<span class="fc" id="L72">    return objectMapGetter.apply(spi);</span>
+  }
+  
+  /**
+   * Constructor.
+   * @param extensions the list of filename extensions that indicate this file type.
+   * @param objectMapGetter function to object the appropriate ObjectMapper from the service provider interface.
+   */
+<span class="fc" id="L80">  FileType(List&lt;String&gt; extensions, Function&lt;Params4JSpi, ObjectMapper&gt; objectMapGetter) {</span>
+<span class="fc" id="L81">    this.extensions = extensions;</span>
+<span class="fc" id="L82">    this.objectMapGetter = objectMapGetter;</span>
+<span class="fc" id="L83">  }</span>
+  
+  
+  
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>CommandLineArgumentsGatherer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Parameters for Java</a> &gt; <a href="index.source.html" class="el_package">uk.co.spudsoft.params4j.impl</a> &gt; <span class="el_source">CommandLineArgumentsGatherer.java</span></div><h1>CommandLineArgumentsGatherer.java</h1><pre class="source lang-java linenums">/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package uk.co.spudsoft.params4j.impl;
+
+import com.fasterxml.jackson.databind.ObjectReader;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import uk.co.spudsoft.params4j.ParameterGatherer;
+import uk.co.spudsoft.params4j.Params4JSpi;
+
+/**
+ * ParameterGather that gathers parameters from command line arguments.
+ * 
+ * Arguments are parsed by whatever shell is in use and should be escaped appropriately.
+ * Each string in the args[] array should be a single key/value pair separated by &quot;=&quot;.
+ * Any arguments that do not contain the equals character will be treated as being &quot;=true&quot;;
+ * 
+ * To avoid trying to process all arguments as parameters the namePrefix can be used to filter them.
+ * If the namePrefix is supplied (is not null or empty) only environment variables that begin with the prefix will be considered.
+ * The prefix will be removed before mapping variables to the parameters object.
+ * The prefix is always considered to have a trailing dot (&quot;.&quot;), this does not have to be specified in the namePrefix argument.
+ * Use of the namePrefix is less useful on command line arguments than on environment variables or system properties, but it often makes sense to include it for consistency. 
+ * 
+ * @author jtalbut
+ * 
+ * @param &lt;P&gt; The type of the parameters object.
+ */
+public class CommandLineArgumentsGatherer&lt;P&gt; implements ParameterGatherer&lt;P&gt; {
+
+  private final Map&lt;String, String&gt; args;
+  private final String namePrefix;
+  
+  /**
+   * Constructor.
+   * 
+   * @param args The arguments passed in to the main() method.
+   * @param namePrefix The prefix that can be used to filter arguments.
+   */
+<span class="fc" id="L43">  public CommandLineArgumentsGatherer(String args[], String namePrefix) {</span>
+<span class="fc" id="L44">    this.args = argsToMap(args);</span>
+<span class="fc" id="L45">    this.namePrefix = namePrefix;</span>
+<span class="fc" id="L46">  }</span>
+  
+  final Map&lt;String, String&gt; argsToMap(String args[]) {
+<span class="fc" id="L49">    Map&lt;String, String&gt; result = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">    for (String arg : args) {</span>
+<span class="fc" id="L51">      String[] parts = arg.split(&quot;=&quot;, 2);</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">      if (parts.length == 1) {</span>
+<span class="fc" id="L53">        result.put(arg, &quot;true&quot;);</span>
+      } else {
+<span class="fc" id="L55">        result.put(parts[0], parts[1]);</span>
+      }
+    }
+<span class="fc" id="L58">    return result;</span>
+  }
+  
+  @Override
+  public P gatherParameters(Params4JSpi spi, P base) throws IOException {
+<span class="fc" id="L63">    ObjectReader reader = spi.getPropsMapper().readerForUpdating(base);</span>
+<span class="fc" id="L64">    byte[] props = spi.prepareProperties(&quot;Command line arguments&quot;, args.entrySet(), Entry::getKey, Entry::getValue, namePrefix);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">    if (props.length &gt; 0) {</span>
+<span class="fc" id="L66">      return reader.readValue(props);</span>
+    } else {
+<span class="fc" id="L68">      return base;</span>
+    }
+    
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>

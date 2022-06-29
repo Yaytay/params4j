@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SystemPropertiesGatherer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Parameters for Java</a> &gt; <a href="index.source.html" class="el_package">uk.co.spudsoft.params4j.impl</a> &gt; <span class="el_source">SystemPropertiesGatherer.java</span></div><h1>SystemPropertiesGatherer.java</h1><pre class="source lang-java linenums">/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package uk.co.spudsoft.params4j.impl;
+
+import com.fasterxml.jackson.databind.ObjectReader;
+import java.io.IOException;
+import java.util.Map.Entry;
+import java.util.Properties;
+import uk.co.spudsoft.params4j.ParameterGatherer;
+import uk.co.spudsoft.params4j.Params4JSpi;
+
+/**
+ * ParameterGather that gathers parameters from Java system properties.
+ * 
+ * To avoid trying to process all environment variables as parameters the namePrefix can be used to filter environment variables.
+ * If the namePrefix is supplied (is not null or empty) only environment variables that begin with the prefix will be considered.
+ * The prefix will be removed before mapping variables to the parameters object.
+ * The prefix is always considered to have a trailing dot (&quot;.&quot;), this does not have to be specified in the namePrefix argument.
+ * 
+ * @author jtalbut
+ * 
+ * @param &lt;P&gt; The type of the parameters object.
+ */
+public class SystemPropertiesGatherer&lt;P&gt; implements ParameterGatherer&lt;P&gt; {
+
+  private final Properties sysProps;
+  private final String propertyPrefix;
+  
+  /**
+   * Constructor.
+   * @param namePrefix The prefix to use to filter out system properties that should not be considered.
+   */
+  public SystemPropertiesGatherer(String namePrefix) {
+<span class="nc" id="L36">    this(System.getProperties(), namePrefix);</span>
+<span class="nc" id="L37">  }</span>
+
+  /**
+   * Constructor.
+   * 
+   * This constructor is only intended for test purposes.
+   * 
+   * @param props Properties data to process.
+   * @param namePrefix The prefix to use to filter out system properties that should not be considered.
+   */
+<span class="fc" id="L47">  public SystemPropertiesGatherer(Properties props,  String namePrefix) {</span>
+<span class="fc" id="L48">    this.sysProps = props;</span>
+<span class="fc" id="L49">    this.propertyPrefix = namePrefix;</span>
+<span class="fc" id="L50">  }</span>
+  
+  @Override
+  public P gatherParameters(Params4JSpi spi, P base) throws IOException {
+<span class="fc" id="L54">    ObjectReader reader = spi.getPropsMapper().readerForUpdating(base);</span>
+<span class="fc" id="L55">    byte[] props = spi.prepareProperties(&quot;System properties&quot;, sysProps.entrySet(), Entry::getKey, Entry::getValue, propertyPrefix);</span>
+<span class="fc bfc" id="L56" title="All 2 branches covered.">    if (props.length &gt; 0) {</span>
+<span class="fc" id="L57">      return reader.readValue(props);</span>
+    } else {
+<span class="fc" id="L59">      return base;</span>
+    }
+       
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
