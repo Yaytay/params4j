@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Params4JImpl.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Parameters for Java</a> &gt; <a href="index.source.html" class="el_package">uk.co.spudsoft.params4j.impl</a> &gt; <span class="el_source">Params4JImpl.java</span></div><h1>Params4JImpl.java</h1><pre class="source lang-java linenums">/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package uk.co.spudsoft.params4j.impl;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStreamWriter;
+import java.lang.reflect.AnnotatedElement;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
+import java.util.Stack;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.co.spudsoft.params4j.Comment;
+import uk.co.spudsoft.params4j.ConfigurationProperty;
+import uk.co.spudsoft.params4j.ParameterGatherer;
+import uk.co.spudsoft.params4j.Params4J;
+import uk.co.spudsoft.params4j.Params4JSpi;
+
+/**
+ *
+ * @author jtalbut
+ * 
+ * @param &lt;P&gt; The type of the parameters object.
+ */
+public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
+
+<span class="fc" id="L62">  private static final Logger logger = LoggerFactory.getLogger(Params4JImpl.class);</span>
+  
+  private final Supplier&lt;P&gt; constructor;
+  private final List&lt;ParameterGatherer&lt;P&gt;&gt; gatherers;
+  private final DeserializationProblemHandler problemHandler;
+  private final JavaPropsMapper propsMapper;
+  private final ObjectMapper jsonMapper;
+  private final ObjectMapper yamlMapper;
+  private final FileWatcher fileWatcher;
+  private Consumer&lt;P&gt; changeHappenedHandler;
+<span class="fc" id="L72">  private final AtomicReference&lt;ObjectNode&gt; lastValue = new AtomicReference&lt;&gt;();</span>
+  
+<span class="fc" id="L74">  private static final Set&lt;String&gt; TERMINAL_TYPES = buildTerminalTypes();</span>
+
+  static Set&lt;String&gt; buildTerminalTypes() {
+<span class="fc" id="L77">    Set&lt;String&gt; tt = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L78">    tt.add(&quot;java.time.LocalDateTime&quot;);</span>
+<span class="fc" id="L79">    tt.add(&quot;java.time.LocalDate&quot;);</span>
+<span class="fc" id="L80">    tt.add(&quot;java.time.LocalTime&quot;);</span>
+<span class="fc" id="L81">    tt.add(&quot;java.lang.String&quot;);</span>
+<span class="fc" id="L82">    tt.add(&quot;java.io.File&quot;);</span>
+<span class="fc" id="L83">    return Collections.unmodifiableSet(tt);</span>
+  }
+  
+  private JavaPropsMapper createPropsMapper(List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules, List&lt;MixIn&gt; mixIns) {
+<span class="fc" id="L87">    JavaPropsMapper mapper = JavaPropsMapper.builder()</span>
+<span class="fc" id="L88">            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)</span>
+<span class="fc" id="L89">            .build();</span>
+<span class="fc" id="L90">    return configureObjectMapper(mapper, customJsonModules, mixIns);</span>
+  }
+  
+  private ObjectMapper createYamlMapper(List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules, List&lt;MixIn&gt; mixIns) {
+<span class="fc" id="L94">    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());</span>
+<span class="fc" id="L95">    return configureObjectMapper(mapper, customJsonModules, mixIns);</span>
+  }
+  
+  private ObjectMapper createJsonMapper(List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules, List&lt;MixIn&gt; mixIns) {
+<span class="fc" id="L99">    ObjectMapper mapper = new ObjectMapper();</span>
+<span class="fc" id="L100">    return configureObjectMapper(mapper, customJsonModules, mixIns);</span>
+  }
+  
+  private &lt;T extends ObjectMapper&gt; T configureObjectMapper(T mapper, List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules, List&lt;MixIn&gt; mixIns) {
+<span class="fc" id="L104">    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);</span>
+<span class="pc bpc" id="L105" title="1 of 2 branches missed.">    if (customJsonModules != null) {</span>
+<span class="fc bfc" id="L106" title="All 2 branches covered.">      for (com.fasterxml.jackson.databind.Module module : customJsonModules) {</span>
+<span class="fc" id="L107">        mapper.registerModule(module);</span>
+<span class="fc" id="L108">      }</span>
+    }
+<span class="pc bpc" id="L110" title="1 of 2 branches missed.">    if (mixIns != null) {</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">      for (MixIn mixIn : mixIns) {</span>
+<span class="fc" id="L112">        mapper.addMixIn(mixIn.target, mixIn.source);</span>
+<span class="fc" id="L113">      }</span>
+    }
+<span class="fc" id="L115">    mapper.registerModule(new JavaTimeModule());</span>
+<span class="fc" id="L116">    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);</span>
+<span class="fc" id="L117">    mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);</span>
+<span class="fc" id="L118">    mapper.setDefaultMergeable(Boolean.TRUE);</span>
+<span class="fc" id="L119">    mapper.addHandler(problemHandler);</span>
+<span class="fc" id="L120">    mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);</span>
+<span class="fc" id="L121">    return mapper;</span>
+  }
+  
+  /**
+   * Constructor.
+   * 
+   * @param constructor Supplier of objects of type P.
+   * @param gatherers The gatherers that will be used to set values on the object provided by the Supplier.
+   * @param problemHandler The handler that will be used to report any problems parsing files.
+   * @param propsMapper The props mapper that is made available to the gatherers via the Params4JSpi.
+   * @param jsonMapper The json mapper that is made available to the gatherers via the Params4JSpi.
+   * @param customJsonModules The custom JSON modules that are added to the default JSON mapper (if one is not passed in).
+   * @param mixIns The custom MixIns that are added to the default JSON mapper (if one is not passed in).
+   * @param yamlMapper The yaml mapper that is made available to the gatherers via the Params4JSpi.
+   */
+  public Params4JImpl(Supplier&lt;P&gt; constructor
+          , List&lt;ParameterGatherer&lt;P&gt;&gt; gatherers
+          , DeserializationProblemHandler problemHandler
+          , JavaPropsMapper propsMapper
+          , ObjectMapper jsonMapper
+          , List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules
+          , List&lt;MixIn&gt; mixIns
+          , ObjectMapper yamlMapper
+<span class="fc" id="L144">  ) {</span>
+<span class="fc" id="L145">    Objects.requireNonNull(constructor, &quot;A valid supplier must be set on the factory&quot;);</span>
+<span class="fc" id="L146">    Objects.requireNonNull(gatherers, &quot;A set of gatherers must be set on the factory&quot;);</span>
+<span class="fc" id="L147">    this.constructor = constructor;</span>
+<span class="fc" id="L148">    this.gatherers = gatherers;</span>
+<span class="fc" id="L149">    this.problemHandler = Objects.requireNonNullElseGet(problemHandler, () -&gt; new DefaultParametersErrorHandler());</span>
+<span class="fc" id="L150">    this.propsMapper = Objects.requireNonNullElseGet(propsMapper, () -&gt; createPropsMapper(customJsonModules, mixIns));</span>
+<span class="fc" id="L151">    this.jsonMapper = Objects.requireNonNullElseGet(jsonMapper, () -&gt; createJsonMapper(customJsonModules, mixIns));</span>
+<span class="fc" id="L152">    this.yamlMapper = Objects.requireNonNullElseGet(yamlMapper, () -&gt; createYamlMapper(customJsonModules, mixIns));</span>
+<span class="fc" id="L153">    this.fileWatcher = new FileWatcher(this::changeNotificationHandler);</span>
+<span class="fc" id="L154">  }</span>
+
+  /**
+   * Get the configured problem handler.
+   * 
+   * This is primarily for test and debug purposes.
+   * 
+   * @return the configured problem handler.
+   */
+  public DeserializationProblemHandler getProblemHandler() {
+<span class="fc" id="L164">    return problemHandler;</span>
+  }
+
+  @Override
+  public JavaPropsMapper getPropsMapper() {
+<span class="fc" id="L169">    return propsMapper;</span>
+  }
+
+  @Override
+  public ObjectMapper getJsonMapper() {
+<span class="fc" id="L174">    return jsonMapper;</span>
+  }
+
+  @Override
+  public ObjectMapper getYamlMapper() {
+<span class="fc" id="L179">    return yamlMapper;</span>
+  }
+
+  @Override
+  public void watch(Path path) throws IOException {
+<span class="fc" id="L184">    fileWatcher.watch(path);</span>
+<span class="fc" id="L185">  }</span>
+  
+  @Override
+  public &lt;T&gt; byte[] prepareProperties(String name
+          , Collection&lt;T&gt; entries
+          , Function&lt;T, Object&gt; keyGetter
+          , Function&lt;T, Object&gt; valueGetter
+          , String propertyPrefix
+  ) throws IOException {
+<span class="fc" id="L194">    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {</span>
+<span class="fc" id="L195">      try (OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8)) {</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        for (T entry : entries) {</span>
+          try {
+<span class="fc" id="L198">            String key = getKeyAsPrefixedString(keyGetter, entry, propertyPrefix);</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">            if (key != null) {</span>
+<span class="fc" id="L200">              String value = (String) valueGetter.apply(entry);</span>
+<span class="fc" id="L201">              logger.trace(&quot;{}: {} = {}&quot;, name, key, value);</span>
+<span class="fc" id="L202">              writer.append(key)</span>
+<span class="fc" id="L203">                  .append(&quot; = &quot;)</span>
+<span class="fc" id="L204">                  .append(value)</span>
+<span class="fc" id="L205">                  .append(&quot;\r\n&quot;);</span>
+            }
+<span class="nc" id="L207">          } catch (ClassCastException ex) {</span>
+<span class="nc" id="L208">            logger.warn(&quot;{} unable to get key or value as a string from {}&quot;, name, entry);</span>
+<span class="fc" id="L209">          }</span>
+<span class="fc" id="L210">        }</span>
+      }
+<span class="fc" id="L212">      return baos.toByteArray();</span>
+    }
+  }
+
+  private &lt;T&gt; String getKeyAsPrefixedString(Function&lt;T, Object&gt; keyGetter, T entry, String propertyPrefix) {
+<span class="fc" id="L217">    String castKey = (String) keyGetter.apply(entry);</span>
+<span class="fc" id="L218">    String key = null;</span>
+<span class="pc bpc" id="L219" title="1 of 4 branches missed.">    if (propertyPrefix == null || propertyPrefix.isEmpty()) {</span>
+<span class="fc" id="L220">      key = castKey;</span>
+<span class="fc bfc" id="L221" title="All 2 branches covered.">    } else if (castKey.startsWith(propertyPrefix)) {</span>
+<span class="fc" id="L222">      key = castKey.substring(propertyPrefix.length());</span>
+    }
+<span class="fc" id="L224">    return key;</span>
+  }
+    
+  @Override
+  public P gatherParameters() {
+<span class="fc" id="L229">    P value = constructor.get();</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">    for (ParameterGatherer&lt;P&gt; gatherer : gatherers) {</span>
+      try {
+<span class="fc" id="L232">        value = gatherer.gatherParameters(this, value);</span>
+<span class="nc" id="L233">      } catch (Throwable ex) {</span>
+<span class="nc" id="L234">        logger.warn(&quot;Failed to process: &quot;, ex);</span>
+<span class="fc" id="L235">      }</span>
+<span class="fc" id="L236">    }</span>
+<span class="fc" id="L237">    lastValue.set(jsonMapper.convertValue(value, ObjectNode.class));</span>
+<span class="fc" id="L238">    return value;</span>
+  }
+
+  @Override
+  public boolean notifyOfChanges(Consumer&lt;P&gt; handler) {
+<span class="fc" id="L243">    changeHappenedHandler = handler;</span>
+<span class="fc" id="L244">    return fileWatcher.start();</span>
+  }
+    
+  private void changeNotificationHandler() {
+<span class="fc" id="L248">    synchronized (lastValue) {</span>
+<span class="fc" id="L249">      P newValue = gatherParameters();</span>
+<span class="fc" id="L250">      ObjectNode newNode = jsonMapper.convertValue(newValue, ObjectNode.class);</span>
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">      if (newNode.equals(lastValue.get())) {</span>
+<span class="fc" id="L252">        lastValue.set(newNode);</span>
+<span class="fc" id="L253">        changeHappenedHandler.accept(newValue);</span>
+      }
+<span class="fc" id="L255">    }</span>
+<span class="fc" id="L256">  }</span>
+  
+  private static boolean cannotBeEnvVar(String propName) {
+<span class="fc bfc" id="L259" title="All 2 branches covered.">    return    propName.contains(&quot;[&quot;)</span>
+<span class="pc bpc" id="L260" title="1 of 2 branches missed.">              || propName.contains(&quot;]&quot;)</span>
+            ;
+  }
+  
+  private Object getValue(Object object, Field field) {
+<span class="pc bpc" id="L265" title="1 of 4 branches missed.">    if (object == null || field ==  null) {</span>
+<span class="fc" id="L266">      return null;</span>
+    }
+    try {
+<span class="pc bpc" id="L269" title="1 of 2 branches missed.">      if (field.canAccess(object)) {</span>
+<span class="nc" id="L270">        return field.get(object);        </span>
+      } else {
+<span class="fc" id="L272">        field.setAccessible(true);</span>
+<span class="fc" id="L273">        Object value = field.get(object);        </span>
+<span class="fc" id="L274">        field.setAccessible(false);</span>
+<span class="fc" id="L275">        return value;</span>
+      }
+<span class="nc" id="L277">    } catch (Throwable ex) {</span>
+<span class="nc" id="L278">      logger.debug(&quot;Failed to get {} from {}: {}&quot;, field, object, ex.getMessage());</span>
+<span class="nc" id="L279">      return null;</span>
+    }
+  }
+  
+  private Object getValue(Object object, String setterName) {
+<span class="pc bpc" id="L284" title="2 of 6 branches missed.">    if (object == null || setterName ==  null || setterName.length() &lt; 4) {</span>
+<span class="fc" id="L285">      return null;</span>
+    }
+<span class="fc" id="L287">    Method method = null;</span>
+    try {
+<span class="fc" id="L289">      method = object.getClass().getMethod(&quot;get&quot; + setterName.substring(3));</span>
+<span class="fc" id="L290">    } catch (NoSuchMethodException ex) {</span>
+<span class="fc" id="L291">    }</span>
+<span class="fc bfc" id="L292" title="All 2 branches covered.">    if (method == null) {</span>
+      try {
+<span class="fc" id="L294">        method = object.getClass().getMethod(&quot;is&quot; + setterName.substring(3));</span>
+<span class="nc" id="L295">      } catch (NoSuchMethodException ex) {</span>
+<span class="fc" id="L296">      }</span>
+    }
+<span class="pc bpc" id="L298" title="1 of 2 branches missed.">    if (method == null) {</span>
+<span class="nc" id="L299">      logger.debug(&quot;No method {} or {} on {}&quot;, &quot;get&quot; + setterName.substring(3), &quot;is&quot; + setterName.substring(3), object.getClass());</span>
+<span class="nc" id="L300">      return null;</span>
+    }
+    try {
+<span class="fc" id="L303">      return method.invoke(object);</span>
+<span class="nc" id="L304">    } catch (Throwable ex) {</span>
+<span class="nc" id="L305">      logger.debug(&quot;Failed to execute {}.{} on {}: {}&quot;, object.getClass().getSimpleName(), method, object, ex.getMessage());</span>
+<span class="nc" id="L306">      return null;</span>
+    }
+  }
+
+  private Properties loadDocProperties(Map&lt;String, Properties&gt; docProperties, Class&lt;?&gt; type) {
+    
+<span class="fc" id="L312">    Properties props = docProperties.get(type.getCanonicalName());</span>
+<span class="fc bfc" id="L313" title="All 2 branches covered.">    if (props == null) {</span>
+<span class="fc" id="L314">      try (InputStream stream = type.getResourceAsStream(type.getSimpleName() + &quot;-doc.properties&quot;)) {</span>
+<span class="fc" id="L315">        props = new Properties();</span>
+<span class="fc" id="L316">        props.load(stream);</span>
+<span class="fc" id="L317">        docProperties.put(type.getCanonicalName(), props);</span>
+<span class="nc" id="L318">      } catch (Throwable ex) {</span>
+<span class="fc" id="L319">      }</span>
+    }
+<span class="fc" id="L321">    return props;</span>
+  }
+  
+  @Override
+  public List&lt;ConfigurationProperty&gt; getDocumentation(P defaultInstance, String prefix, List&lt;Pattern&gt; terminalClasses, List&lt;Pattern&gt; undocumentedClasses) {
+<span class="fc" id="L326">    List&lt;ConfigurationProperty&gt; result = new ArrayList&lt;&gt;();</span>
+
+<span class="fc" id="L328">    walkSetters(result, new HashMap&lt;&gt;(), prefix, defaultInstance, defaultInstance.getClass(), new Stack&lt;&gt;(), terminalClasses, undocumentedClasses);</span>
+    
+<span class="fc" id="L330">    return result;</span>
+  }
+
+  private boolean typeIsIn(List&lt;Pattern&gt; list, String typeName) {
+<span class="pc bpc" id="L334" title="2 of 6 branches missed.">    if (list == null || list.isEmpty() || typeName == null) {</span>
+<span class="fc" id="L335">      return false;</span>
+    }
+<span class="fc bfc" id="L337" title="All 2 branches covered.">    for (Pattern pattern : list) {</span>
+<span class="fc bfc" id="L338" title="All 2 branches covered.">      if (pattern.matcher(typeName).matches()) {</span>
+<span class="fc" id="L339">        return true;</span>
+      }
+<span class="fc" id="L341">    }</span>
+<span class="fc" id="L342">    return false;</span>
+  }
+  
+  private static class PropertyState {
+    final String name;
+    final String comment;
+    final Class&lt;?&gt; clazz;
+
+<span class="fc" id="L350">    PropertyState(String name, String comment, Class&lt;?&gt; clazz) {</span>
+<span class="fc" id="L351">      this.name = name;</span>
+<span class="fc" id="L352">      this.comment = comment;</span>
+<span class="fc" id="L353">      this.clazz = clazz;</span>
+<span class="fc" id="L354">    }        </span>
+  }
+  
+  private &lt;T&gt; void walkSetters(
+          List&lt;ConfigurationProperty&gt; properties
+          , Map&lt;String, Properties&gt; docProperties
+          , String prefix
+          , T defaultInstance
+          , Class&lt;?&gt; clazz
+          , Stack&lt;PropertyState&gt; propertyStates
+          , List&lt;Pattern&gt; terminalClasses
+          , List&lt;Pattern&gt; undocumentedClasses
+  ) throws SecurityException {
+<span class="fc" id="L367">    Properties classDocProperties = loadDocProperties(docProperties, clazz);</span>
+<span class="fc" id="L368">    Set&lt;String&gt; propsDone = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L369" title="All 2 branches covered.">    for (Method method : clazz.getMethods()) {</span>
+<span class="fc bfc" id="L370" title="All 4 branches covered.">      if (method.getParameters().length == 1 &amp;&amp; method.getName().startsWith(&quot;set&quot;)) {</span>
+<span class="fc" id="L371">        Parameter parameter = method.getParameters()[0];</span>
+        
+<span class="fc" id="L373">        Class&lt;?&gt; fieldType = parameter.getType();</span>
+<span class="fc" id="L374">        String fieldName = JavadocCapturer.setterNameToVariableName(method.getName());</span>
+<span class="fc" id="L375">        Object defaultValue = getValue(defaultInstance, method.getName());</span>
+
+<span class="fc" id="L377">        propsDone.add(fieldName);</span>
+<span class="fc" id="L378">        documentField(properties</span>
+                , docProperties
+                , classDocProperties
+                , prefix
+                , propertyStates
+                , terminalClasses
+                , undocumentedClasses
+                , method
+                , fieldName
+                , fieldType
+                , defaultValue
+<span class="fc" id="L389">                , () -&gt; (ParameterizedType) parameter.getParameterizedType()</span>
+        );
+      }
+    }
+<span class="fc bfc" id="L393" title="All 2 branches covered.">    for (Field field : clazz.getDeclaredFields()) {</span>
+<span class="fc" id="L394">      Class&lt;?&gt; fieldType = field.getType();</span>
+<span class="fc" id="L395">      String fieldName = field.getName();      </span>
+<span class="fc" id="L396">      Object defaultValue = getValue(defaultInstance, field);</span>
+
+<span class="fc bfc" id="L398" title="All 2 branches covered.">      if (!propsDone.contains(fieldName)) {</span>
+<span class="fc" id="L399">        documentField(properties</span>
+                , docProperties
+                , classDocProperties
+                , prefix
+                , propertyStates
+                , terminalClasses
+                , undocumentedClasses
+                , field
+                , fieldName
+                , fieldType
+                , defaultValue
+<span class="nc" id="L410">                , () -&gt; (ParameterizedType) field.getGenericType()</span>
+        );
+      }
+    }
+<span class="fc" id="L414">  }</span>
+
+  private void documentField(
+          List&lt;ConfigurationProperty&gt; properties
+          , Map&lt;String, Properties&gt; docProperties
+          , Properties classDocProperties
+          , String prefix
+          , Stack&lt;PropertyState&gt; propertyStates
+          , List&lt;Pattern&gt; terminalClasses
+          , List&lt;Pattern&gt; undocumentedClasses
+          , AnnotatedElement annotatedElement
+          , String fieldName
+          , Class&lt;?&gt; fieldType
+          , Object defaultValue
+          , Supplier&lt;ParameterizedType&gt; parameterizedTypeGetter
+    ) throws SecurityException {
+    
+<span class="fc" id="L431">    String fieldTypeName = fieldType.getCanonicalName();</span>
+<span class="fc" id="L432">    boolean undocumented = typeIsIn(undocumentedClasses, fieldTypeName);</span>
+<span class="pc bpc" id="L433" title="1 of 8 branches missed.">    if (fieldType.isPrimitive() || undocumented || TERMINAL_TYPES.contains(fieldTypeName) || typeIsIn(terminalClasses, fieldTypeName)) {</span>
+<span class="fc" id="L434">      outputTerminalField(propertyStates, fieldName, annotatedElement, classDocProperties, undocumented, defaultValue, prefix, fieldType, properties);</span>
+<span class="fc bfc" id="L435" title="All 2 branches covered.">    } else if (Map.class.isAssignableFrom(fieldType)) {</span>
+      
+<span class="fc" id="L437">      Type[] actualTypeArguments = parameterizedTypeGetter.get().getActualTypeArguments();</span>
+<span class="pc bpc" id="L438" title="1 of 2 branches missed.">      if (actualTypeArguments.length == 2) {</span>
+<span class="fc" id="L439">        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);</span>
+<span class="fc" id="L440">        propertyStates.push(ps);</span>
+<span class="fc" id="L441">        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, annotatedElement, &quot;&lt;xxx&gt;&quot;, (Class) actualTypeArguments[1], null, parameterizedTypeGetter);</span>
+<span class="fc" id="L442">        propertyStates.pop();</span>
+      }
+<span class="fc bfc" id="L444" title="All 2 branches covered.">    } else if (List.class.isAssignableFrom(fieldType)) {</span>
+<span class="fc" id="L445">      Type[] actualTypeArguments = parameterizedTypeGetter.get().getActualTypeArguments();</span>
+<span class="pc bpc" id="L446" title="1 of 2 branches missed.">      if (actualTypeArguments.length == 1) {</span>
+<span class="fc" id="L447">        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);</span>
+<span class="fc" id="L448">        propertyStates.push(ps);</span>
+<span class="fc" id="L449">        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, annotatedElement, &quot;[&lt;n&gt;]&quot;, (Class) actualTypeArguments[0], null, parameterizedTypeGetter);</span>
+<span class="fc" id="L450">        propertyStates.pop();</span>
+      }      
+<span class="fc" id="L452">    } else {</span>
+<span class="fc" id="L453">      boolean found = false;</span>
+<span class="fc bfc" id="L454" title="All 2 branches covered.">      for (PropertyState ps : propertyStates) {</span>
+<span class="pc bpc" id="L455" title="1 of 2 branches missed.">        if (ps.clazz == fieldType) {</span>
+<span class="nc" id="L456">          found = true;</span>
+        }
+<span class="fc" id="L458">      }</span>
+<span class="pc bpc" id="L459" title="1 of 2 branches missed.">      if (!found) {</span>
+<span class="fc" id="L460">        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);</span>
+<span class="fc" id="L461">        propertyStates.push(ps);</span>
+<span class="fc" id="L462">        walkSetters(properties, docProperties, prefix, defaultValue, fieldType, propertyStates, terminalClasses, undocumentedClasses);</span>
+<span class="fc" id="L463">        propertyStates.pop();</span>
+      }
+    }
+<span class="fc" id="L466">  }</span>
+
+  private void outputTerminalField(
+          Stack&lt;PropertyState&gt; propertyStates
+          , String name
+          , AnnotatedElement element
+          , Properties classDocProperties
+          , boolean undocumented
+          , Object defaultValue
+          , String prefix
+          , Class&lt;?&gt; type
+          , List&lt;ConfigurationProperty&gt; properties
+  ) {
+<span class="fc" id="L479">    String propName = propertyStates.stream().map(ps -&gt; ps.name).collect(Collectors.joining(&quot;.&quot;));</span>
+<span class="pc bpc" id="L480" title="1 of 6 branches missed.">    if (propName != null &amp;&amp; !propName.isEmpty() &amp;&amp; !name.startsWith(&quot;[&quot;)) {</span>
+<span class="fc" id="L481">      propName = propName + &quot;.&quot;;</span>
+    }
+<span class="fc" id="L483">    propName = propName + name;</span>
+    
+<span class="fc" id="L485">    String newComment = null;</span>
+<span class="fc bfc" id="L486" title="All 2 branches covered.">    if (element.isAnnotationPresent(Comment.class)) {</span>
+<span class="fc" id="L487">      newComment = element.getAnnotation(Comment.class).value();</span>
+    }
+<span class="pc bpc" id="L489" title="1 of 4 branches missed.">    if (newComment == null || newComment.isEmpty()) {</span>
+<span class="fc" id="L490">      newComment = classDocProperties.getProperty(name);</span>
+    }
+<span class="fc bfc" id="L492" title="All 2 branches covered.">    String comment = propertyStates.stream().map(ps -&gt; ps.comment).filter(c -&gt; c != null).collect(Collectors.joining(&quot;, &quot;));</span>
+<span class="pc bpc" id="L493" title="1 of 4 branches missed.">    if (newComment != null &amp;&amp; !newComment.isEmpty()) {</span>
+<span class="pc bpc" id="L494" title="1 of 2 branches missed.">      if (classDocProperties.containsKey(name)) {</span>
+<span class="pc bpc" id="L495" title="1 of 4 branches missed.">        if (comment != null &amp;&amp; !comment.isEmpty()) {</span>
+<span class="fc" id="L496">          comment = comment + &quot;, &quot; + newComment;</span>
+        } else {
+<span class="fc" id="L498">          comment = newComment;</span>
+        }
+      }
+    }
+<span class="fc" id="L502">    ConfigurationProperty prop = ConfigurationProperty.builder()</span>
+<span class="fc bfc" id="L503" title="All 2 branches covered.">            .canBeEnvVar(!cannotBeEnvVar(propName))</span>
+<span class="fc" id="L504">            .undocumented(undocumented)</span>
+<span class="fc" id="L505">            .comment(comment)</span>
+<span class="fc bfc" id="L506" title="All 2 branches covered.">            .defaultValue(defaultValue == null ? null : defaultValue.toString())</span>
+<span class="pc bpc" id="L507" title="1 of 2 branches missed.">            .name(prefix == null ? propName : prefix + propName)</span>
+<span class="fc" id="L508">            .type(type)</span>
+<span class="fc" id="L509">            .build();</span>
+<span class="fc" id="L510">    properties.add(prop);</span>
+<span class="fc" id="L511">  }</span>
+  
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.8.202204050719</span></div></body></html>
