@@ -9,6 +9,8 @@
   <artifactId>params4j</artifactId>
   <version>0.0.0</version>
   <name>Parameters for Java</name>
+  <description>Parameters for Java is a small library for collating parameters to Java daemons</description>
+  <url>https://github.com/Yaytay/params4j</url>
   
   <licenses>
     <license>
