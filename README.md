@@ -123,3 +123,4 @@ mvn clean install
 ```
 
 There are minimal dependencies, at runtime it's jackson and slf4j, but there are a lot of plugins.
+Note that the version is determined using [jgitver](https://jgitver.github.io/).
