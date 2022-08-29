@@ -47,6 +47,7 @@
     <jdk.version>11</jdk.version>
     <jackson.version>[2.13,]</jackson.version>
     <slf4j.version>[1.7,)</slf4j.version>
+    <logback.version>[1.2,)</logback.version>
     <junit-jupiter.version>5.9.0</junit-jupiter.version>
     <junit-platform.version>1.9.0</junit-platform.version>
   </properties>
@@ -83,7 +84,7 @@
     <dependency>
       <groupId>ch.qos.logback</groupId>
       <artifactId>logback-classic</artifactId>
-      <version>1.4.0</version>
+      <version>${logback.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
