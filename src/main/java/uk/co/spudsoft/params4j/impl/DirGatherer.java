@@ -70,8 +70,8 @@ public class DirGatherer<P> implements ParameterGatherer<P> {
           }
         }
       }
+      spi.watch(dir.toPath());
     }
-    spi.watch(dir.toPath());
     
     return base;    
   }
