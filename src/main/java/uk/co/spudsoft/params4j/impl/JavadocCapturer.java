@@ -40,7 +40,8 @@ import uk.co.spudsoft.params4j.JavadocCapture;
 
 
 /**
- *
+ * Annotation processor for capturing Javadoc comments and converting them to annotations that can be understood by Params4J.
+ * This provides a simple mechanism for document parameters both in Javadoc and on the command line in one go.
  * @author jtalbut
  */
 @SupportedAnnotationTypes("uk.co.spudsoft.params4j.JavadocCapture")

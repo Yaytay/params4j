@@ -19,7 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * The default handler of errors reported by Jackson.
+ * 
+ * This error handler logs the errors (at 'warn' level) and then ignores them.
+ * 
  * @author jtalbut
  */
 public class DefaultParametersErrorHandler extends DeserializationProblemHandler {

@@ -13,7 +13,7 @@ import java.nio.file.Path;
 import java.util.function.Supplier;
 
 /**
- *
+ * Factory class for creating Params4J instances.
  * @author jtalbut
  * @param <P> The type of the parameters object.
  */

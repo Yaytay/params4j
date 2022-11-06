@@ -10,7 +10,8 @@ import java.util.List;
 import java.util.function.Function;
 
 /**
- *
+ * The type of file that values can be read from.
+ * 
  * @author jtalbut
  */
 public enum FileType {
