@@ -87,6 +87,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     JavaPropsMapper mapper = JavaPropsMapper.builder()
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
             .build();
+
     return configureObjectMapper(mapper, customJsonModules, mixIns);
   }
   

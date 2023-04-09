@@ -5,6 +5,7 @@
 package uk.co.spudsoft.params4j.impl;
 
 import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -60,7 +61,11 @@ public class CommandLineArgumentsGatherer<P> implements ParameterGatherer<P> {
   
   @Override
   public P gatherParameters(Params4JSpi spi, P base) throws IOException {
-    ObjectReader reader = spi.getPropsMapper().readerForUpdating(base);
+    ObjectReader reader = spi.getPropsMapper()
+            .readerForUpdating(base)
+            .with(new JavaPropsSchema().withPathSeparatorEscapeChar('\\'))
+            ;
+    
     byte[] props = spi.prepareProperties("Command line arguments", args.entrySet(), Entry::getKey, Entry::getValue, namePrefix);
     if (props.length > 0) {
       return reader.readValue(props);
