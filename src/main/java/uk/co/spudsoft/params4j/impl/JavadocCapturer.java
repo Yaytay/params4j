@@ -24,7 +24,6 @@ import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -45,7 +44,6 @@ import uk.co.spudsoft.params4j.JavadocCapture;
  * @author jtalbut
  */
 @SupportedAnnotationTypes("uk.co.spudsoft.params4j.JavadocCapture")
-@SupportedSourceVersion(SourceVersion.RELEASE_17)
 public class JavadocCapturer extends AbstractProcessor {
 
   @Override
@@ -61,6 +59,11 @@ public class JavadocCapturer extends AbstractProcessor {
     }
     
     return true;
+  }
+
+  @Override
+  public SourceVersion getSupportedSourceVersion() {
+    return SourceVersion.latestSupported();
   }
   
   private void writeDocProperties(PackageElement packageElement, TypeElement classElement, Properties commentProps) {
