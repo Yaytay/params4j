@@ -241,17 +241,16 @@ public class ConfigurationProperty {
     builder.append("        ")
             .append(typeName);
 
-    if (defaultValue != null) {
-      builder.append(" ".repeat(typeName.length() + 10 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
-              .append("default: ")
-              .append(defaultValue);
-    }
     if (undocumented) {
       builder.append(" ".repeat(typeName.length() + 10 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
               .append("This parameter is undocumented, consult the source for ")
               .append(type)
               .append(" for details of the values for <***>");
       
+    } else if (defaultValue != null) {
+      builder.append(" ".repeat(typeName.length() + 10 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
+              .append("default: ")
+              .append(defaultValue);
     }
     builder.append("\n\n");
   }
@@ -304,19 +303,18 @@ public class ConfigurationProperty {
       builder.append("        ")
               .append(typeName);
             
-      if (defaultValue != null) {
-        builder.append(" ".repeat(typeName.length() + 10 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
-                .append("default: ")
-                .append(defaultValue);
-      }
-      
       if (undocumented) {
         builder.append(" ".repeat(typeName.length() + 10 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
                 .append("This parameter is undocumented, consult the source for ")
                 .append(type)
                 .append(" for details of the values for <***>");
 
+      } else if (defaultValue != null) {
+        builder.append(" ".repeat(typeName.length() + 10 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
+                .append("default: ")
+                .append(defaultValue);
       }
+      
       
       builder.append("\n\n");
     }
