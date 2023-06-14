@@ -60,7 +60,11 @@ public interface Params4J<P> {
    * @param defaultInstance An instance of the class to be examined, preloaded with default values.
    * @param prefix The prefix to be prepended to any determined property names to match the prefix specified in (for example) the CommandLineArgumentsGatherer.
    * @param terminalClasses List of regular expressions used to identify properties that are of terminal types - if the class is terminal it should be settable by Jackson from a single string value.
+   * Examples of built-in terminal classes include java.time.LocalDateTime and java.time.Duration.
+   * Terminal classes are documented, but their internals are not.
    * @param undocumentedClasses List of regular expressions used to identify properties that are of undocumented types - if the class is undocumented it will not be traversed further despite not being settable by Jackson.
+   * Undocumented classes cannot be set directly and their internal properties are not output in generated documentation (usually because they haven't been processed by the JavadocCapturer).
+   * There are no built-in undocumented classes, but a typical example of a class that should be undocumented is VertxOptions.
    * @return A list of properties that can be set.
    */
   List<ConfigurationProperty> getDocumentation(P defaultInstance, String prefix, List<Pattern> terminalClasses, List<Pattern> undocumentedClasses);

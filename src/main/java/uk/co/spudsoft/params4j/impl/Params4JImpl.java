@@ -259,15 +259,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     }
   }
   
-  private static boolean canBeEnvVar(String propName, Class<?> type, boolean undocumented) {
-    logger.debug("{}/{}/{}", propName, type.getPackageName(), undocumented);
-    if (type.isArray()) {
-      return false;
-    }
-    if (undocumented) {
-      String packageName = type.getPackageName();
-      return "java.time".equals(packageName);
-    }
+  private static boolean canBeEnvVar(String propName) {
     if (propName.contains("[") || propName.contains("]")) {
       return false;
     }
@@ -514,7 +506,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
       }
     }
     ConfigurationProperty prop = ConfigurationProperty.builder()
-            .canBeEnvVar(canBeEnvVar(propName, type, undocumented))
+            .canBeEnvVar(canBeEnvVar(propName))
             .undocumented(undocumented)
             .comment(comment)
             .defaultValue(defaultValue == null ? null : defaultValue.toString())

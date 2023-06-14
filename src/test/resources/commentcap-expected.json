@@ -23,14 +23,14 @@
   }, {
     "type": "uk.co.spudsoft.params4j.impl.HtmlAnchorElement",
     "name": "--alien",
-    "canBeEnvVar": false,
+    "canBeEnvVar": true,
     "undocumented": true,
     "comment": "alien value that cannot be documented further in this codebase",
     "defaultValue": null
   }, {
     "type": "uk.co.spudsoft.params4j.impl.HtmlAnchorElement",
     "name": "--documentedAlien",
-    "canBeEnvVar": false,
+    "canBeEnvVar": true,
     "undocumented": true,
     "comment": "configure the alien properties as documented at https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html",
     "defaultValue": null

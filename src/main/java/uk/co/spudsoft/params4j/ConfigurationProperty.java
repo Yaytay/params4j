@@ -225,22 +225,35 @@ public class ConfigurationProperty {
    * 
    */
   public void appendUsage(StringBuilder builder, int maxNameLen) {
-      builder.append("    ")
-              .append(name)
-              .append(" ".repeat(maxNameLen + 1 - name.length()))
-              .append(comment)
-              .append('\n');
+    
+    maxNameLen += 6;
+    
+    builder.append("    ")
+            .append(name);
+    if (undocumented) {
+      builder.append(".<***>");
+    }
+    builder.append(" ".repeat(maxNameLen + 1 - name.length() - (undocumented ? 6 : 0)))
+            .append(comment)            
+            .append('\n');
 
-      String typeName = type.getSimpleName();
-      builder.append("        ")
-              .append(typeName);
+    String typeName = type.getSimpleName();
+    builder.append("        ")
+            .append(typeName);
+
+    if (defaultValue != null) {
+      builder.append(" ".repeat(typeName.length() + 10 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
+              .append("default: ")
+              .append(defaultValue);
+    }
+    if (undocumented) {
+      builder.append(" ".repeat(typeName.length() + 10 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
+              .append("This parameter is undocumented, consult the source for ")
+              .append(type)
+              .append(" for details of the values for <***>");
       
-      if (defaultValue != null) {
-        builder.append(" ".repeat(typeName.length() + 4 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
-                .append("default: ")
-                .append(defaultValue);
-      }
-      builder.append('\n');
+    }
+    builder.append("\n\n");
   }
 
   /**
@@ -266,7 +279,7 @@ public class ConfigurationProperty {
         prefixAdd = "";
       }
       
-      maxNameLen = maxNameLen - prefixStrip.length() + prefixAdd.length() + 1;
+      maxNameLen = maxNameLen - prefixStrip.length() + prefixAdd.length() + 7;
       
       String envVarName = name;
       if (envVarName.startsWith(prefixStrip)) {
@@ -279,21 +292,33 @@ public class ConfigurationProperty {
       envVarName = envVarName.toUpperCase(Locale.ROOT);
       
       builder.append("    ")
-              .append(envVarName)
-              .append(" ".repeat(maxNameLen + 1 - envVarName.length()))
+              .append(envVarName);
+      if (undocumented) {
+        builder.append("_<***>");
+      }
+      builder.append(" ".repeat(maxNameLen + 1 - envVarName.length() - (undocumented ? 6 : 0)))
               .append(comment)
               .append('\n');
 
       String typeName = type.getSimpleName();
       builder.append("        ")
               .append(typeName);
-      
+            
       if (defaultValue != null) {
-        builder.append(" ".repeat(typeName.length() + 4 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
+        builder.append(" ".repeat(typeName.length() + 10 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
                 .append("default: ")
                 .append(defaultValue);
       }
-      builder.append('\n');
+      
+      if (undocumented) {
+        builder.append(" ".repeat(typeName.length() + 10 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
+                .append("This parameter is undocumented, consult the source for ")
+                .append(type)
+                .append(" for details of the values for <***>");
+
+      }
+      
+      builder.append("\n\n");
     }
   }
   
