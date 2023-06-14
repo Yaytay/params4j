@@ -17,14 +17,16 @@
 package uk.co.spudsoft.params4j.impl;
 
 /**
- *
+ * Representation of a MixIn added via the {@link uk.co.spudsoft.params4j.Params4JFactory#withMixIn(java.lang.Class, java.lang.Class)}.
+ * 
+ * MixIns enable a pre-compiled class to have annotations added to it (by sourcing them from another class).
+ * 
  * @author jtalbut
  */
 public class MixIn {
   /**
    * Class (or interface) whose annotations to effectively override.
    */
-
   public final Class<?> target;
   /**
    * Class (or interface) whose annotations are to be "added" to target's annotations, overriding as necessary.

@@ -18,6 +18,7 @@ package uk.co.spudsoft.params4j;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -38,9 +39,12 @@ public class ConfigurationProperty {
    */
   public final String name;
   /**
-   * If true this property cannot be represented as an environment variable.
+   * If true this property can be represented as an environment variable.
+   * 
    * Lists cannot be represented as environment variables because the '[' and ']' characters are not permitted in environment variables in a Linux shell.
-   * It may still be possible to specify this property as an environment variable as long as no Unix-like shell is required to process it.
+   * It may still be possible to specify list properties as an environment variable as long as no Unix-like shell is required to process it.
+   * 
+   * Terminal classes that cannot be represented as a single string cannot be represented as a single environment variable.
    */
   public final boolean canBeEnvVar;
   /**
@@ -206,6 +210,91 @@ public class ConfigurationProperty {
       return false;
     }
     return Objects.equals(this.type, other.type);
+  }
+
+  /**
+   * Append an output suitable for use in response to a '--help' command.
+   * 
+   * @param builder The StringBuilder that will have the details appeneded.
+   * @param maxNameLen The length of the longest name in the set of ConfigurationProperties being processed.
+   * This must be calculated by the called before calling appendUsages for correct alignment.
+   * Given a List&lt;ConfigurationProperty> this can be calculated with:
+   * <pre>
+   * int maxNameLen = docs.stream().map(p -> p.name.length()).max(Integer::compare).get();
+   * </pre>
+   * 
+   */
+  public void appendUsage(StringBuilder builder, int maxNameLen) {
+      builder.append("    ")
+              .append(name)
+              .append(" ".repeat(maxNameLen + 1 - name.length()))
+              .append(comment)
+              .append('\n');
+
+      String typeName = type.getSimpleName();
+      builder.append("        ")
+              .append(typeName);
+      
+      if (defaultValue != null) {
+        builder.append(" ".repeat(typeName.length() + 4 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
+                .append("default: ")
+                .append(defaultValue);
+      }
+      builder.append('\n');
+  }
+
+  /**
+   * Append environment variable that can be used for this value.Will only change the builder if canBeEnvVar is true.
+   * 
+   * @param builder The StringBuilder that will have the details appeneded.
+   * @param maxNameLen The length of the longest name in the set of ConfigurationProperties being processed.
+   * This must be calculated by the called before calling appendUsages for correct alignment.
+   * Given a List&lt;ConfigurationProperty> this can be calculated with:
+   * <pre>
+   * int maxNameLen = docs.stream().map(p -> p.name.length()).max(Integer::compare).get();
+   * </pre>
+   * @param prefixStrip String to be removed from the beginning of each name (typically '--')
+   * @param prefixAdd String to be add to the beginning of each name (the namePrefix passed in to withEnvironmentVariablesGatherer)
+   * 
+   */
+  public void appendEnv(StringBuilder builder, int maxNameLen, String prefixStrip, String prefixAdd) {
+    if (canBeEnvVar) {
+      if (prefixStrip == null) {
+        prefixStrip = "";
+      }
+      if (prefixAdd == null) {
+        prefixAdd = "";
+      }
+      
+      maxNameLen = maxNameLen - prefixStrip.length() + prefixAdd.length() + 1;
+      
+      String envVarName = name;
+      if (envVarName.startsWith(prefixStrip)) {
+        envVarName = envVarName.substring(prefixStrip.length());
+      }
+      envVarName = envVarName.replaceAll("\\.", "_");
+      if (prefixAdd.length() > 0) {
+        envVarName = prefixAdd + "_" + envVarName;
+      }
+      envVarName = envVarName.toUpperCase(Locale.ROOT);
+      
+      builder.append("    ")
+              .append(envVarName)
+              .append(" ".repeat(maxNameLen + 1 - envVarName.length()))
+              .append(comment)
+              .append('\n');
+
+      String typeName = type.getSimpleName();
+      builder.append("        ")
+              .append(typeName);
+      
+      if (defaultValue != null) {
+        builder.append(" ".repeat(typeName.length() + 4 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
+                .append("default: ")
+                .append(defaultValue);
+      }
+      builder.append('\n');
+    }
   }
   
 }

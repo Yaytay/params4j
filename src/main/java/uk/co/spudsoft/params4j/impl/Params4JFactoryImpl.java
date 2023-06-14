@@ -22,6 +22,8 @@ import uk.co.spudsoft.params4j.Params4JFactory;
 
 /**
  *
+ * Implementation of the {@link uk.co.spudsoft.params4j.Params4JFactory}.
+ * 
  * @author jtalbut
  * 
  * @param <P> The type of the parameters object.

@@ -53,6 +53,8 @@ import uk.co.spudsoft.params4j.Params4JSpi;
 
 /**
  *
+ * Implementation of {@link uk.co.spudsoft.params4j.Params4J} and {@link uk.co.spudsoft.params4j.Params4JSpi}.
+ * 
  * @author jtalbut
  * 
  * @param <P> The type of the parameters object.
@@ -257,10 +259,19 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     }
   }
   
-  private static boolean cannotBeEnvVar(String propName) {
-    return    propName.contains("[")
-              || propName.contains("]")
-            ;
+  private static boolean canBeEnvVar(String propName, Class<?> type, boolean undocumented) {
+    logger.debug("{}/{}/{}", propName, type.getPackageName(), undocumented);
+    if (type.isArray()) {
+      return false;
+    }
+    if (undocumented) {
+      String packageName = type.getPackageName();
+      return "java.time".equals(packageName);
+    }
+    if (propName.contains("[") || propName.contains("]")) {
+      return false;
+    }
+    return true;
   }
   
   private Object getValue(Object object, Field field) {
@@ -432,7 +443,8 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     
     String fieldTypeName = fieldType.getCanonicalName();
     boolean undocumented = typeIsIn(undocumentedClasses, fieldTypeName);
-    if (fieldType.isPrimitive() || undocumented || TERMINAL_TYPES.contains(fieldTypeName) || typeIsIn(terminalClasses, fieldTypeName)) {
+    boolean isListedTerminalClass = typeIsIn(terminalClasses, fieldTypeName);
+    if (fieldType.isPrimitive() || undocumented || TERMINAL_TYPES.contains(fieldTypeName) || isListedTerminalClass) {
       outputTerminalField(propertyStates, fieldName, annotatedElement, classDocProperties, undocumented, defaultValue, prefix, fieldType, properties);
     } else if (Map.class.isAssignableFrom(fieldType)) {
       
@@ -502,7 +514,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
       }
     }
     ConfigurationProperty prop = ConfigurationProperty.builder()
-            .canBeEnvVar(!cannotBeEnvVar(propName))
+            .canBeEnvVar(canBeEnvVar(propName, type, undocumented))
             .undocumented(undocumented)
             .comment(comment)
             .defaultValue(defaultValue == null ? null : defaultValue.toString())

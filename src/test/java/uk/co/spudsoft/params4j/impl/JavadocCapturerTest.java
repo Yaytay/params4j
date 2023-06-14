@@ -144,6 +144,15 @@ public class JavadocCapturerTest {
     
     Method testProcessArgs = testDocsClass.getMethod("testProcessArgs");
     testProcessArgs.invoke(object);
+
+    Method usageMethod = testDocsClass.getMethod("usage");
+    String usage = (String) usageMethod.invoke(object);
+    logger.debug("Usage:\n{}", usage);
+    
+    Method envVarsMethod = testDocsClass.getMethod("envVars");
+    String envVars = (String) envVarsMethod.invoke(object);
+    logger.debug("Env vars:\n{}", envVars);
+    
   }
   
   private Map<String, ConfigurationProperty> loadExpectedDocsAsJson() throws IOException {

@@ -46,30 +46,27 @@ public class TestDocs {
   
   public TestDocs() {
     Params4J<Parameters> params4j = Params4J.<Parameters>factory().withConstructor(() -> new Parameters()).create();
-    docs = params4j.getDocumentation(new Parameters(), "--", null, Arrays.asList(Pattern.compile(".*\\.Html.*")));
-    
+    docs = params4j.getDocumentation(new Parameters(), "--", null, Arrays.asList(Pattern.compile(".*\\.Html.*")));    
+  }
+  
+  public String usage() {
     int maxNameLen = docs.stream().map(p -> p.name.length()).max(Integer::compare).get();
     
     StringBuilder usageBuilder = new StringBuilder();
     for (ConfigurationProperty prop : docs) {
-      usageBuilder.append("    ")
-              .append(prop.name)
-              .append(" ".repeat(maxNameLen + 1 - prop.name.length()))
-              .append(prop.comment)
-              .append('\n');
-
-      String typeName = prop.type.getSimpleName();
-      usageBuilder.append("        ")
-              .append(typeName);
-      
-      if (prop.defaultValue != null) {
-        usageBuilder.append(" ".repeat(typeName.length() + 4 > maxNameLen ? 1 : maxNameLen - typeName.length() - 3))
-                .append("default: ")
-                .append(prop.defaultValue);
-      }
-      usageBuilder.append('\n');
+      prop.appendUsage(usageBuilder, maxNameLen);
     }
-    logger.debug("Usage:\n{}", usageBuilder);
+    return usageBuilder.toString();
+  }
+
+  public String envVars() {
+    int maxNameLen = docs.stream().map(p -> p.name.length()).max(Integer::compare).get();
+    
+    StringBuilder usageBuilder = new StringBuilder();
+    for (ConfigurationProperty prop : docs) {
+      prop.appendEnv(usageBuilder, maxNameLen, "--", "test");
+    }
+    return usageBuilder.toString();
   }
 
   public List<ConfigurationProperty> getDocs() {
