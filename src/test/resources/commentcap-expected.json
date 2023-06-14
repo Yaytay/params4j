@@ -132,5 +132,12 @@
     "undocumented": false,
     "comment": "when it happened",
     "defaultValue": "1971-06-05T14:00"
+  }, {
+    "type": "java.time.Duration",
+    "name": "--howLong",
+    "canBeEnvVar": true,
+    "undocumented": false,
+    "comment": "how long something should wait",
+    "defaultValue": "PT15M"
   }
 ]

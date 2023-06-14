@@ -78,6 +78,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     tt.add("java.time.LocalDateTime");
     tt.add("java.time.LocalDate");
     tt.add("java.time.LocalTime");
+    tt.add("java.time.Duration");
     tt.add("java.lang.String");
     tt.add("java.io.File");
     return Collections.unmodifiableSet(tt);

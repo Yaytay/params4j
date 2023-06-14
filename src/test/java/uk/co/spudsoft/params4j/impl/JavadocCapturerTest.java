@@ -113,7 +113,7 @@ public class JavadocCapturerTest {
     try ( InputStream stream = cls.getResourceAsStream("/commentcap/Parameters-doc.properties")) {
       props.load(stream);
     }
-    assertThat(props.size(), equalTo(9));
+    assertThat(props.size(), equalTo(10));
     assertThat(props.get("auditDataSource"), equalTo("datasource used for recording activity"));
     assertThat(props.get("baseConfigPath"), equalTo("path to the root of the configuration files"));
     assertThat(props.get("logins"), equalTo("login for a system"));
@@ -131,12 +131,12 @@ public class JavadocCapturerTest {
     for (ConfigurationProperty cp : docs) {
       logger.trace("Configuration property: {}", OBJECT_MAPPER.writeValueAsString(cp));
     }
-    assertThat(docs, hasSize(19));
+    assertThat(docs, hasSize(20));
     // Convert from array to map because the order isn't stable with reflection
     Map<String, ConfigurationProperty> docsMap = docs.stream().collect(Collectors.toMap(cp -> cp.name, cp -> cp));
     
     Map<String, ConfigurationProperty> expectedDocsAsJson = loadExpectedDocsAsJson();
-    assertEquals(docsMap.size(), expectedDocsAsJson.size());
+    assertEquals(expectedDocsAsJson.size(), docsMap.size());
     for (Entry<String, ConfigurationProperty> entry : expectedDocsAsJson.entrySet()) {
       assertTrue(docsMap.containsKey(entry.getKey()), "Fields does not include " + entry.getKey());
       assertEquals(OBJECT_MAPPER.convertValue(entry.getValue(), ObjectNode.class), OBJECT_MAPPER.convertValue(docsMap.get(entry.getKey()), ObjectNode.class));

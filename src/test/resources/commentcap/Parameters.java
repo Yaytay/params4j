@@ -5,6 +5,7 @@
 package commentcap;
 
 import java.io.File;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,8 @@ public class Parameters {
   private LocalDateTime when = LocalDateTime.of(1971, 06, 05, 14, 0);
   // A key/value pair parameter
   private Map<String, String> translations;
+  // A duration
+  private Duration howLong = Duration.parse("PT15M");
   /**
    * The login for a system.
    */
@@ -175,4 +178,21 @@ public class Parameters {
     this.logins = logins;
   }
 
+  /**
+   * how long something should wait.
+   * @return the value for how long something should wait.
+   */
+  public Duration getHowLong() {
+    return howLong;
+  }
+
+  /**
+   * how long something should wait.
+   * @param howLong the value for how long something should wait.
+   */
+  public void setHowLong(Duration howLong) {
+    this.howLong = howLong;
+  }
+
+  
 }
