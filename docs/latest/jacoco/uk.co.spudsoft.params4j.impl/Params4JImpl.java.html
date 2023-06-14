@@ -53,13 +53,15 @@ import uk.co.spudsoft.params4j.Params4JSpi;
 
 /**
  *
+ * Implementation of {@link uk.co.spudsoft.params4j.Params4J} and {@link uk.co.spudsoft.params4j.Params4JSpi}.
+ * 
  * @author jtalbut
  * 
  * @param &lt;P&gt; The type of the parameters object.
  */
 public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
 
-<span class="fc" id="L62">  private static final Logger logger = LoggerFactory.getLogger(Params4JImpl.class);</span>
+<span class="fc" id="L64">  private static final Logger logger = LoggerFactory.getLogger(Params4JImpl.class);</span>
   
   private final Supplier&lt;P&gt; constructor;
   private final List&lt;ParameterGatherer&lt;P&gt;&gt; gatherers;
@@ -69,57 +71,58 @@ public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
   private final ObjectMapper yamlMapper;
   private final FileWatcher fileWatcher;
   private Consumer&lt;P&gt; changeHappenedHandler;
-<span class="fc" id="L72">  private final AtomicReference&lt;ObjectNode&gt; lastValue = new AtomicReference&lt;&gt;();</span>
+<span class="fc" id="L74">  private final AtomicReference&lt;ObjectNode&gt; lastValue = new AtomicReference&lt;&gt;();</span>
   
-<span class="fc" id="L74">  private static final Set&lt;String&gt; TERMINAL_TYPES = buildTerminalTypes();</span>
+<span class="fc" id="L76">  private static final Set&lt;String&gt; TERMINAL_TYPES = buildTerminalTypes();</span>
 
   static Set&lt;String&gt; buildTerminalTypes() {
-<span class="fc" id="L77">    Set&lt;String&gt; tt = new HashSet&lt;&gt;();</span>
-<span class="fc" id="L78">    tt.add(&quot;java.time.LocalDateTime&quot;);</span>
-<span class="fc" id="L79">    tt.add(&quot;java.time.LocalDate&quot;);</span>
-<span class="fc" id="L80">    tt.add(&quot;java.time.LocalTime&quot;);</span>
-<span class="fc" id="L81">    tt.add(&quot;java.lang.String&quot;);</span>
-<span class="fc" id="L82">    tt.add(&quot;java.io.File&quot;);</span>
-<span class="fc" id="L83">    return Collections.unmodifiableSet(tt);</span>
+<span class="fc" id="L79">    Set&lt;String&gt; tt = new HashSet&lt;&gt;();</span>
+<span class="fc" id="L80">    tt.add(&quot;java.time.LocalDateTime&quot;);</span>
+<span class="fc" id="L81">    tt.add(&quot;java.time.LocalDate&quot;);</span>
+<span class="fc" id="L82">    tt.add(&quot;java.time.LocalTime&quot;);</span>
+<span class="fc" id="L83">    tt.add(&quot;java.time.Duration&quot;);</span>
+<span class="fc" id="L84">    tt.add(&quot;java.lang.String&quot;);</span>
+<span class="fc" id="L85">    tt.add(&quot;java.io.File&quot;);</span>
+<span class="fc" id="L86">    return Collections.unmodifiableSet(tt);</span>
   }
   
   private JavaPropsMapper createPropsMapper(List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules, List&lt;MixIn&gt; mixIns) {
-<span class="fc" id="L87">    JavaPropsMapper mapper = JavaPropsMapper.builder()</span>
-<span class="fc" id="L88">            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)</span>
-<span class="fc" id="L89">            .build();</span>
+<span class="fc" id="L90">    JavaPropsMapper mapper = JavaPropsMapper.builder()</span>
+<span class="fc" id="L91">            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)</span>
+<span class="fc" id="L92">            .build();</span>
 
-<span class="fc" id="L91">    return configureObjectMapper(mapper, customJsonModules, mixIns);</span>
+<span class="fc" id="L94">    return configureObjectMapper(mapper, customJsonModules, mixIns);</span>
   }
   
   private ObjectMapper createYamlMapper(List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules, List&lt;MixIn&gt; mixIns) {
-<span class="fc" id="L95">    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());</span>
-<span class="fc" id="L96">    return configureObjectMapper(mapper, customJsonModules, mixIns);</span>
+<span class="fc" id="L98">    ObjectMapper mapper = new ObjectMapper(new YAMLFactory());</span>
+<span class="fc" id="L99">    return configureObjectMapper(mapper, customJsonModules, mixIns);</span>
   }
   
   private ObjectMapper createJsonMapper(List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules, List&lt;MixIn&gt; mixIns) {
-<span class="fc" id="L100">    ObjectMapper mapper = new ObjectMapper();</span>
-<span class="fc" id="L101">    return configureObjectMapper(mapper, customJsonModules, mixIns);</span>
+<span class="fc" id="L103">    ObjectMapper mapper = new ObjectMapper();</span>
+<span class="fc" id="L104">    return configureObjectMapper(mapper, customJsonModules, mixIns);</span>
   }
   
   private &lt;T extends ObjectMapper&gt; T configureObjectMapper(T mapper, List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules, List&lt;MixIn&gt; mixIns) {
-<span class="fc" id="L105">    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);</span>
-<span class="pc bpc" id="L106" title="1 of 2 branches missed.">    if (customJsonModules != null) {</span>
-<span class="fc bfc" id="L107" title="All 2 branches covered.">      for (com.fasterxml.jackson.databind.Module module : customJsonModules) {</span>
-<span class="fc" id="L108">        mapper.registerModule(module);</span>
-<span class="fc" id="L109">      }</span>
+<span class="fc" id="L108">    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, true);</span>
+<span class="pc bpc" id="L109" title="1 of 2 branches missed.">    if (customJsonModules != null) {</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">      for (com.fasterxml.jackson.databind.Module module : customJsonModules) {</span>
+<span class="fc" id="L111">        mapper.registerModule(module);</span>
+<span class="fc" id="L112">      }</span>
     }
-<span class="pc bpc" id="L111" title="1 of 2 branches missed.">    if (mixIns != null) {</span>
-<span class="fc bfc" id="L112" title="All 2 branches covered.">      for (MixIn mixIn : mixIns) {</span>
-<span class="fc" id="L113">        mapper.addMixIn(mixIn.target, mixIn.source);</span>
-<span class="fc" id="L114">      }</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">    if (mixIns != null) {</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">      for (MixIn mixIn : mixIns) {</span>
+<span class="fc" id="L116">        mapper.addMixIn(mixIn.target, mixIn.source);</span>
+<span class="fc" id="L117">      }</span>
     }
-<span class="fc" id="L116">    mapper.registerModule(new JavaTimeModule());</span>
-<span class="fc" id="L117">    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);</span>
-<span class="fc" id="L118">    mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);</span>
-<span class="fc" id="L119">    mapper.setDefaultMergeable(Boolean.TRUE);</span>
-<span class="fc" id="L120">    mapper.addHandler(problemHandler);</span>
-<span class="fc" id="L121">    mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);</span>
-<span class="fc" id="L122">    return mapper;</span>
+<span class="fc" id="L119">    mapper.registerModule(new JavaTimeModule());</span>
+<span class="fc" id="L120">    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);</span>
+<span class="fc" id="L121">    mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);</span>
+<span class="fc" id="L122">    mapper.setDefaultMergeable(Boolean.TRUE);</span>
+<span class="fc" id="L123">    mapper.addHandler(problemHandler);</span>
+<span class="fc" id="L124">    mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);</span>
+<span class="fc" id="L125">    return mapper;</span>
   }
   
   /**
@@ -142,17 +145,17 @@ public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
           , List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules
           , List&lt;MixIn&gt; mixIns
           , ObjectMapper yamlMapper
-<span class="fc" id="L145">  ) {</span>
-<span class="fc" id="L146">    Objects.requireNonNull(constructor, &quot;A valid supplier must be set on the factory&quot;);</span>
-<span class="fc" id="L147">    Objects.requireNonNull(gatherers, &quot;A set of gatherers must be set on the factory&quot;);</span>
-<span class="fc" id="L148">    this.constructor = constructor;</span>
-<span class="fc" id="L149">    this.gatherers = gatherers;</span>
-<span class="fc" id="L150">    this.problemHandler = Objects.requireNonNullElseGet(problemHandler, () -&gt; new DefaultParametersErrorHandler());</span>
-<span class="fc" id="L151">    this.propsMapper = Objects.requireNonNullElseGet(propsMapper, () -&gt; createPropsMapper(customJsonModules, mixIns));</span>
-<span class="fc" id="L152">    this.jsonMapper = Objects.requireNonNullElseGet(jsonMapper, () -&gt; createJsonMapper(customJsonModules, mixIns));</span>
-<span class="fc" id="L153">    this.yamlMapper = Objects.requireNonNullElseGet(yamlMapper, () -&gt; createYamlMapper(customJsonModules, mixIns));</span>
-<span class="fc" id="L154">    this.fileWatcher = new FileWatcher(this::changeNotificationHandler);</span>
-<span class="fc" id="L155">  }</span>
+<span class="fc" id="L148">  ) {</span>
+<span class="fc" id="L149">    Objects.requireNonNull(constructor, &quot;A valid supplier must be set on the factory&quot;);</span>
+<span class="fc" id="L150">    Objects.requireNonNull(gatherers, &quot;A set of gatherers must be set on the factory&quot;);</span>
+<span class="fc" id="L151">    this.constructor = constructor;</span>
+<span class="fc" id="L152">    this.gatherers = gatherers;</span>
+<span class="fc" id="L153">    this.problemHandler = Objects.requireNonNullElseGet(problemHandler, () -&gt; new DefaultParametersErrorHandler());</span>
+<span class="fc" id="L154">    this.propsMapper = Objects.requireNonNullElseGet(propsMapper, () -&gt; createPropsMapper(customJsonModules, mixIns));</span>
+<span class="fc" id="L155">    this.jsonMapper = Objects.requireNonNullElseGet(jsonMapper, () -&gt; createJsonMapper(customJsonModules, mixIns));</span>
+<span class="fc" id="L156">    this.yamlMapper = Objects.requireNonNullElseGet(yamlMapper, () -&gt; createYamlMapper(customJsonModules, mixIns));</span>
+<span class="fc" id="L157">    this.fileWatcher = new FileWatcher(this::changeNotificationHandler);</span>
+<span class="fc" id="L158">  }</span>
 
   /**
    * Get the configured problem handler.
@@ -162,28 +165,28 @@ public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
    * @return the configured problem handler.
    */
   public DeserializationProblemHandler getProblemHandler() {
-<span class="fc" id="L165">    return problemHandler;</span>
+<span class="fc" id="L168">    return problemHandler;</span>
   }
 
   @Override
   public JavaPropsMapper getPropsMapper() {
-<span class="fc" id="L170">    return propsMapper;</span>
+<span class="fc" id="L173">    return propsMapper;</span>
   }
 
   @Override
   public ObjectMapper getJsonMapper() {
-<span class="fc" id="L175">    return jsonMapper;</span>
+<span class="fc" id="L178">    return jsonMapper;</span>
   }
 
   @Override
   public ObjectMapper getYamlMapper() {
-<span class="fc" id="L180">    return yamlMapper;</span>
+<span class="fc" id="L183">    return yamlMapper;</span>
   }
 
   @Override
   public void watch(Path path) throws IOException {
-<span class="fc" id="L185">    fileWatcher.watch(path);</span>
-<span class="fc" id="L186">  }</span>
+<span class="fc" id="L188">    fileWatcher.watch(path);</span>
+<span class="fc" id="L189">  }</span>
   
   @Override
   public &lt;T&gt; byte[] prepareProperties(String name
@@ -192,155 +195,156 @@ public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
           , Function&lt;T, Object&gt; valueGetter
           , String propertyPrefix
   ) throws IOException {
-<span class="fc" id="L195">    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {</span>
-<span class="fc" id="L196">      try (OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8)) {</span>
-<span class="fc bfc" id="L197" title="All 2 branches covered.">        for (T entry : entries) {</span>
+<span class="fc" id="L198">    try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {</span>
+<span class="fc" id="L199">      try (OutputStreamWriter writer = new OutputStreamWriter(baos, StandardCharsets.UTF_8)) {</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">        for (T entry : entries) {</span>
           try {
-<span class="fc" id="L199">            String key = getKeyAsPrefixedString(keyGetter, entry, propertyPrefix);</span>
-<span class="fc bfc" id="L200" title="All 2 branches covered.">            if (key != null) {</span>
-<span class="fc" id="L201">              String value = (String) valueGetter.apply(entry);</span>
-<span class="fc" id="L202">              logger.trace(&quot;{}: {} = {}&quot;, name, key, value);</span>
-<span class="fc" id="L203">              writer.append(key)</span>
-<span class="fc" id="L204">                  .append(&quot; = &quot;)</span>
-<span class="fc" id="L205">                  .append(value)</span>
-<span class="fc" id="L206">                  .append(&quot;\r\n&quot;);</span>
+<span class="fc" id="L202">            String key = getKeyAsPrefixedString(keyGetter, entry, propertyPrefix);</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">            if (key != null) {</span>
+<span class="fc" id="L204">              String value = (String) valueGetter.apply(entry);</span>
+<span class="fc" id="L205">              logger.trace(&quot;{}: {} = {}&quot;, name, key, value);</span>
+<span class="fc" id="L206">              writer.append(key)</span>
+<span class="fc" id="L207">                  .append(&quot; = &quot;)</span>
+<span class="fc" id="L208">                  .append(value)</span>
+<span class="fc" id="L209">                  .append(&quot;\r\n&quot;);</span>
             }
-<span class="nc" id="L208">          } catch (ClassCastException ex) {</span>
-<span class="nc" id="L209">            logger.warn(&quot;{} unable to get key or value as a string from {}&quot;, name, entry);</span>
-<span class="fc" id="L210">          }</span>
-<span class="fc" id="L211">        }</span>
+<span class="nc" id="L211">          } catch (ClassCastException ex) {</span>
+<span class="nc" id="L212">            logger.warn(&quot;{} unable to get key or value as a string from {}&quot;, name, entry);</span>
+<span class="fc" id="L213">          }</span>
+<span class="fc" id="L214">        }</span>
       }
-<span class="fc" id="L213">      return baos.toByteArray();</span>
+<span class="fc" id="L216">      return baos.toByteArray();</span>
     }
   }
 
   private &lt;T&gt; String getKeyAsPrefixedString(Function&lt;T, Object&gt; keyGetter, T entry, String propertyPrefix) {
-<span class="fc" id="L218">    String castKey = (String) keyGetter.apply(entry);</span>
-<span class="fc" id="L219">    String key = null;</span>
-<span class="pc bpc" id="L220" title="1 of 4 branches missed.">    if (propertyPrefix == null || propertyPrefix.isEmpty()) {</span>
-<span class="fc" id="L221">      key = castKey;</span>
-<span class="fc bfc" id="L222" title="All 2 branches covered.">    } else if (castKey.startsWith(propertyPrefix)) {</span>
-<span class="fc" id="L223">      key = castKey.substring(propertyPrefix.length());</span>
+<span class="fc" id="L221">    String castKey = (String) keyGetter.apply(entry);</span>
+<span class="fc" id="L222">    String key = null;</span>
+<span class="pc bpc" id="L223" title="1 of 4 branches missed.">    if (propertyPrefix == null || propertyPrefix.isEmpty()) {</span>
+<span class="fc" id="L224">      key = castKey;</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">    } else if (castKey.startsWith(propertyPrefix)) {</span>
+<span class="fc" id="L226">      key = castKey.substring(propertyPrefix.length());</span>
     }
-<span class="fc" id="L225">    return key;</span>
+<span class="fc" id="L228">    return key;</span>
   }
     
   @Override
   public P gatherParameters() {
-<span class="fc" id="L230">    P value = constructor.get();</span>
-<span class="fc bfc" id="L231" title="All 2 branches covered.">    for (ParameterGatherer&lt;P&gt; gatherer : gatherers) {</span>
+<span class="fc" id="L233">    P value = constructor.get();</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">    for (ParameterGatherer&lt;P&gt; gatherer : gatherers) {</span>
       try {
-<span class="fc" id="L233">        value = gatherer.gatherParameters(this, value);</span>
-<span class="nc" id="L234">      } catch (Throwable ex) {</span>
-<span class="nc" id="L235">        logger.warn(&quot;Failed to process: &quot;, ex);</span>
-<span class="fc" id="L236">      }</span>
-<span class="fc" id="L237">    }</span>
-<span class="fc" id="L238">    lastValue.set(jsonMapper.convertValue(value, ObjectNode.class));</span>
-<span class="fc" id="L239">    return value;</span>
+<span class="fc" id="L236">        value = gatherer.gatherParameters(this, value);</span>
+<span class="nc" id="L237">      } catch (Throwable ex) {</span>
+<span class="nc" id="L238">        logger.warn(&quot;Failed to process: &quot;, ex);</span>
+<span class="fc" id="L239">      }</span>
+<span class="fc" id="L240">    }</span>
+<span class="fc" id="L241">    lastValue.set(jsonMapper.convertValue(value, ObjectNode.class));</span>
+<span class="fc" id="L242">    return value;</span>
   }
 
   @Override
   public boolean notifyOfChanges(Consumer&lt;P&gt; handler) {
-<span class="fc" id="L244">    changeHappenedHandler = handler;</span>
-<span class="fc" id="L245">    return fileWatcher.start();</span>
+<span class="fc" id="L247">    changeHappenedHandler = handler;</span>
+<span class="fc" id="L248">    return fileWatcher.start();</span>
   }
     
   private void changeNotificationHandler() {
-<span class="fc" id="L249">    synchronized (lastValue) {</span>
-<span class="fc" id="L250">      P newValue = gatherParameters();</span>
-<span class="fc" id="L251">      ObjectNode newNode = jsonMapper.convertValue(newValue, ObjectNode.class);</span>
-<span class="pc bpc" id="L252" title="1 of 2 branches missed.">      if (newNode.equals(lastValue.get())) {</span>
-<span class="fc" id="L253">        lastValue.set(newNode);</span>
-<span class="fc" id="L254">        changeHappenedHandler.accept(newValue);</span>
+<span class="fc" id="L252">    synchronized (lastValue) {</span>
+<span class="fc" id="L253">      P newValue = gatherParameters();</span>
+<span class="fc" id="L254">      ObjectNode newNode = jsonMapper.convertValue(newValue, ObjectNode.class);</span>
+<span class="pc bpc" id="L255" title="1 of 2 branches missed.">      if (newNode.equals(lastValue.get())) {</span>
+<span class="fc" id="L256">        lastValue.set(newNode);</span>
+<span class="fc" id="L257">        changeHappenedHandler.accept(newValue);</span>
       }
-<span class="fc" id="L256">    }</span>
-<span class="fc" id="L257">  }</span>
+<span class="fc" id="L259">    }</span>
+<span class="fc" id="L260">  }</span>
   
-  private static boolean cannotBeEnvVar(String propName) {
-<span class="fc bfc" id="L260" title="All 2 branches covered.">    return    propName.contains(&quot;[&quot;)</span>
-<span class="pc bpc" id="L261" title="1 of 2 branches missed.">              || propName.contains(&quot;]&quot;)</span>
-            ;
+  private static boolean canBeEnvVar(String propName) {
+<span class="pc bpc" id="L263" title="1 of 4 branches missed.">    if (propName.contains(&quot;[&quot;) || propName.contains(&quot;]&quot;)) {</span>
+<span class="fc" id="L264">      return false;</span>
+    }
+<span class="fc" id="L266">    return true;</span>
   }
   
   private Object getValue(Object object, Field field) {
-<span class="pc bpc" id="L266" title="1 of 4 branches missed.">    if (object == null || field ==  null) {</span>
-<span class="fc" id="L267">      return null;</span>
+<span class="pc bpc" id="L270" title="1 of 4 branches missed.">    if (object == null || field ==  null) {</span>
+<span class="fc" id="L271">      return null;</span>
     }
     try {
-<span class="pc bpc" id="L270" title="1 of 2 branches missed.">      if (field.canAccess(object)) {</span>
-<span class="nc" id="L271">        return field.get(object);        </span>
+<span class="pc bpc" id="L274" title="1 of 2 branches missed.">      if (field.canAccess(object)) {</span>
+<span class="nc" id="L275">        return field.get(object);        </span>
       } else {
-<span class="fc" id="L273">        field.setAccessible(true);</span>
-<span class="fc" id="L274">        Object value = field.get(object);        </span>
-<span class="fc" id="L275">        field.setAccessible(false);</span>
-<span class="fc" id="L276">        return value;</span>
+<span class="fc" id="L277">        field.setAccessible(true);</span>
+<span class="fc" id="L278">        Object value = field.get(object);        </span>
+<span class="fc" id="L279">        field.setAccessible(false);</span>
+<span class="fc" id="L280">        return value;</span>
       }
-<span class="nc" id="L278">    } catch (Throwable ex) {</span>
-<span class="nc" id="L279">      logger.debug(&quot;Failed to get {} from {}: {}&quot;, field, object, ex.getMessage());</span>
-<span class="nc" id="L280">      return null;</span>
+<span class="nc" id="L282">    } catch (Throwable ex) {</span>
+<span class="nc" id="L283">      logger.debug(&quot;Failed to get {} from {}: {}&quot;, field, object, ex.getMessage());</span>
+<span class="nc" id="L284">      return null;</span>
     }
   }
   
   private Object getValue(Object object, String setterName) {
-<span class="pc bpc" id="L285" title="2 of 6 branches missed.">    if (object == null || setterName ==  null || setterName.length() &lt; 4) {</span>
-<span class="fc" id="L286">      return null;</span>
+<span class="pc bpc" id="L289" title="2 of 6 branches missed.">    if (object == null || setterName ==  null || setterName.length() &lt; 4) {</span>
+<span class="fc" id="L290">      return null;</span>
     }
-<span class="fc" id="L288">    Method method = null;</span>
+<span class="fc" id="L292">    Method method = null;</span>
     try {
-<span class="fc" id="L290">      method = object.getClass().getMethod(&quot;get&quot; + setterName.substring(3));</span>
-<span class="fc" id="L291">    } catch (NoSuchMethodException ex) {</span>
-<span class="fc" id="L292">    }</span>
-<span class="fc bfc" id="L293" title="All 2 branches covered.">    if (method == null) {</span>
+<span class="fc" id="L294">      method = object.getClass().getMethod(&quot;get&quot; + setterName.substring(3));</span>
+<span class="fc" id="L295">    } catch (NoSuchMethodException ex) {</span>
+<span class="fc" id="L296">    }</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">    if (method == null) {</span>
       try {
-<span class="fc" id="L295">        method = object.getClass().getMethod(&quot;is&quot; + setterName.substring(3));</span>
-<span class="nc" id="L296">      } catch (NoSuchMethodException ex) {</span>
-<span class="fc" id="L297">      }</span>
+<span class="fc" id="L299">        method = object.getClass().getMethod(&quot;is&quot; + setterName.substring(3));</span>
+<span class="nc" id="L300">      } catch (NoSuchMethodException ex) {</span>
+<span class="fc" id="L301">      }</span>
     }
-<span class="pc bpc" id="L299" title="1 of 2 branches missed.">    if (method == null) {</span>
-<span class="nc" id="L300">      logger.debug(&quot;No method {} or {} on {}&quot;, &quot;get&quot; + setterName.substring(3), &quot;is&quot; + setterName.substring(3), object.getClass());</span>
-<span class="nc" id="L301">      return null;</span>
+<span class="pc bpc" id="L303" title="1 of 2 branches missed.">    if (method == null) {</span>
+<span class="nc" id="L304">      logger.debug(&quot;No method {} or {} on {}&quot;, &quot;get&quot; + setterName.substring(3), &quot;is&quot; + setterName.substring(3), object.getClass());</span>
+<span class="nc" id="L305">      return null;</span>
     }
     try {
-<span class="fc" id="L304">      return method.invoke(object);</span>
-<span class="nc" id="L305">    } catch (Throwable ex) {</span>
-<span class="nc" id="L306">      logger.debug(&quot;Failed to execute {}.{} on {}: {}&quot;, object.getClass().getSimpleName(), method, object, ex.getMessage());</span>
-<span class="nc" id="L307">      return null;</span>
+<span class="fc" id="L308">      return method.invoke(object);</span>
+<span class="nc" id="L309">    } catch (Throwable ex) {</span>
+<span class="nc" id="L310">      logger.debug(&quot;Failed to execute {}.{} on {}: {}&quot;, object.getClass().getSimpleName(), method, object, ex.getMessage());</span>
+<span class="nc" id="L311">      return null;</span>
     }
   }
 
   private Properties loadDocProperties(Map&lt;String, Properties&gt; docProperties, Class&lt;?&gt; type) {
     
-<span class="fc" id="L313">    Properties props = docProperties.get(type.getCanonicalName());</span>
-<span class="fc bfc" id="L314" title="All 2 branches covered.">    if (props == null) {</span>
-<span class="fc" id="L315">      try (InputStream stream = type.getResourceAsStream(type.getSimpleName() + &quot;-doc.properties&quot;)) {</span>
-<span class="fc" id="L316">        props = new Properties();</span>
-<span class="fc" id="L317">        props.load(stream);</span>
-<span class="fc" id="L318">        docProperties.put(type.getCanonicalName(), props);</span>
-<span class="nc" id="L319">      } catch (Throwable ex) {</span>
-<span class="fc" id="L320">      }</span>
+<span class="fc" id="L317">    Properties props = docProperties.get(type.getCanonicalName());</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">    if (props == null) {</span>
+<span class="fc" id="L319">      try (InputStream stream = type.getResourceAsStream(type.getSimpleName() + &quot;-doc.properties&quot;)) {</span>
+<span class="fc" id="L320">        props = new Properties();</span>
+<span class="fc" id="L321">        props.load(stream);</span>
+<span class="fc" id="L322">        docProperties.put(type.getCanonicalName(), props);</span>
+<span class="nc" id="L323">      } catch (Throwable ex) {</span>
+<span class="fc" id="L324">      }</span>
     }
-<span class="fc" id="L322">    return props;</span>
+<span class="fc" id="L326">    return props;</span>
   }
   
   @Override
   public List&lt;ConfigurationProperty&gt; getDocumentation(P defaultInstance, String prefix, List&lt;Pattern&gt; terminalClasses, List&lt;Pattern&gt; undocumentedClasses) {
-<span class="fc" id="L327">    List&lt;ConfigurationProperty&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L331">    List&lt;ConfigurationProperty&gt; result = new ArrayList&lt;&gt;();</span>
 
-<span class="fc" id="L329">    walkSetters(result, new HashMap&lt;&gt;(), prefix, defaultInstance, defaultInstance.getClass(), new Stack&lt;&gt;(), terminalClasses, undocumentedClasses);</span>
+<span class="fc" id="L333">    walkSetters(result, new HashMap&lt;&gt;(), prefix, defaultInstance, defaultInstance.getClass(), new Stack&lt;&gt;(), terminalClasses, undocumentedClasses);</span>
     
-<span class="fc" id="L331">    return result;</span>
+<span class="fc" id="L335">    return result;</span>
   }
 
   private boolean typeIsIn(List&lt;Pattern&gt; list, String typeName) {
-<span class="pc bpc" id="L335" title="2 of 6 branches missed.">    if (list == null || list.isEmpty() || typeName == null) {</span>
-<span class="fc" id="L336">      return false;</span>
+<span class="pc bpc" id="L339" title="2 of 6 branches missed.">    if (list == null || list.isEmpty() || typeName == null) {</span>
+<span class="fc" id="L340">      return false;</span>
     }
-<span class="fc bfc" id="L338" title="All 2 branches covered.">    for (Pattern pattern : list) {</span>
-<span class="fc bfc" id="L339" title="All 2 branches covered.">      if (pattern.matcher(typeName).matches()) {</span>
-<span class="fc" id="L340">        return true;</span>
+<span class="fc bfc" id="L342" title="All 2 branches covered.">    for (Pattern pattern : list) {</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">      if (pattern.matcher(typeName).matches()) {</span>
+<span class="fc" id="L344">        return true;</span>
       }
-<span class="fc" id="L342">    }</span>
-<span class="fc" id="L343">    return false;</span>
+<span class="fc" id="L346">    }</span>
+<span class="fc" id="L347">    return false;</span>
   }
   
   private static class PropertyState {
@@ -348,11 +352,11 @@ public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
     final String comment;
     final Class&lt;?&gt; clazz;
 
-<span class="fc" id="L351">    PropertyState(String name, String comment, Class&lt;?&gt; clazz) {</span>
-<span class="fc" id="L352">      this.name = name;</span>
-<span class="fc" id="L353">      this.comment = comment;</span>
-<span class="fc" id="L354">      this.clazz = clazz;</span>
-<span class="fc" id="L355">    }        </span>
+<span class="fc" id="L355">    PropertyState(String name, String comment, Class&lt;?&gt; clazz) {</span>
+<span class="fc" id="L356">      this.name = name;</span>
+<span class="fc" id="L357">      this.comment = comment;</span>
+<span class="fc" id="L358">      this.clazz = clazz;</span>
+<span class="fc" id="L359">    }        </span>
   }
   
   private &lt;T&gt; void walkSetters(
@@ -365,18 +369,18 @@ public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
           , List&lt;Pattern&gt; terminalClasses
           , List&lt;Pattern&gt; undocumentedClasses
   ) throws SecurityException {
-<span class="fc" id="L368">    Properties classDocProperties = loadDocProperties(docProperties, clazz);</span>
-<span class="fc" id="L369">    Set&lt;String&gt; propsDone = new HashSet&lt;&gt;();</span>
-<span class="fc bfc" id="L370" title="All 2 branches covered.">    for (Method method : clazz.getMethods()) {</span>
-<span class="fc bfc" id="L371" title="All 4 branches covered.">      if (method.getParameters().length == 1 &amp;&amp; method.getName().startsWith(&quot;set&quot;)) {</span>
-<span class="fc" id="L372">        Parameter parameter = method.getParameters()[0];</span>
+<span class="fc" id="L372">    Properties classDocProperties = loadDocProperties(docProperties, clazz);</span>
+<span class="fc" id="L373">    Set&lt;String&gt; propsDone = new HashSet&lt;&gt;();</span>
+<span class="fc bfc" id="L374" title="All 2 branches covered.">    for (Method method : clazz.getMethods()) {</span>
+<span class="fc bfc" id="L375" title="All 4 branches covered.">      if (method.getParameters().length == 1 &amp;&amp; method.getName().startsWith(&quot;set&quot;)) {</span>
+<span class="fc" id="L376">        Parameter parameter = method.getParameters()[0];</span>
         
-<span class="fc" id="L374">        Class&lt;?&gt; fieldType = parameter.getType();</span>
-<span class="fc" id="L375">        String fieldName = JavadocCapturer.setterNameToVariableName(method.getName());</span>
-<span class="fc" id="L376">        Object defaultValue = getValue(defaultInstance, method.getName());</span>
+<span class="fc" id="L378">        Class&lt;?&gt; fieldType = parameter.getType();</span>
+<span class="fc" id="L379">        String fieldName = JavadocCapturer.setterNameToVariableName(method.getName());</span>
+<span class="fc" id="L380">        Object defaultValue = getValue(defaultInstance, method.getName());</span>
 
-<span class="fc" id="L378">        propsDone.add(fieldName);</span>
-<span class="fc" id="L379">        documentField(properties</span>
+<span class="fc" id="L382">        propsDone.add(fieldName);</span>
+<span class="fc" id="L383">        documentField(properties</span>
                 , docProperties
                 , classDocProperties
                 , prefix
@@ -387,17 +391,17 @@ public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
                 , fieldName
                 , fieldType
                 , defaultValue
-<span class="fc" id="L390">                , () -&gt; (ParameterizedType) parameter.getParameterizedType()</span>
+<span class="fc" id="L394">                , () -&gt; (ParameterizedType) parameter.getParameterizedType()</span>
         );
       }
     }
-<span class="fc bfc" id="L394" title="All 2 branches covered.">    for (Field field : clazz.getDeclaredFields()) {</span>
-<span class="fc" id="L395">      Class&lt;?&gt; fieldType = field.getType();</span>
-<span class="fc" id="L396">      String fieldName = field.getName();      </span>
-<span class="fc" id="L397">      Object defaultValue = getValue(defaultInstance, field);</span>
+<span class="fc bfc" id="L398" title="All 2 branches covered.">    for (Field field : clazz.getDeclaredFields()) {</span>
+<span class="fc" id="L399">      Class&lt;?&gt; fieldType = field.getType();</span>
+<span class="fc" id="L400">      String fieldName = field.getName();      </span>
+<span class="fc" id="L401">      Object defaultValue = getValue(defaultInstance, field);</span>
 
-<span class="fc bfc" id="L399" title="All 2 branches covered.">      if (!propsDone.contains(fieldName)) {</span>
-<span class="fc" id="L400">        documentField(properties</span>
+<span class="fc bfc" id="L403" title="All 2 branches covered.">      if (!propsDone.contains(fieldName)) {</span>
+<span class="fc" id="L404">        documentField(properties</span>
                 , docProperties
                 , classDocProperties
                 , prefix
@@ -408,11 +412,11 @@ public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
                 , fieldName
                 , fieldType
                 , defaultValue
-<span class="nc" id="L411">                , () -&gt; (ParameterizedType) field.getGenericType()</span>
+<span class="nc" id="L415">                , () -&gt; (ParameterizedType) field.getGenericType()</span>
         );
       }
     }
-<span class="fc" id="L415">  }</span>
+<span class="fc" id="L419">  }</span>
 
   private void documentField(
           List&lt;ConfigurationProperty&gt; properties
@@ -429,42 +433,43 @@ public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
           , Supplier&lt;ParameterizedType&gt; parameterizedTypeGetter
     ) throws SecurityException {
     
-<span class="fc" id="L432">    String fieldTypeName = fieldType.getCanonicalName();</span>
-<span class="fc" id="L433">    boolean undocumented = typeIsIn(undocumentedClasses, fieldTypeName);</span>
-<span class="pc bpc" id="L434" title="1 of 8 branches missed.">    if (fieldType.isPrimitive() || undocumented || TERMINAL_TYPES.contains(fieldTypeName) || typeIsIn(terminalClasses, fieldTypeName)) {</span>
-<span class="fc" id="L435">      outputTerminalField(propertyStates, fieldName, annotatedElement, classDocProperties, undocumented, defaultValue, prefix, fieldType, properties);</span>
-<span class="fc bfc" id="L436" title="All 2 branches covered.">    } else if (Map.class.isAssignableFrom(fieldType)) {</span>
+<span class="fc" id="L436">    String fieldTypeName = fieldType.getCanonicalName();</span>
+<span class="fc" id="L437">    boolean undocumented = typeIsIn(undocumentedClasses, fieldTypeName);</span>
+<span class="fc" id="L438">    boolean isListedTerminalClass = typeIsIn(terminalClasses, fieldTypeName);</span>
+<span class="pc bpc" id="L439" title="1 of 8 branches missed.">    if (fieldType.isPrimitive() || undocumented || TERMINAL_TYPES.contains(fieldTypeName) || isListedTerminalClass) {</span>
+<span class="fc" id="L440">      outputTerminalField(propertyStates, fieldName, annotatedElement, classDocProperties, undocumented, defaultValue, prefix, fieldType, properties);</span>
+<span class="fc bfc" id="L441" title="All 2 branches covered.">    } else if (Map.class.isAssignableFrom(fieldType)) {</span>
       
-<span class="fc" id="L438">      Type[] actualTypeArguments = parameterizedTypeGetter.get().getActualTypeArguments();</span>
-<span class="pc bpc" id="L439" title="1 of 2 branches missed.">      if (actualTypeArguments.length == 2) {</span>
-<span class="fc" id="L440">        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);</span>
-<span class="fc" id="L441">        propertyStates.push(ps);</span>
-<span class="fc" id="L442">        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, annotatedElement, &quot;&lt;xxx&gt;&quot;, (Class) actualTypeArguments[1], null, parameterizedTypeGetter);</span>
-<span class="fc" id="L443">        propertyStates.pop();</span>
+<span class="fc" id="L443">      Type[] actualTypeArguments = parameterizedTypeGetter.get().getActualTypeArguments();</span>
+<span class="pc bpc" id="L444" title="1 of 2 branches missed.">      if (actualTypeArguments.length == 2) {</span>
+<span class="fc" id="L445">        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);</span>
+<span class="fc" id="L446">        propertyStates.push(ps);</span>
+<span class="fc" id="L447">        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, annotatedElement, &quot;&lt;xxx&gt;&quot;, (Class) actualTypeArguments[1], null, parameterizedTypeGetter);</span>
+<span class="fc" id="L448">        propertyStates.pop();</span>
       }
-<span class="fc bfc" id="L445" title="All 2 branches covered.">    } else if (List.class.isAssignableFrom(fieldType)) {</span>
-<span class="fc" id="L446">      Type[] actualTypeArguments = parameterizedTypeGetter.get().getActualTypeArguments();</span>
-<span class="pc bpc" id="L447" title="1 of 2 branches missed.">      if (actualTypeArguments.length == 1) {</span>
-<span class="fc" id="L448">        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);</span>
-<span class="fc" id="L449">        propertyStates.push(ps);</span>
-<span class="fc" id="L450">        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, annotatedElement, &quot;[&lt;n&gt;]&quot;, (Class) actualTypeArguments[0], null, parameterizedTypeGetter);</span>
-<span class="fc" id="L451">        propertyStates.pop();</span>
+<span class="fc bfc" id="L450" title="All 2 branches covered.">    } else if (List.class.isAssignableFrom(fieldType)) {</span>
+<span class="fc" id="L451">      Type[] actualTypeArguments = parameterizedTypeGetter.get().getActualTypeArguments();</span>
+<span class="pc bpc" id="L452" title="1 of 2 branches missed.">      if (actualTypeArguments.length == 1) {</span>
+<span class="fc" id="L453">        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);</span>
+<span class="fc" id="L454">        propertyStates.push(ps);</span>
+<span class="fc" id="L455">        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, annotatedElement, &quot;[&lt;n&gt;]&quot;, (Class) actualTypeArguments[0], null, parameterizedTypeGetter);</span>
+<span class="fc" id="L456">        propertyStates.pop();</span>
       }      
-<span class="fc" id="L453">    } else {</span>
-<span class="fc" id="L454">      boolean found = false;</span>
-<span class="fc bfc" id="L455" title="All 2 branches covered.">      for (PropertyState ps : propertyStates) {</span>
-<span class="pc bpc" id="L456" title="1 of 2 branches missed.">        if (ps.clazz == fieldType) {</span>
-<span class="nc" id="L457">          found = true;</span>
+<span class="fc" id="L458">    } else {</span>
+<span class="fc" id="L459">      boolean found = false;</span>
+<span class="fc bfc" id="L460" title="All 2 branches covered.">      for (PropertyState ps : propertyStates) {</span>
+<span class="pc bpc" id="L461" title="1 of 2 branches missed.">        if (ps.clazz == fieldType) {</span>
+<span class="nc" id="L462">          found = true;</span>
         }
-<span class="fc" id="L459">      }</span>
-<span class="pc bpc" id="L460" title="1 of 2 branches missed.">      if (!found) {</span>
-<span class="fc" id="L461">        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);</span>
-<span class="fc" id="L462">        propertyStates.push(ps);</span>
-<span class="fc" id="L463">        walkSetters(properties, docProperties, prefix, defaultValue, fieldType, propertyStates, terminalClasses, undocumentedClasses);</span>
-<span class="fc" id="L464">        propertyStates.pop();</span>
+<span class="fc" id="L464">      }</span>
+<span class="pc bpc" id="L465" title="1 of 2 branches missed.">      if (!found) {</span>
+<span class="fc" id="L466">        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);</span>
+<span class="fc" id="L467">        propertyStates.push(ps);</span>
+<span class="fc" id="L468">        walkSetters(properties, docProperties, prefix, defaultValue, fieldType, propertyStates, terminalClasses, undocumentedClasses);</span>
+<span class="fc" id="L469">        propertyStates.pop();</span>
       }
     }
-<span class="fc" id="L467">  }</span>
+<span class="fc" id="L472">  }</span>
 
   private void outputTerminalField(
           Stack&lt;PropertyState&gt; propertyStates
@@ -477,39 +482,39 @@ public class Params4JImpl&lt;P&gt; implements Params4J&lt;P&gt;, Params4JSpi {
           , Class&lt;?&gt; type
           , List&lt;ConfigurationProperty&gt; properties
   ) {
-<span class="fc" id="L480">    String propName = propertyStates.stream().map(ps -&gt; ps.name).collect(Collectors.joining(&quot;.&quot;));</span>
-<span class="pc bpc" id="L481" title="1 of 6 branches missed.">    if (propName != null &amp;&amp; !propName.isEmpty() &amp;&amp; !name.startsWith(&quot;[&quot;)) {</span>
-<span class="fc" id="L482">      propName = propName + &quot;.&quot;;</span>
+<span class="fc" id="L485">    String propName = propertyStates.stream().map(ps -&gt; ps.name).collect(Collectors.joining(&quot;.&quot;));</span>
+<span class="pc bpc" id="L486" title="1 of 6 branches missed.">    if (propName != null &amp;&amp; !propName.isEmpty() &amp;&amp; !name.startsWith(&quot;[&quot;)) {</span>
+<span class="fc" id="L487">      propName = propName + &quot;.&quot;;</span>
     }
-<span class="fc" id="L484">    propName = propName + name;</span>
+<span class="fc" id="L489">    propName = propName + name;</span>
     
-<span class="fc" id="L486">    String newComment = null;</span>
-<span class="fc bfc" id="L487" title="All 2 branches covered.">    if (element.isAnnotationPresent(Comment.class)) {</span>
-<span class="fc" id="L488">      newComment = element.getAnnotation(Comment.class).value();</span>
+<span class="fc" id="L491">    String newComment = null;</span>
+<span class="fc bfc" id="L492" title="All 2 branches covered.">    if (element.isAnnotationPresent(Comment.class)) {</span>
+<span class="fc" id="L493">      newComment = element.getAnnotation(Comment.class).value();</span>
     }
-<span class="pc bpc" id="L490" title="1 of 4 branches missed.">    if (newComment == null || newComment.isEmpty()) {</span>
-<span class="fc" id="L491">      newComment = classDocProperties.getProperty(name);</span>
+<span class="pc bpc" id="L495" title="1 of 4 branches missed.">    if (newComment == null || newComment.isEmpty()) {</span>
+<span class="fc" id="L496">      newComment = classDocProperties.getProperty(name);</span>
     }
-<span class="fc bfc" id="L493" title="All 2 branches covered.">    String comment = propertyStates.stream().map(ps -&gt; ps.comment).filter(c -&gt; c != null).collect(Collectors.joining(&quot;, &quot;));</span>
-<span class="pc bpc" id="L494" title="1 of 4 branches missed.">    if (newComment != null &amp;&amp; !newComment.isEmpty()) {</span>
-<span class="pc bpc" id="L495" title="1 of 2 branches missed.">      if (classDocProperties.containsKey(name)) {</span>
-<span class="pc bpc" id="L496" title="1 of 4 branches missed.">        if (comment != null &amp;&amp; !comment.isEmpty()) {</span>
-<span class="fc" id="L497">          comment = comment + &quot;, &quot; + newComment;</span>
+<span class="fc bfc" id="L498" title="All 2 branches covered.">    String comment = propertyStates.stream().map(ps -&gt; ps.comment).filter(c -&gt; c != null).collect(Collectors.joining(&quot;, &quot;));</span>
+<span class="pc bpc" id="L499" title="1 of 4 branches missed.">    if (newComment != null &amp;&amp; !newComment.isEmpty()) {</span>
+<span class="pc bpc" id="L500" title="1 of 2 branches missed.">      if (classDocProperties.containsKey(name)) {</span>
+<span class="pc bpc" id="L501" title="1 of 4 branches missed.">        if (comment != null &amp;&amp; !comment.isEmpty()) {</span>
+<span class="fc" id="L502">          comment = comment + &quot;, &quot; + newComment;</span>
         } else {
-<span class="fc" id="L499">          comment = newComment;</span>
+<span class="fc" id="L504">          comment = newComment;</span>
         }
       }
     }
-<span class="fc" id="L503">    ConfigurationProperty prop = ConfigurationProperty.builder()</span>
-<span class="fc bfc" id="L504" title="All 2 branches covered.">            .canBeEnvVar(!cannotBeEnvVar(propName))</span>
-<span class="fc" id="L505">            .undocumented(undocumented)</span>
-<span class="fc" id="L506">            .comment(comment)</span>
-<span class="fc bfc" id="L507" title="All 2 branches covered.">            .defaultValue(defaultValue == null ? null : defaultValue.toString())</span>
-<span class="pc bpc" id="L508" title="1 of 2 branches missed.">            .name(prefix == null ? propName : prefix + propName)</span>
-<span class="fc" id="L509">            .type(type)</span>
-<span class="fc" id="L510">            .build();</span>
-<span class="fc" id="L511">    properties.add(prop);</span>
-<span class="fc" id="L512">  }</span>
+<span class="fc" id="L508">    ConfigurationProperty prop = ConfigurationProperty.builder()</span>
+<span class="fc" id="L509">            .canBeEnvVar(canBeEnvVar(propName))</span>
+<span class="fc" id="L510">            .undocumented(undocumented)</span>
+<span class="fc" id="L511">            .comment(comment)</span>
+<span class="fc bfc" id="L512" title="All 2 branches covered.">            .defaultValue(defaultValue == null ? null : defaultValue.toString())</span>
+<span class="pc bpc" id="L513" title="1 of 2 branches missed.">            .name(prefix == null ? propName : prefix + propName)</span>
+<span class="fc" id="L514">            .type(type)</span>
+<span class="fc" id="L515">            .build();</span>
+<span class="fc" id="L516">    properties.add(prop);</span>
+<span class="fc" id="L517">  }</span>
   
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

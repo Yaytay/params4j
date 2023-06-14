@@ -17,14 +17,16 @@
 package uk.co.spudsoft.params4j.impl;
 
 /**
- *
+ * Representation of a MixIn added via the {@link uk.co.spudsoft.params4j.Params4JFactory#withMixIn(java.lang.Class, java.lang.Class)}.
+ * 
+ * MixIns enable a pre-compiled class to have annotations added to it (by sourcing them from another class).
+ * 
  * @author jtalbut
  */
 public class MixIn {
   /**
    * Class (or interface) whose annotations to effectively override.
    */
-
   public final Class&lt;?&gt; target;
   /**
    * Class (or interface) whose annotations are to be &quot;added&quot; to target's annotations, overriding as necessary.
@@ -36,9 +38,9 @@ public class MixIn {
    * @param target Class (or interface) whose annotations to effectively override.
    * @param source Class (or interface) whose annotations are to be &quot;added&quot; to target's annotations, overriding as necessary
    */
-<span class="fc" id="L39">  public MixIn(Class&lt;?&gt; target, Class&lt;?&gt; source) {</span>
-<span class="fc" id="L40">    this.target = target;</span>
-<span class="fc" id="L41">    this.source = source;</span>
-<span class="fc" id="L42">  }    </span>
+<span class="fc" id="L41">  public MixIn(Class&lt;?&gt; target, Class&lt;?&gt; source) {</span>
+<span class="fc" id="L42">    this.target = target;</span>
+<span class="fc" id="L43">    this.source = source;</span>
+<span class="fc" id="L44">  }    </span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>

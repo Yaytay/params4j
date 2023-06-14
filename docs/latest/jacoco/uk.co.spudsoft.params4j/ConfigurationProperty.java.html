@@ -18,6 +18,7 @@ package uk.co.spudsoft.params4j;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
+import java.util.Locale;
 import java.util.Objects;
 
 /**
@@ -38,9 +39,12 @@ public class ConfigurationProperty {
    */
   public final String name;
   /**
-   * If true this property cannot be represented as an environment variable.
+   * If true this property can be represented as an environment variable.
+   * 
    * Lists cannot be represented as environment variables because the '[' and ']' characters are not permitted in environment variables in a Linux shell.
-   * It may still be possible to specify this property as an environment variable as long as no Unix-like shell is required to process it.
+   * It may still be possible to specify list properties as an environment variable as long as no Unix-like shell is required to process it.
+   * 
+   * Terminal classes that cannot be represented as a single string cannot be represented as a single environment variable.
    */
   public final boolean canBeEnvVar;
   /**
@@ -85,8 +89,8 @@ public class ConfigurationProperty {
      * @return this
      */
     public Builder type(final Class&lt;?&gt; value) {
-<span class="fc" id="L88">      this.type = value;</span>
-<span class="fc" id="L89">      return this;</span>
+<span class="fc" id="L92">      this.type = value;</span>
+<span class="fc" id="L93">      return this;</span>
     }
 
     /**
@@ -95,8 +99,8 @@ public class ConfigurationProperty {
      * @return this
      */
     public Builder name(final String value) {
-<span class="fc" id="L98">      this.name = value;</span>
-<span class="fc" id="L99">      return this;</span>
+<span class="fc" id="L102">      this.name = value;</span>
+<span class="fc" id="L103">      return this;</span>
     }
 
     /**
@@ -105,8 +109,8 @@ public class ConfigurationProperty {
      * @return this
      */
     public Builder canBeEnvVar(final boolean value) {
-<span class="fc" id="L108">      this.canBeEnvVar = value;</span>
-<span class="fc" id="L109">      return this;</span>
+<span class="fc" id="L112">      this.canBeEnvVar = value;</span>
+<span class="fc" id="L113">      return this;</span>
     }
 
     /**
@@ -116,8 +120,8 @@ public class ConfigurationProperty {
      * @return this
      */
     public Builder undocumented(final boolean value) {
-<span class="fc" id="L119">      this.undocumented = value;</span>
-<span class="fc" id="L120">      return this;</span>
+<span class="fc" id="L123">      this.undocumented = value;</span>
+<span class="fc" id="L124">      return this;</span>
     }
 
     /**
@@ -126,8 +130,8 @@ public class ConfigurationProperty {
      * @return this
      */
     public Builder comment(final String value) {
-<span class="fc" id="L129">      this.comment = value;</span>
-<span class="fc" id="L130">      return this;</span>
+<span class="fc" id="L133">      this.comment = value;</span>
+<span class="fc" id="L134">      return this;</span>
     }
 
     /**
@@ -136,8 +140,8 @@ public class ConfigurationProperty {
      * @return this
      */
     public Builder defaultValue(final String value) {
-<span class="fc" id="L139">      this.defaultValue = value;</span>
-<span class="fc" id="L140">      return this;</span>
+<span class="fc" id="L143">      this.defaultValue = value;</span>
+<span class="fc" id="L144">      return this;</span>
     }
 
     /**
@@ -145,7 +149,7 @@ public class ConfigurationProperty {
      * @return a new {@link ConfigurationProperty} instance.
      */
     public ConfigurationProperty build() {
-<span class="fc" id="L148">      return new uk.co.spudsoft.params4j.ConfigurationProperty(type, name, canBeEnvVar, undocumented, comment, defaultValue);</span>
+<span class="fc" id="L152">      return new uk.co.spudsoft.params4j.ConfigurationProperty(type, name, canBeEnvVar, undocumented, comment, defaultValue);</span>
     }
   }
 
@@ -154,59 +158,169 @@ public class ConfigurationProperty {
    * @return a newly constructed {@link Builder} instance.
    */
   public static ConfigurationProperty.Builder builder() {
-<span class="fc" id="L157">    return new ConfigurationProperty.Builder();</span>
+<span class="fc" id="L161">    return new ConfigurationProperty.Builder();</span>
   }
 
-<span class="fc" id="L160">  private ConfigurationProperty(final Class&lt;?&gt; type, final String name, final boolean canBeEnvVar, final boolean undocumented, final String comment, final String defaultValue) {</span>
-<span class="fc" id="L161">    this.type = type;</span>
-<span class="fc" id="L162">    this.name = name;</span>
-<span class="fc" id="L163">    this.canBeEnvVar = canBeEnvVar;</span>
-<span class="fc" id="L164">    this.undocumented = undocumented;</span>
-<span class="fc" id="L165">    this.comment = comment;</span>
-<span class="fc" id="L166">    this.defaultValue = defaultValue;</span>
-<span class="fc" id="L167">  }</span>
+<span class="fc" id="L164">  private ConfigurationProperty(final Class&lt;?&gt; type, final String name, final boolean canBeEnvVar, final boolean undocumented, final String comment, final String defaultValue) {</span>
+<span class="fc" id="L165">    this.type = type;</span>
+<span class="fc" id="L166">    this.name = name;</span>
+<span class="fc" id="L167">    this.canBeEnvVar = canBeEnvVar;</span>
+<span class="fc" id="L168">    this.undocumented = undocumented;</span>
+<span class="fc" id="L169">    this.comment = comment;</span>
+<span class="fc" id="L170">    this.defaultValue = defaultValue;</span>
+<span class="fc" id="L171">  }</span>
 
   @Override
   public int hashCode() {
-<span class="fc" id="L171">    int hash = 3;</span>
-<span class="fc" id="L172">    hash = 71 * hash + Objects.hashCode(this.type);</span>
-<span class="fc" id="L173">    hash = 71 * hash + Objects.hashCode(this.name);</span>
-<span class="pc bpc" id="L174" title="1 of 2 branches missed.">    hash = 71 * hash + (this.canBeEnvVar ? 1 : 0);</span>
-<span class="pc bpc" id="L175" title="1 of 2 branches missed.">    hash = 71 * hash + (this.undocumented ? 1 : 0);</span>
-<span class="fc" id="L176">    hash = 71 * hash + Objects.hashCode(this.comment);</span>
-<span class="fc" id="L177">    hash = 71 * hash + Objects.hashCode(this.defaultValue);</span>
-<span class="fc" id="L178">    return hash;</span>
+<span class="fc" id="L175">    int hash = 3;</span>
+<span class="fc" id="L176">    hash = 71 * hash + Objects.hashCode(this.type);</span>
+<span class="fc" id="L177">    hash = 71 * hash + Objects.hashCode(this.name);</span>
+<span class="pc bpc" id="L178" title="1 of 2 branches missed.">    hash = 71 * hash + (this.canBeEnvVar ? 1 : 0);</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">    hash = 71 * hash + (this.undocumented ? 1 : 0);</span>
+<span class="fc" id="L180">    hash = 71 * hash + Objects.hashCode(this.comment);</span>
+<span class="fc" id="L181">    hash = 71 * hash + Objects.hashCode(this.defaultValue);</span>
+<span class="fc" id="L182">    return hash;</span>
   }
 
   @Override
   public boolean equals(Object obj) {
-<span class="fc bfc" id="L183" title="All 2 branches covered.">    if (this == obj) {</span>
-<span class="fc" id="L184">      return true;</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">    if (this == obj) {</span>
+<span class="fc" id="L188">      return true;</span>
     }
-<span class="fc bfc" id="L186" title="All 2 branches covered.">    if (obj == null) {</span>
-<span class="fc" id="L187">      return false;</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">    if (obj == null) {</span>
+<span class="fc" id="L191">      return false;</span>
     }
-<span class="fc bfc" id="L189" title="All 2 branches covered.">    if (getClass() != obj.getClass()) {</span>
-<span class="fc" id="L190">      return false;</span>
-    }
-<span class="fc" id="L192">    final ConfigurationProperty other = (ConfigurationProperty) obj;</span>
-<span class="fc bfc" id="L193" title="All 2 branches covered.">    if (this.canBeEnvVar != other.canBeEnvVar) {</span>
+<span class="fc bfc" id="L193" title="All 2 branches covered.">    if (getClass() != obj.getClass()) {</span>
 <span class="fc" id="L194">      return false;</span>
     }
-<span class="fc bfc" id="L196" title="All 2 branches covered.">    if (this.undocumented != other.undocumented) {</span>
-<span class="fc" id="L197">      return false;</span>
+<span class="fc" id="L196">    final ConfigurationProperty other = (ConfigurationProperty) obj;</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">    if (this.canBeEnvVar != other.canBeEnvVar) {</span>
+<span class="fc" id="L198">      return false;</span>
     }
-<span class="fc bfc" id="L199" title="All 2 branches covered.">    if (!Objects.equals(this.name, other.name)) {</span>
-<span class="fc" id="L200">      return false;</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">    if (this.undocumented != other.undocumented) {</span>
+<span class="fc" id="L201">      return false;</span>
     }
-<span class="fc bfc" id="L202" title="All 2 branches covered.">    if (!Objects.equals(this.comment, other.comment)) {</span>
-<span class="fc" id="L203">      return false;</span>
+<span class="fc bfc" id="L203" title="All 2 branches covered.">    if (!Objects.equals(this.name, other.name)) {</span>
+<span class="fc" id="L204">      return false;</span>
     }
-<span class="fc bfc" id="L205" title="All 2 branches covered.">    if (!Objects.equals(this.defaultValue, other.defaultValue)) {</span>
-<span class="fc" id="L206">      return false;</span>
+<span class="fc bfc" id="L206" title="All 2 branches covered.">    if (!Objects.equals(this.comment, other.comment)) {</span>
+<span class="fc" id="L207">      return false;</span>
     }
-<span class="fc" id="L208">    return Objects.equals(this.type, other.type);</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">    if (!Objects.equals(this.defaultValue, other.defaultValue)) {</span>
+<span class="fc" id="L210">      return false;</span>
+    }
+<span class="fc" id="L212">    return Objects.equals(this.type, other.type);</span>
   }
+
+  /**
+   * Append an output suitable for use in response to a '--help' command.
+   * 
+   * @param builder The StringBuilder that will have the details appeneded.
+   * @param maxNameLen The length of the longest name in the set of ConfigurationProperties being processed.
+   * This must be calculated by the called before calling appendUsages for correct alignment.
+   * Given a List&amp;lt;ConfigurationProperty&gt; this can be calculated with:
+   * &lt;pre&gt;
+   * int maxNameLen = docs.stream().map(p -&gt; p.name.length()).max(Integer::compare).get();
+   * &lt;/pre&gt;
+   * 
+   */
+  public void appendUsage(StringBuilder builder, int maxNameLen) {
+    
+<span class="fc" id="L229">    maxNameLen += 6;</span>
+    
+<span class="fc" id="L231">    builder.append(&quot;    &quot;)</span>
+<span class="fc" id="L232">            .append(name);</span>
+<span class="fc bfc" id="L233" title="All 2 branches covered.">    if (undocumented) {</span>
+<span class="fc" id="L234">      builder.append(&quot;.&lt;***&gt;&quot;);</span>
+    }
+<span class="fc bfc" id="L236" title="All 2 branches covered.">    builder.append(&quot; &quot;.repeat(maxNameLen + 1 - name.length() - (undocumented ? 6 : 0)))</span>
+<span class="fc" id="L237">            .append(comment)            </span>
+<span class="fc" id="L238">            .append('\n');</span>
+
+<span class="fc" id="L240">    String typeName = type.getSimpleName();</span>
+<span class="fc" id="L241">    builder.append(&quot;        &quot;)</span>
+<span class="fc" id="L242">            .append(typeName);</span>
+
+<span class="fc bfc" id="L244" title="All 2 branches covered.">    if (defaultValue != null) {</span>
+<span class="pc bpc" id="L245" title="1 of 2 branches missed.">      builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
+<span class="fc" id="L246">              .append(&quot;default: &quot;)</span>
+<span class="fc" id="L247">              .append(defaultValue);</span>
+    }
+<span class="fc bfc" id="L249" title="All 2 branches covered.">    if (undocumented) {</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">      builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
+<span class="fc" id="L251">              .append(&quot;This parameter is undocumented, consult the source for &quot;)</span>
+<span class="fc" id="L252">              .append(type)</span>
+<span class="fc" id="L253">              .append(&quot; for details of the values for &lt;***&gt;&quot;);</span>
+      
+    }
+<span class="fc" id="L256">    builder.append(&quot;\n\n&quot;);</span>
+<span class="fc" id="L257">  }</span>
+
+  /**
+   * Append environment variable that can be used for this value.Will only change the builder if canBeEnvVar is true.
+   * 
+   * @param builder The StringBuilder that will have the details appeneded.
+   * @param maxNameLen The length of the longest name in the set of ConfigurationProperties being processed.
+   * This must be calculated by the called before calling appendUsages for correct alignment.
+   * Given a List&amp;lt;ConfigurationProperty&gt; this can be calculated with:
+   * &lt;pre&gt;
+   * int maxNameLen = docs.stream().map(p -&gt; p.name.length()).max(Integer::compare).get();
+   * &lt;/pre&gt;
+   * @param prefixStrip String to be removed from the beginning of each name (typically '--')
+   * @param prefixAdd String to be add to the beginning of each name (the namePrefix passed in to withEnvironmentVariablesGatherer)
+   * 
+   */
+  public void appendEnv(StringBuilder builder, int maxNameLen, String prefixStrip, String prefixAdd) {
+<span class="fc bfc" id="L274" title="All 2 branches covered.">    if (canBeEnvVar) {</span>
+<span class="pc bpc" id="L275" title="1 of 2 branches missed.">      if (prefixStrip == null) {</span>
+<span class="nc" id="L276">        prefixStrip = &quot;&quot;;</span>
+      }
+<span class="pc bpc" id="L278" title="1 of 2 branches missed.">      if (prefixAdd == null) {</span>
+<span class="nc" id="L279">        prefixAdd = &quot;&quot;;</span>
+      }
+      
+<span class="fc" id="L282">      maxNameLen = maxNameLen - prefixStrip.length() + prefixAdd.length() + 7;</span>
+      
+<span class="fc" id="L284">      String envVarName = name;</span>
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">      if (envVarName.startsWith(prefixStrip)) {</span>
+<span class="fc" id="L286">        envVarName = envVarName.substring(prefixStrip.length());</span>
+      }
+<span class="fc" id="L288">      envVarName = envVarName.replaceAll(&quot;\\.&quot;, &quot;_&quot;);</span>
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">      if (prefixAdd.length() &gt; 0) {</span>
+<span class="fc" id="L290">        envVarName = prefixAdd + &quot;_&quot; + envVarName;</span>
+      }
+<span class="fc" id="L292">      envVarName = envVarName.toUpperCase(Locale.ROOT);</span>
+      
+<span class="fc" id="L294">      builder.append(&quot;    &quot;)</span>
+<span class="fc" id="L295">              .append(envVarName);</span>
+<span class="fc bfc" id="L296" title="All 2 branches covered.">      if (undocumented) {</span>
+<span class="fc" id="L297">        builder.append(&quot;_&lt;***&gt;&quot;);</span>
+      }
+<span class="fc bfc" id="L299" title="All 2 branches covered.">      builder.append(&quot; &quot;.repeat(maxNameLen + 1 - envVarName.length() - (undocumented ? 6 : 0)))</span>
+<span class="fc" id="L300">              .append(comment)</span>
+<span class="fc" id="L301">              .append('\n');</span>
+
+<span class="fc" id="L303">      String typeName = type.getSimpleName();</span>
+<span class="fc" id="L304">      builder.append(&quot;        &quot;)</span>
+<span class="fc" id="L305">              .append(typeName);</span>
+            
+<span class="fc bfc" id="L307" title="All 2 branches covered.">      if (defaultValue != null) {</span>
+<span class="pc bpc" id="L308" title="1 of 2 branches missed.">        builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
+<span class="fc" id="L309">                .append(&quot;default: &quot;)</span>
+<span class="fc" id="L310">                .append(defaultValue);</span>
+      }
+      
+<span class="fc bfc" id="L313" title="All 2 branches covered.">      if (undocumented) {</span>
+<span class="pc bpc" id="L314" title="1 of 2 branches missed.">        builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
+<span class="fc" id="L315">                .append(&quot;This parameter is undocumented, consult the source for &quot;)</span>
+<span class="fc" id="L316">                .append(type)</span>
+<span class="fc" id="L317">                .append(&quot; for details of the values for &lt;***&gt;&quot;);</span>
+
+      }
+      
+<span class="fc" id="L321">      builder.append(&quot;\n\n&quot;);</span>
+    }
+<span class="fc" id="L323">  }</span>
   
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
