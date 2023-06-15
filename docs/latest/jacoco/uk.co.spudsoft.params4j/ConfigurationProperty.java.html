@@ -222,38 +222,38 @@ public class ConfigurationProperty {
    * &lt;pre&gt;
    * int maxNameLen = docs.stream().map(p -&gt; p.name.length()).max(Integer::compare).get();
    * &lt;/pre&gt;
+   * @param lineTerminator The string to put at the end of each line, probably &quot;\n&quot;, but could be &quot;\n\n&quot; or &quot;\r\n&quot; if you prefer.
    * 
    */
-  public void appendUsage(StringBuilder builder, int maxNameLen) {
+  public void appendUsage(StringBuilder builder, int maxNameLen, String lineTerminator) {
     
-<span class="fc" id="L229">    maxNameLen += 6;</span>
+<span class="fc" id="L230">    maxNameLen += 6;</span>
     
-<span class="fc" id="L231">    builder.append(&quot;    &quot;)</span>
-<span class="fc" id="L232">            .append(name);</span>
-<span class="fc bfc" id="L233" title="All 2 branches covered.">    if (undocumented) {</span>
-<span class="fc" id="L234">      builder.append(&quot;.&lt;***&gt;&quot;);</span>
+<span class="fc" id="L232">    builder.append(&quot;    &quot;)</span>
+<span class="fc" id="L233">            .append(name);</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">    if (undocumented) {</span>
+<span class="fc" id="L235">      builder.append(&quot;.&lt;***&gt;&quot;);</span>
     }
-<span class="fc bfc" id="L236" title="All 2 branches covered.">    builder.append(&quot; &quot;.repeat(maxNameLen + 1 - name.length() - (undocumented ? 6 : 0)))</span>
-<span class="fc" id="L237">            .append(comment)            </span>
-<span class="fc" id="L238">            .append('\n');</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">    builder.append(&quot; &quot;.repeat(maxNameLen + 1 - name.length() - (undocumented ? 6 : 0)))</span>
+<span class="fc" id="L238">            .append(comment)            </span>
+<span class="fc" id="L239">            .append('\n');</span>
 
-<span class="fc" id="L240">    String typeName = type.getSimpleName();</span>
-<span class="fc" id="L241">    builder.append(&quot;        &quot;)</span>
-<span class="fc" id="L242">            .append(typeName);</span>
+<span class="fc" id="L241">    String typeName = type.getSimpleName();</span>
+<span class="fc" id="L242">    builder.append(&quot;        &quot;)</span>
+<span class="fc" id="L243">            .append(typeName);</span>
 
-<span class="fc bfc" id="L244" title="All 2 branches covered.">    if (defaultValue != null) {</span>
-<span class="pc bpc" id="L245" title="1 of 2 branches missed.">      builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
-<span class="fc" id="L246">              .append(&quot;default: &quot;)</span>
-<span class="fc" id="L247">              .append(defaultValue);</span>
-    }
-<span class="fc bfc" id="L249" title="All 2 branches covered.">    if (undocumented) {</span>
-<span class="pc bpc" id="L250" title="1 of 2 branches missed.">      builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
-<span class="fc" id="L251">              .append(&quot;This parameter is undocumented, consult the source for &quot;)</span>
-<span class="fc" id="L252">              .append(type)</span>
-<span class="fc" id="L253">              .append(&quot; for details of the values for &lt;***&gt;&quot;);</span>
+<span class="fc bfc" id="L245" title="All 2 branches covered.">    if (undocumented) {</span>
+<span class="pc bpc" id="L246" title="1 of 2 branches missed.">      builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
+<span class="fc" id="L247">              .append(&quot;This parameter is undocumented, consult the source for &quot;)</span>
+<span class="fc" id="L248">              .append(type)</span>
+<span class="fc" id="L249">              .append(&quot; for details of the values for &lt;***&gt;&quot;);</span>
       
+<span class="fc bfc" id="L251" title="All 2 branches covered.">    } else if (defaultValue != null) {</span>
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">      builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
+<span class="fc" id="L253">              .append(&quot;default: &quot;)</span>
+<span class="fc" id="L254">              .append(defaultValue);</span>
     }
-<span class="fc" id="L256">    builder.append(&quot;\n\n&quot;);</span>
+<span class="fc" id="L256">    builder.append(lineTerminator);</span>
 <span class="fc" id="L257">  }</span>
 
   /**
@@ -268,59 +268,58 @@ public class ConfigurationProperty {
    * &lt;/pre&gt;
    * @param prefixStrip String to be removed from the beginning of each name (typically '--')
    * @param prefixAdd String to be add to the beginning of each name (the namePrefix passed in to withEnvironmentVariablesGatherer)
+   * @param lineTerminator The string to put at the end of each line, probably &quot;\n&quot;, but could be &quot;\n\n&quot; or &quot;\r\n&quot; if you prefer.
    * 
    */
-  public void appendEnv(StringBuilder builder, int maxNameLen, String prefixStrip, String prefixAdd) {
-<span class="fc bfc" id="L274" title="All 2 branches covered.">    if (canBeEnvVar) {</span>
-<span class="pc bpc" id="L275" title="1 of 2 branches missed.">      if (prefixStrip == null) {</span>
-<span class="nc" id="L276">        prefixStrip = &quot;&quot;;</span>
+  public void appendEnv(StringBuilder builder, int maxNameLen, String prefixStrip, String prefixAdd, String lineTerminator) {
+<span class="fc bfc" id="L275" title="All 2 branches covered.">    if (canBeEnvVar) {</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">      if (prefixStrip == null) {</span>
+<span class="nc" id="L277">        prefixStrip = &quot;&quot;;</span>
       }
-<span class="pc bpc" id="L278" title="1 of 2 branches missed.">      if (prefixAdd == null) {</span>
-<span class="nc" id="L279">        prefixAdd = &quot;&quot;;</span>
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">      if (prefixAdd == null) {</span>
+<span class="nc" id="L280">        prefixAdd = &quot;&quot;;</span>
       }
       
-<span class="fc" id="L282">      maxNameLen = maxNameLen - prefixStrip.length() + prefixAdd.length() + 7;</span>
+<span class="fc" id="L283">      maxNameLen = maxNameLen - prefixStrip.length() + prefixAdd.length() + 7;</span>
       
-<span class="fc" id="L284">      String envVarName = name;</span>
-<span class="pc bpc" id="L285" title="1 of 2 branches missed.">      if (envVarName.startsWith(prefixStrip)) {</span>
-<span class="fc" id="L286">        envVarName = envVarName.substring(prefixStrip.length());</span>
+<span class="fc" id="L285">      String envVarName = name;</span>
+<span class="pc bpc" id="L286" title="1 of 2 branches missed.">      if (envVarName.startsWith(prefixStrip)) {</span>
+<span class="fc" id="L287">        envVarName = envVarName.substring(prefixStrip.length());</span>
       }
-<span class="fc" id="L288">      envVarName = envVarName.replaceAll(&quot;\\.&quot;, &quot;_&quot;);</span>
-<span class="pc bpc" id="L289" title="1 of 2 branches missed.">      if (prefixAdd.length() &gt; 0) {</span>
-<span class="fc" id="L290">        envVarName = prefixAdd + &quot;_&quot; + envVarName;</span>
+<span class="fc" id="L289">      envVarName = envVarName.replaceAll(&quot;\\.&quot;, &quot;_&quot;);</span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">      if (prefixAdd.length() &gt; 0) {</span>
+<span class="fc" id="L291">        envVarName = prefixAdd + &quot;_&quot; + envVarName;</span>
       }
-<span class="fc" id="L292">      envVarName = envVarName.toUpperCase(Locale.ROOT);</span>
+<span class="fc" id="L293">      envVarName = envVarName.toUpperCase(Locale.ROOT);</span>
       
-<span class="fc" id="L294">      builder.append(&quot;    &quot;)</span>
-<span class="fc" id="L295">              .append(envVarName);</span>
-<span class="fc bfc" id="L296" title="All 2 branches covered.">      if (undocumented) {</span>
-<span class="fc" id="L297">        builder.append(&quot;_&lt;***&gt;&quot;);</span>
+<span class="fc" id="L295">      builder.append(&quot;    &quot;)</span>
+<span class="fc" id="L296">              .append(envVarName);</span>
+<span class="fc bfc" id="L297" title="All 2 branches covered.">      if (undocumented) {</span>
+<span class="fc" id="L298">        builder.append(&quot;_&lt;***&gt;&quot;);</span>
       }
-<span class="fc bfc" id="L299" title="All 2 branches covered.">      builder.append(&quot; &quot;.repeat(maxNameLen + 1 - envVarName.length() - (undocumented ? 6 : 0)))</span>
-<span class="fc" id="L300">              .append(comment)</span>
-<span class="fc" id="L301">              .append('\n');</span>
+<span class="fc bfc" id="L300" title="All 2 branches covered.">      builder.append(&quot; &quot;.repeat(maxNameLen + 1 - envVarName.length() - (undocumented ? 6 : 0)))</span>
+<span class="fc" id="L301">              .append(comment)</span>
+<span class="fc" id="L302">              .append('\n');</span>
 
-<span class="fc" id="L303">      String typeName = type.getSimpleName();</span>
-<span class="fc" id="L304">      builder.append(&quot;        &quot;)</span>
-<span class="fc" id="L305">              .append(typeName);</span>
+<span class="fc" id="L304">      String typeName = type.getSimpleName();</span>
+<span class="fc" id="L305">      builder.append(&quot;        &quot;)</span>
+<span class="fc" id="L306">              .append(typeName);</span>
             
-<span class="fc bfc" id="L307" title="All 2 branches covered.">      if (defaultValue != null) {</span>
-<span class="pc bpc" id="L308" title="1 of 2 branches missed.">        builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
-<span class="fc" id="L309">                .append(&quot;default: &quot;)</span>
-<span class="fc" id="L310">                .append(defaultValue);</span>
-      }
-      
-<span class="fc bfc" id="L313" title="All 2 branches covered.">      if (undocumented) {</span>
-<span class="pc bpc" id="L314" title="1 of 2 branches missed.">        builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
-<span class="fc" id="L315">                .append(&quot;This parameter is undocumented, consult the source for &quot;)</span>
-<span class="fc" id="L316">                .append(type)</span>
-<span class="fc" id="L317">                .append(&quot; for details of the values for &lt;***&gt;&quot;);</span>
+<span class="fc bfc" id="L308" title="All 2 branches covered.">      if (undocumented) {</span>
+<span class="pc bpc" id="L309" title="1 of 2 branches missed.">        builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
+<span class="fc" id="L310">                .append(&quot;This parameter is undocumented, consult the source for &quot;)</span>
+<span class="fc" id="L311">                .append(type)</span>
+<span class="fc" id="L312">                .append(&quot; for details of the values for &lt;***&gt;&quot;);</span>
 
+<span class="fc bfc" id="L314" title="All 2 branches covered.">      } else if (defaultValue != null) {</span>
+<span class="pc bpc" id="L315" title="1 of 2 branches missed.">        builder.append(&quot; &quot;.repeat(typeName.length() + 10 &gt; maxNameLen ? 1 : maxNameLen - typeName.length() - 3))</span>
+<span class="fc" id="L316">                .append(&quot;default: &quot;)</span>
+<span class="fc" id="L317">                .append(defaultValue);</span>
       }
       
-<span class="fc" id="L321">      builder.append(&quot;\n\n&quot;);</span>
+<span class="fc" id="L320">      builder.append(lineTerminator);</span>
     }
-<span class="fc" id="L323">  }</span>
+<span class="fc" id="L322">  }</span>
   
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
