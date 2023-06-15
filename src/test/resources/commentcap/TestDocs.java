@@ -54,7 +54,7 @@ public class TestDocs {
     
     StringBuilder usageBuilder = new StringBuilder();
     for (ConfigurationProperty prop : docs) {
-      prop.appendUsage(usageBuilder, maxNameLen);
+      prop.appendUsage(usageBuilder, maxNameLen, "\n");
     }
     return usageBuilder.toString();
   }
@@ -64,7 +64,7 @@ public class TestDocs {
     
     StringBuilder usageBuilder = new StringBuilder();
     for (ConfigurationProperty prop : docs) {
-      prop.appendEnv(usageBuilder, maxNameLen, "--", "test");
+      prop.appendEnv(usageBuilder, maxNameLen, "--", "test", "\n");
     }
     return usageBuilder.toString();
   }

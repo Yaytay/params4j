@@ -222,9 +222,10 @@ public class ConfigurationProperty {
    * <pre>
    * int maxNameLen = docs.stream().map(p -> p.name.length()).max(Integer::compare).get();
    * </pre>
+   * @param lineTerminator The string to put at the end of each line, probably "\n", but could be "\n\n" or "\r\n" if you prefer.
    * 
    */
-  public void appendUsage(StringBuilder builder, int maxNameLen) {
+  public void appendUsage(StringBuilder builder, int maxNameLen, String lineTerminator) {
     
     maxNameLen += 6;
     
@@ -252,7 +253,7 @@ public class ConfigurationProperty {
               .append("default: ")
               .append(defaultValue);
     }
-    builder.append("\n\n");
+    builder.append(lineTerminator);
   }
 
   /**
@@ -267,9 +268,10 @@ public class ConfigurationProperty {
    * </pre>
    * @param prefixStrip String to be removed from the beginning of each name (typically '--')
    * @param prefixAdd String to be add to the beginning of each name (the namePrefix passed in to withEnvironmentVariablesGatherer)
+   * @param lineTerminator The string to put at the end of each line, probably "\n", but could be "\n\n" or "\r\n" if you prefer.
    * 
    */
-  public void appendEnv(StringBuilder builder, int maxNameLen, String prefixStrip, String prefixAdd) {
+  public void appendEnv(StringBuilder builder, int maxNameLen, String prefixStrip, String prefixAdd, String lineTerminator) {
     if (canBeEnvVar) {
       if (prefixStrip == null) {
         prefixStrip = "";
@@ -315,8 +317,7 @@ public class ConfigurationProperty {
                 .append(defaultValue);
       }
       
-      
-      builder.append("\n\n");
+      builder.append(lineTerminator);
     }
   }
   
