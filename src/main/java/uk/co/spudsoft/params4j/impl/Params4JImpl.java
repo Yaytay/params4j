@@ -82,6 +82,8 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     tt.add("java.time.LocalTime");
     tt.add("java.time.Duration");
     tt.add("java.lang.String");
+    tt.add("java.lang.Integer");
+    tt.add("java.lang.Long");
     tt.add("java.io.File");
     return Collections.unmodifiableSet(tt);
   }
@@ -412,7 +414,14 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
                 , fieldName
                 , fieldType
                 , defaultValue
-                , () -> (ParameterizedType) field.getGenericType()
+                , () -> {
+                  Type genericType = field.getGenericType();
+                  if (genericType instanceof ParameterizedType) {
+                    return (ParameterizedType) genericType;                    
+                  } else {
+                    return null;
+                  }
+                }
         );
       }
     }
@@ -439,22 +448,32 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     if (fieldType.isPrimitive() || undocumented || TERMINAL_TYPES.contains(fieldTypeName) || isListedTerminalClass) {
       outputTerminalField(propertyStates, fieldName, annotatedElement, classDocProperties, undocumented, defaultValue, prefix, fieldType, properties);
     } else if (Map.class.isAssignableFrom(fieldType)) {
-      
-      Type[] actualTypeArguments = parameterizedTypeGetter.get().getActualTypeArguments();
-      if (actualTypeArguments.length == 2) {
-        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);
-        propertyStates.push(ps);
-        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, annotatedElement, "<xxx>", (Class) actualTypeArguments[1], null, parameterizedTypeGetter);
-        propertyStates.pop();
+      ParameterizedType paramType = parameterizedTypeGetter.get();
+      if (paramType != null) {
+        Type[] actualTypeArguments = paramType.getActualTypeArguments();
+
+        if (actualTypeArguments.length == 2 && actualTypeArguments[1] instanceof Class) {
+          PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);
+          propertyStates.push(ps);
+          documentField(properties, docProperties, classDocProperties, prefix, propertyStates
+                  , terminalClasses, undocumentedClasses, annotatedElement, "<xxx>"
+                  , (Class) actualTypeArguments[1], null, parameterizedTypeGetter);
+          propertyStates.pop();
+        }
       }
     } else if (List.class.isAssignableFrom(fieldType)) {
-      Type[] actualTypeArguments = parameterizedTypeGetter.get().getActualTypeArguments();
-      if (actualTypeArguments.length == 1) {
-        PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);
-        propertyStates.push(ps);
-        documentField(properties, docProperties, classDocProperties, prefix, propertyStates, terminalClasses, undocumentedClasses, annotatedElement, "[<n>]", (Class) actualTypeArguments[0], null, parameterizedTypeGetter);
-        propertyStates.pop();
-      }      
+      ParameterizedType paramType = parameterizedTypeGetter.get();
+      if (paramType != null) {
+        Type[] actualTypeArguments = paramType.getActualTypeArguments();
+        if (actualTypeArguments.length == 1 && actualTypeArguments[0] instanceof Class) {
+          PropertyState ps = new PropertyState(fieldName, classDocProperties.getProperty(fieldName), fieldType);
+          propertyStates.push(ps);
+          documentField(properties, docProperties, classDocProperties, prefix, propertyStates
+                  , terminalClasses, undocumentedClasses, annotatedElement, "[<n>]"
+                  , (Class) actualTypeArguments[0], null, parameterizedTypeGetter);
+          propertyStates.pop();
+        }
+      }
     } else {
       boolean found = false;
       for (PropertyState ps : propertyStates) {

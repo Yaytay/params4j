@@ -131,7 +131,7 @@ public class JavadocCapturerTest {
     for (ConfigurationProperty cp : docs) {
       logger.trace("Configuration property: {}", OBJECT_MAPPER.writeValueAsString(cp));
     }
-    assertThat(docs, hasSize(20));
+    assertThat(docs, hasSize(21));
     // Convert from array to map because the order isn't stable with reflection
     Map<String, ConfigurationProperty> docsMap = docs.stream().collect(Collectors.toMap(cp -> cp.name, cp -> cp));
     

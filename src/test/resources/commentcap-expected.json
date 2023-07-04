@@ -7,6 +7,13 @@
     "comment": "names that are recognised by the process",
     "defaultValue": null
   }, {
+    "type":"java.lang.Integer",
+    "name":"--undocumentedValue",
+    "canBeEnvVar":true,
+    "undocumented":false,
+    "comment":"",
+    "defaultValue":null
+  }, {
     "type": "java.io.File",
     "name": "--baseConfigPath",
     "canBeEnvVar": true,

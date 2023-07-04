@@ -121,7 +121,7 @@ public class AsciiDocDocletTest {
     assertThat(output, not(containsString("--help")));
     assertEquals(0, diagListener.getCount(Diagnostic.Kind.ERROR));
     assertEquals(0, diagListener.getCount(Diagnostic.Kind.MANDATORY_WARNING));
-    assertEquals(0, diagListener.getCount(Diagnostic.Kind.WARNING));
+    assertEquals(1, diagListener.getCount(Diagnostic.Kind.WARNING));
   }
 
 }

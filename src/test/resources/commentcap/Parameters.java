@@ -39,6 +39,10 @@ public class Parameters {
   private Map<String, String> translations;
   // A duration
   private Duration howLong = Duration.parse("PT15M");
+  
+  // An undocumented value
+  private Integer undocumentedValue;
+  
   /**
    * The login for a system.
    */
@@ -130,7 +134,13 @@ public class Parameters {
   /**
    * The path to the root of the configuration files.
    * 
-   * The value is a {@link java.io.File}
+   * The value is a {@link java.io.File}.
+   * 
+   * This is an irrelevant ordered list:
+   * <OL>
+   * <lI>First
+   * <Li>Second
+   * </oL>
    * 
    * @param baseConfigPath the path to the root of the configuration files.
    */
@@ -200,7 +210,7 @@ public class Parameters {
 
   /**
    * login for a system.
-   * A map of system names to credentials.
+   * A Map<String, Credentials> of system names to credentials.
    * @param logins 
    */
   public void setLogins(Map<String, Credentials> logins) {
@@ -223,5 +233,8 @@ public class Parameters {
     this.howLong = howLong;
   }
 
+  public void setUndocumentedValue(Integer value) {
+    undocumentedValue = value;
+  }
   
 }
