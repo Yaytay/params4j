@@ -71,9 +71,15 @@ public class Parameters {
   }
 
   /**
-   * alien value that cannot be documented further in this codebase
-   * Note that the URL in the comment is wrong, can't use an actual HTMLAnchorElement because they are interfaces.
+   * alien value that cannot be documented further in this codebase.
+   * <p>
+   * Note that the URL in the comment is wrong, can't use an actual HtmlAnchorElement because they are interfaces.
+   * So this is really just a {@link uk.co.spudsoft.params4j.impl.HtmlAnchorElement}
+   * 
+   * <a href="https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html">HTMLAnchorElement</a>
+   * 
    * @param documentedAlien alien value that cannot be documented further in this codebase
+   * @see https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html
    */
   @Comment("configure the alien properties as documented at https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html")
   public void setDocumentedAlien(HtmlAnchorElement documentedAlien) {
@@ -91,7 +97,22 @@ public class Parameters {
 
   /**
    * if true the process will end rather than waiting for requests
+   * 
    * This is expected to be useful for things such as JIT compilers or CDS preparation.
+   * Possible values:
+   * <uL>
+   * <li>true - the process will exit before starting the daemon.
+   * <li>false - the process will run as a daemon.
+   * </Ul>
+   * The method 
+   * {@link java.lang.Boolean#parseBoolean(java.lang.String)} 
+   * really isn't relevant 
+   * (nor are 
+   * {@link java.util.Map<String, Credentials>#forEach(java.util.function.BiConsumer)}
+   * or
+   * {@link java.lang.String#String(byte[], int, int, java.nio.charset.Charset)}
+   * ).
+   * 
    * @param exitOnRun the exitOnRun value.
    */
   public void setExitOnRun(boolean exitOnRun) {
@@ -108,6 +129,9 @@ public class Parameters {
 
   /**
    * The path to the root of the configuration files.
+   * 
+   * The value is a {@link java.io.File}
+   * 
    * @param baseConfigPath the path to the root of the configuration files.
    */
   public void setBaseConfigPath(File baseConfigPath) {
@@ -151,7 +175,7 @@ public class Parameters {
   }
 
   /**
-   * translations from one word to another
+   * translations from one word to another.
    * @param translations 
    */
   public void setTranslations(Map<String, String> translations) {
@@ -163,7 +187,7 @@ public class Parameters {
   }
 
   /**
-   * names that are recognised by the process
+   * names that are recognised by the process.
    * @param names 
    */
   public void setNames(List<String> names) {
@@ -174,6 +198,11 @@ public class Parameters {
     return logins;
   }
 
+  /**
+   * login for a system.
+   * A map of system names to credentials.
+   * @param logins 
+   */
   public void setLogins(Map<String, Credentials> logins) {
     this.logins = logins;
   }
