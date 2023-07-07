@@ -28,6 +28,14 @@ import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.ExecutableType;
+import javax.lang.model.type.NoType;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
+import javax.lang.model.util.ElementKindVisitor14;
+import javax.lang.model.util.SimpleTypeVisitor14;
 import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
@@ -83,7 +91,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
           return null;
         }
       }
-      File output = new File(dir, e.getSimpleName() + ".adoc");
+      File output = new File(dir, e.getQualifiedName() + ".adoc");
       try (Writer newWriter = new FileWriter(output)) {
         this.writer = newWriter;
         
@@ -92,12 +100,13 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
           writer.write("\n\n");
 
           
-          AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(options, writer, reporter);
+          AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));
           DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);
           if (docCommentTree == null) {
             reporter.print(Diagnostic.Kind.WARNING, "No doc comment for " + e.getSimpleName());
           } else {
-            environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
+            docTreeWalker.scan();
+            // environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
             writer.write("\n");
             writer.write("\n");
 
@@ -106,7 +115,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
             writer.write("| Name\n");
             writer.write("| Type\n");
             writer.write("| Details\n");
-            writer.write("\n");
+            writer.write("\n\n");
           }
           e.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
         } catch (IOException ex) {
@@ -144,17 +153,32 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
         writer.write("\n");
         
         writer.write("| ");
-        Reference ref = Reference.parse(e.getParameters().get(0).asType());
-        writer.write(options.getLinkMaps().getLinkForReference(ref));
+        VariableElement variableElement = (VariableElement) e.getParameters().get(0);
+                
+        DeclaredType declaredType = variableElement.asType().accept(new SimpleTypeVisitor14<DeclaredType, Void>(){
+          @Override
+          public DeclaredType visitDeclared(DeclaredType t, Void p) {
+            return t;
+          }
+          
+        }, null);
+        Element declaredTypeElement = declaredType == null ? null : declaredType.asElement();
+        TypeElement typeElement = declaredTypeElement instanceof TypeElement ? (TypeElement) declaredTypeElement : null;
+        if (typeElement == null) {
+          writer.write(variableElement.asType().toString());
+        } else {
+          TypeWriter.write(writer, reporter, options.getIncludeClasses(), options.getLinkMaps(), typeElement, null);
+        }
         writer.write("\n");
         
         writer.write("| ");
-        AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(options, writer, reporter);
+        AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));
         DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);
         if (docCommentTree == null) {
           reporter.print(Diagnostic.Kind.WARNING, "No doc comment for " + e.getSimpleName());
         } else {
-          environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
+          docTreeWalker.scan();
+          // environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
         }
         writer.write("\n");
       } catch (IOException ex) {

@@ -17,17 +17,23 @@
 package uk.co.spudsoft.params4j.doclet;
 
 import com.sun.source.doctree.DocCommentTree;
-import com.sun.source.doctree.DocTree;
 import com.sun.source.doctree.EndElementTree;
 import com.sun.source.doctree.LinkTree;
 import com.sun.source.doctree.StartElementTree;
 import com.sun.source.doctree.TextTree;
-import com.sun.source.util.SimpleDocTreeVisitor;
+import com.sun.source.util.DocTreePath;
+import com.sun.source.util.DocTreePathScanner;
+import com.sun.source.util.TreePath;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayDeque;
 import java.util.Queue;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
+import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,29 +42,36 @@ import org.slf4j.LoggerFactory;
  *
  * @author njt
  */
-public class AsciiDocDocTreeWalker extends SimpleDocTreeVisitor<Void, Void> {
+public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   
   private static final Logger logger = LoggerFactory.getLogger(AsciiDocDocTreeWalker.class);
   
+  private final DocletEnvironment environment;  
   private final AsciiDocOptions options;
   private final Writer writer;
   private final Reporter reporter;
+  private final TreePath path;
+  private DocCommentTree dc;
   
-  private Queue<Boolean> listOrderedStack = new ArrayDeque<>();
+  private final Queue<Boolean> listOrderedStack = new ArrayDeque<>();
   
-  public AsciiDocDocTreeWalker(AsciiDocOptions options, Writer writer, Reporter reporter) {
+  public AsciiDocDocTreeWalker(DocletEnvironment environment, AsciiDocOptions options, Writer writer, Reporter reporter, TreePath path) {
+    this.environment = environment;
     this.options = options;
     this.writer = writer;
     this.reporter = reporter;
+    this.path = path;
+  }
+  
+  public void scan() {
+    dc = environment.getDocTrees().getDocCommentTree(path);
+    scan(new DocTreePath(path, dc), null);    
   }
 
   @Override
   public Void visitDocComment(DocCommentTree node, Void p) {
     logger.debug("visitDocComment({}, {})", node, p);
-    for (DocTree tree : node.getFullBody()) {
-      tree.accept(this, null);
-    }
-    return null;
+    return super.visitDocComment(node, p);
   }
 
   @Override
@@ -81,15 +94,28 @@ public class AsciiDocDocTreeWalker extends SimpleDocTreeVisitor<Void, Void> {
       write(node.toString());
       write(" ");
     }
-    return null;
+    return super.visitEndElement(node, p);
   }
 
   @Override
   public Void visitLink(LinkTree node, Void p) {
     logger.debug("visitLink({}, {})", node, p);
-    Reference ref = Reference.parse(node.getReference());
-    write(options.getLinkMaps().getLinkForReference(ref));
-    return null;
+    scan(node.getReference(), null);
+    logger.debug("path: {} ({})", this.getCurrentPath());
+    
+    Element element = environment.getDocTrees().getElement(new DocTreePath(this.getCurrentPath(), node.getReference()));
+    TypeMirror type = environment.getDocTrees().getType(new DocTreePath(this.getCurrentPath(), node.getReference()));
+    logger.debug("element: {}", element);
+    logger.debug("type: {}", type);
+    if (element instanceof ExecutableElement) {
+      TypeElement typeElement = (TypeElement) element.getEnclosingElement();
+      ExecutableElement methodElement = (ExecutableElement) element;
+      TypeWriter.write(writer, reporter, options.getIncludeClasses(), options.getLinkMaps(), typeElement, methodElement);
+    } else if (element instanceof TypeElement) {
+      TypeElement typeElement = (TypeElement) element;
+      TypeWriter.write(writer, reporter, options.getIncludeClasses(), options.getLinkMaps(), typeElement, null);
+    }
+    return super.visitLink(node, p);
   }
 
   @Override
@@ -111,25 +137,15 @@ public class AsciiDocDocTreeWalker extends SimpleDocTreeVisitor<Void, Void> {
     } else {
       write(node.toString());
     }
-    return null;
+    return super.visitStartElement(node, p);
   }
 
   @Override
   public Void visitText(TextTree node, Void p) {
     logger.debug("visitText({}, {})", node, p);
-//    if (node instanceof HTMLAnchorElement) {
-//      HTMLAnchorElement ae = (HTMLAnchorElement) node;
-//      write("link:");
-//      write(ae.getHref());
-//      if (node.getBody() != null && !node.getBody().isBlank()) {
-//        write("[");
-//        write(node.getBody());
-//        write("] ");
-//      }
-//    }
     write(node.getBody().trim());
     write("\n");
-    return null;
+    return super.visitText(node, p);
   }
 
   private void write(String s) {

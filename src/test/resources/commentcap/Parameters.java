@@ -40,6 +40,9 @@ public class Parameters {
   // A duration
   private Duration howLong = Duration.parse("PT15M");
   
+  // An inner class
+  private Map.Entry<String, Integer> entry;
+  
   // An undocumented value
   private Integer undocumentedValue;
   
@@ -116,6 +119,8 @@ public class Parameters {
    * or
    * {@link java.lang.String#String(byte[], int, int, java.nio.charset.Charset)}
    * ).
+   * 
+   * You could look at {@link commentcap.Credentials#getPassword()} but it wouldn't really help much.
    * 
    * @param exitOnRun the exitOnRun value.
    */
@@ -236,5 +241,13 @@ public class Parameters {
   public void setUndocumentedValue(Integer value) {
     undocumentedValue = value;
   }
-  
+
+  /**
+   * Set an inner class.
+   * @param entry an inner class object.
+   */
+  public void setEntry(Map.Entry<String, Integer> entry) {
+    this.entry = entry;
+  }
+
 }

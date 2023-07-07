@@ -113,7 +113,7 @@ public class JavadocCapturerTest {
     try ( InputStream stream = cls.getResourceAsStream("/commentcap/Parameters-doc.properties")) {
       props.load(stream);
     }
-    assertThat(props.size(), equalTo(10));
+    assertThat(props.size(), equalTo(11));
     assertThat(props.get("auditDataSource"), equalTo("datasource used for recording activity"));
     assertThat(props.get("baseConfigPath"), equalTo("path to the root of the configuration files"));
     assertThat(props.get("logins"), equalTo("login for a system"));

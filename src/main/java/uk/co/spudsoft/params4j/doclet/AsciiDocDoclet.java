@@ -69,7 +69,7 @@ public class AsciiDocDoclet implements Doclet {
   public boolean run(DocletEnvironment environment) {
     environment.getSpecifiedElements()
             .forEach(e -> {
-              reporter.print(Diagnostic.Kind.NOTE, "MarkdownDoclet: " + e);
+              reporter.print(Diagnostic.Kind.NOTE, "AsciiDoclet: " + e);
               e.accept(new AsciiDocElementVisitor(environment, options, reporter), null);
             });
     return OK;

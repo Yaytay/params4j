@@ -62,29 +62,13 @@ public class AsciiDocLinkMaps {
     }
   }
 
-  public String getLinkForReference(Reference ref) {
-    StringBuilder builder = new StringBuilder();
-    String packageUrl = getUrlForPackage(ref.getPackageName());
+  public String getLinkForType(String packageName, String className, String methodName) {
+    String packageUrl = getUrlForPackage(packageName);
     if (packageUrl == null) {
-      builder.append(ref.getClassName());
+      return null;
     } else {
-      builder.append("link:");
-      builder.append(packageUrl);
-      builder.append(ref.getClassName());
-      builder.append(".html");
-      if (ref.getMethodSignature() != null) {
-        builder.append("#");
-        builder.append(ref.getMethodSignature().replaceAll("\\[", "%5B").replaceAll("\\]", "%5D").replaceAll("\\s+", ""));
-      }
-      builder.append("[");
-      builder.append(ref.getClassName());
-      if (ref.getSimpleMethodSignature() != null) {
-        builder.append("#");
-        builder.append(ref.getSimpleMethodSignatureEscaped());
-      }
-      builder.append("] ");
+      return packageUrl + className + ".html";
     }
-    return builder.toString();
   }
   
   static void readPackageList(Map<String, String> baseUrlFromPackage, String baseUrl) {
