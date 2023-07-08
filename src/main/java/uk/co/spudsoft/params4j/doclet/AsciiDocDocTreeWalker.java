@@ -16,9 +16,12 @@
  */
 package uk.co.spudsoft.params4j.doclet;
 
+import com.sun.source.doctree.AttributeTree;
 import com.sun.source.doctree.DocCommentTree;
+import com.sun.source.doctree.DocTree;
 import com.sun.source.doctree.EndElementTree;
 import com.sun.source.doctree.LinkTree;
+import com.sun.source.doctree.ReferenceTree;
 import com.sun.source.doctree.StartElementTree;
 import com.sun.source.doctree.TextTree;
 import com.sun.source.util.DocTreePath;
@@ -35,8 +38,8 @@ import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 /**
  *
@@ -96,24 +99,67 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     }
     return super.visitEndElement(node, p);
   }
-
+  
   @Override
   public Void visitLink(LinkTree node, Void p) {
     logger.debug("visitLink({}, {})", node, p);
     scan(node.getReference(), null);
     logger.debug("path: {} ({})", this.getCurrentPath());
-    
-    Element element = environment.getDocTrees().getElement(new DocTreePath(this.getCurrentPath(), node.getReference()));
-    TypeMirror type = environment.getDocTrees().getType(new DocTreePath(this.getCurrentPath(), node.getReference()));
+
+    ReferenceTree refTree = node.getReference();
+    Element element = environment.getDocTrees().getElement(new DocTreePath(this.getCurrentPath(), refTree));
+    TypeMirror type = environment.getDocTrees().getType(new DocTreePath(this.getCurrentPath(), refTree));
     logger.debug("element: {}", element);
     logger.debug("type: {}", type);
-    if (element instanceof ExecutableElement) {
+    if (element instanceof ExecutableElement) {      
       TypeElement typeElement = (TypeElement) element.getEnclosingElement();
       ExecutableElement methodElement = (ExecutableElement) element;
-      TypeWriter.write(writer, reporter, options.getIncludeClasses(), options.getLinkMaps(), typeElement, methodElement);
+      
+      String url = options.getLinkMaps().getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
+      if (url == null) {
+        if (options.getIncludeClasses().contains(typeElement.getQualifiedName().toString())) {
+          write("xref:");
+          write(typeElement.getQualifiedName().toString());
+          write(".adoc[");
+          // For method links javadoc removes leading packages and type parameters        
+          write(TypeWriter.simplifySignature(refTree.getSignature()));
+          write("] ");
+        } else {
+          write(refTree.getSignature());
+          write(" ");
+        }
+      } else {
+        write("link:");
+        write(options.getLinkMaps().getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement)));
+        write(TypeWriter.getMethodAnchor(methodElement));
+        write("[");
+        // For method links javadoc removes leading packages and type parameters        
+        write(TypeWriter.simplifySignature(refTree.getSignature()));
+        write("] ");
+      }
     } else if (element instanceof TypeElement) {
       TypeElement typeElement = (TypeElement) element;
-      TypeWriter.write(writer, reporter, options.getIncludeClasses(), options.getLinkMaps(), typeElement, null);
+      
+      String url = options.getLinkMaps().getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
+      if (url == null) {
+        if (options.getIncludeClasses().contains(typeElement.getQualifiedName().toString())) {
+          write("xref:");
+          write(typeElement.getQualifiedName().toString());
+          write(".adoc[");
+          // For method links javadoc removes leading packages and type parameters        
+          write(refTree.getSignature());
+          write("] ");
+        } else {
+          write(refTree.getSignature());
+          write(" ");
+        }
+      } else {
+        write("link:");
+        write(options.getLinkMaps().getUrlForType(TypeWriter.getPackage(element), TypeWriter.getClassName(element)));
+        write("[");
+        write(refTree.getSignature());
+        write("] ");
+      }
     }
     return super.visitLink(node, p);
   }
@@ -132,8 +178,21 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
       } else {
         write("* ");
       }
+    } else if (name.equalsIgnoreCase("p")) {
+      write("\n\n");
     } else if (name.equalsIgnoreCase("a")) {
       write("link:");
+      for (DocTree attribute : node.getAttributes()) {
+        if (attribute instanceof AttributeTree) {
+          AttributeTree attributeTree = (AttributeTree) attribute;
+          if (attributeTree.getName().toString().equalsIgnoreCase("href")) {
+            write(attributeTree.getValue().toString());
+            break;
+          }
+        }
+      }
+      write("[");
+      return null;
     } else {
       write(node.toString());
     }
@@ -149,12 +208,14 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   }
 
   private void write(String s) {
-    s = s.replaceAll("\n ", "\n");
-    
-    try {
-      writer.write(s);
-    } catch (IOException ex) {
-      reporter.print(Diagnostic.Kind.ERROR, "Failed to write: " + ex.getMessage());
+    if (s != null) {
+      s = s.replaceAll("\n ", " ");
+
+      try {
+        writer.write(s);
+      } catch (IOException ex) {
+        reporter.print(Diagnostic.Kind.ERROR, "Failed to write: " + ex.getMessage());
+      }
     }
   }
   

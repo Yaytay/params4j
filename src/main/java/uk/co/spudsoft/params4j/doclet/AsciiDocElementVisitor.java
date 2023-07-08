@@ -167,7 +167,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
         if (typeElement == null) {
           writer.write(variableElement.asType().toString());
         } else {
-          TypeWriter.write(writer, reporter, options.getIncludeClasses(), options.getLinkMaps(), typeElement, null);
+          TypeWriter.write(writer, reporter, options.getIncludeClasses(), options.getLinkMaps(), variableElement.asType(), null, null);
         }
         writer.write("\n");
         

@@ -62,7 +62,7 @@ public class AsciiDocLinkMaps {
     }
   }
 
-  public String getLinkForType(String packageName, String className, String methodName) {
+  public String getUrlForType(String packageName, String className) {
     String packageUrl = getUrlForPackage(packageName);
     if (packageUrl == null) {
       return null;

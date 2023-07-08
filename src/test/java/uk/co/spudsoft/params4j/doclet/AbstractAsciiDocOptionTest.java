@@ -41,26 +41,29 @@ public class AbstractAsciiDocOptionTest {
   public void testOptionGetters() {
     assertEquals(3, OPTIONS.size());
     
-    assertEquals(1, OPTIONS.get(0).getNames().size());
-    assertEquals("-d", OPTIONS.get(0).getNames().get(0));
-    assertEquals(1, OPTIONS.get(0).getArgumentCount());
-    assertEquals(Kind.STANDARD,  OPTIONS.get(0).getKind());
-    assertEquals("Destination directory for output files",  OPTIONS.get(0).getDescription());
-    assertEquals("directory",  OPTIONS.get(0).getParameters());
+    Option option = OPTIONS.get(0);
+    assertEquals(1, option.getNames().size());
+    assertEquals("-link", option.getNames().get(0));
+    assertEquals(1, option.getArgumentCount());
+    assertEquals(Kind.STANDARD,  option.getKind());
+    assertEquals("Map from package names to a URL base to use for links",  option.getDescription());
+    assertEquals("link",  option.getParameters());
     
-    assertEquals(1, OPTIONS.get(1).getNames().size());
-    assertEquals("--link", OPTIONS.get(1).getNames().get(0));
-    assertEquals(1, OPTIONS.get(1).getArgumentCount());
-    assertEquals(Kind.STANDARD,  OPTIONS.get(1).getKind());
-    assertEquals("Map from package names to a URL base to use for links",  OPTIONS.get(1).getDescription());
-    assertEquals("link",  OPTIONS.get(1).getParameters());
+    option = OPTIONS.get(1);
+    assertEquals(1, option.getNames().size());
+    assertEquals("-d", option.getNames().get(0));
+    assertEquals(1, option.getArgumentCount());
+    assertEquals(Kind.STANDARD,  option.getKind());
+    assertEquals("Destination directory for output files",  option.getDescription());
+    assertEquals("directory",  option.getParameters());
     
-    assertEquals(1, OPTIONS.get(2).getNames().size());
-    assertEquals("--include-classes", OPTIONS.get(2).getNames().get(0));
-    assertEquals(1, OPTIONS.get(2).getArgumentCount());
-    assertEquals(Kind.STANDARD,  OPTIONS.get(2).getKind());
-    assertEquals("If set, only the listed classes will be processed",  OPTIONS.get(2).getDescription());
-    assertEquals("include-classes",  OPTIONS.get(2).getParameters());
+    option = OPTIONS.get(2);
+    assertEquals(1, option.getNames().size());
+    assertEquals("--include-classes", option.getNames().get(0));
+    assertEquals(1, option.getArgumentCount());
+    assertEquals(Kind.STANDARD,  option.getKind());
+    assertEquals("If set, only the listed classes will be processed",  option.getDescription());
+    assertEquals("include-classes",  option.getParameters());
     
     
   }

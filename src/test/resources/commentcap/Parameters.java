@@ -81,9 +81,8 @@ public class Parameters {
    * alien value that cannot be documented further in this codebase.
    * <p>
    * Note that the URL in the comment is wrong, can't use an actual HtmlAnchorElement because they are interfaces.
-   * So this is really just a {@link uk.co.spudsoft.params4j.impl.HtmlAnchorElement}
-   * 
-   * <a href="https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html">HTMLAnchorElement</a>
+   * So this is really just a {@link uk.co.spudsoft.params4j.impl.HtmlAnchorElement} not an
+   * <a href="https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html">HTMLAnchorElement</a>.
    * 
    * @param documentedAlien alien value that cannot be documented further in this codebase
    * @see https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html
@@ -103,9 +102,10 @@ public class Parameters {
   }
 
   /**
-   * if true the process will end rather than waiting for requests
-   * 
+   * if true the process will end rather than waiting for requests.
+   * <p>
    * This is expected to be useful for things such as JIT compilers or CDS preparation.
+   * <p>
    * Possible values:
    * <uL>
    * <li>true - the process will exit before starting the daemon.
@@ -115,7 +115,7 @@ public class Parameters {
    * {@link java.lang.Boolean#parseBoolean(java.lang.String)} 
    * really isn't relevant 
    * (nor are 
-   * {@link java.util.Map<String, Credentials>#forEach(java.util.function.BiConsumer)}
+   * {@link Map<String, Credentials>#forEach(BiConsumer)}
    * or
    * {@link java.lang.String#String(byte[], int, int, java.nio.charset.Charset)}
    * ).
@@ -215,7 +215,7 @@ public class Parameters {
 
   /**
    * login for a system.
-   * A Map<String, Credentials> of system names to credentials.
+   * A {@link Map<String, Credentials>} of system names to credentials.
    * @param logins 
    */
   public void setLogins(Map<String, Credentials> logins) {

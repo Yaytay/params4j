@@ -20,15 +20,20 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import javax.lang.model.util.ElementKindVisitor14;
 import javax.lang.model.util.SimpleTypeVisitor14;
 import javax.tools.Diagnostic;
@@ -52,49 +57,40 @@ public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
   // inlink preventes recursive calls from outputting links
   private boolean inlink;
 
-  public static void write(Writer writer, Reporter reporter, Set<String> includedClasses, AsciiDocLinkMaps linkMaps, TypeElement typeElement, ExecutableElement methodElement) {
+  public static void write(Writer writer, Reporter reporter, Set<String> includedClasses, AsciiDocLinkMaps linkMaps, TypeMirror classType, ExecutableElement methodElement, ExecutableType methodType) {
     
-    
-    String primitiveName = typeElement.asType().accept(new SimpleTypeVisitor14<String, Void>() {
+    TypeElement typeElement = classType.accept(new SimpleTypeVisitor14<TypeElement, Void>(){
       @Override
-      public String visitPrimitive(PrimitiveType t, Void p) {
-        return t.toString();
+      public TypeElement visitDeclared(DeclaredType t, Void p) {
+        return (TypeElement) t.asElement();
       }
-    }, null);
 
-    if (primitiveName != null) {
-      logger.debug("Primitive: {}", primitiveName);
-      return ;
-    }
+      @Override
+      public TypeElement visitTypeVariable(TypeVariable t, Void p) {
+        return super.visitTypeVariable(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+      }
+      
+    }, null);
     
     String packageName =  getPackage(typeElement);    
     String baseClassName = getBaseClassName(typeElement);
     String fullClassName = getClassName(typeElement);
     String typeParameters = getTypeParameters(typeElement);
-
+    if (typeParameters != null) {
+      logger.debug("{}", typeParameters);
+    }
     
     String methodName = null;
     String methodParameters = null;
-    if (methodElement != null) {
-      ExecutableType methodType = methodElement.asType().accept(new SimpleTypeVisitor14<ExecutableType, Void>(){
-        @Override
-        public ExecutableType visitExecutable(ExecutableType t, Void p) {
-          return t;
-        }
-
-        @Override
-        protected ExecutableType defaultAction(TypeMirror t, Void p) {
-          logger.debug("Got a {}: {}", t.getClass(), t);
-          return super.defaultAction(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-        }
-        
-      }, null);
+    if (methodType != null) {
       methodName = methodElement.getSimpleName().toString();
     }
     
-    //            new TypeWriter(writer, reporter, includedClasses, linkMaps), method);
-  }
+    logger.debug("{} {} {} {} {} {}", packageName, fullClassName, baseClassName, typeParameters, methodName, methodParameters);
     
+    //            new TypeWriter(writer, reporter, includedClasses, linkMaps), method);
+  }      
+  
   public TypeWriter(Writer writer, Reporter reporter, Set<String> includedClasses, AsciiDocLinkMaps linkMaps) {
     super();
     this.writer = writer;
@@ -160,7 +156,7 @@ public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
 //    return super.visitError(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
 //  }
 
-  private static String getPackage(Element elem) {
+  public static String getPackage(Element elem) {
     while (elem != null && !(elem instanceof PackageElement)) {
       elem = elem.getEnclosingElement();
     }
@@ -171,7 +167,38 @@ public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
     return null;
   }
   
-  private static String getBaseClassName(Element elem) {
+  public static String getMethodAnchor(ExecutableElement methodElement) {
+    StringBuilder builder = new StringBuilder();
+    builder.append("#");
+    builder.append(methodElement.getSimpleName());
+    builder.append("(");
+    boolean first = true;
+    for (VariableElement ve : methodElement.getParameters()) {
+      if (!first) {
+        builder.append(",");
+      }
+      first = false;
+      String type = ve.asType().accept(new SimpleTypeVisitor14<String, Void>(){
+        @Override
+        public String visitDeclared(DeclaredType t, Void p) {
+          return t.asElement().toString();
+        }        
+        @Override
+        public String visitArray(ArrayType t, Void p) {
+          return t.toString().replaceAll("\\[\\]", "%5B%5D");
+        }
+        @Override
+        public String visitPrimitive(PrimitiveType t, Void p) {
+          return t.toString();
+        }
+      }, null);
+      builder.append(type);
+    }
+    builder.append(")");
+    return builder.toString();
+  }
+  
+  public static String getBaseClassName(Element elem) {
     Element lastElem = elem;
     while (elem instanceof TypeElement) {
       elem = elem.getEnclosingElement();
@@ -182,7 +209,7 @@ public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
     return lastElem.getSimpleName().toString();
   }
   
-  private static String getClassName(Element elem) {
+  public static String getClassName(Element elem) {
     StringBuilder builder = new StringBuilder();
     while (elem instanceof TypeElement) {
       if (!builder.isEmpty()) {
@@ -192,6 +219,31 @@ public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
       elem = elem.getEnclosingElement();
     }    
     return builder.toString();
+  }
+  
+  /**
+   * Remove, using regexes, leading packages and type parameters.
+   * @param signature The signature to be simplified.
+   * @return A  simpler signature.
+   */
+  private static final Pattern LEADING_PACKAGE = Pattern.compile("^([a-z][a-zA-Z0-9]+\\.)+");
+  private static final Pattern TYPE_PARAMS = Pattern.compile("(<[^<]+>)");
+  private static final Pattern SQUARE_BRACKET = Pattern.compile("\\]");
+  private static final Pattern CONSTRUCTOR = Pattern.compile("^([a-zA-Z0-9]+)#\\1");
+  public static String simplifySignature(String signature) {
+    signature = LEADING_PACKAGE.matcher(signature).replaceAll("");
+    
+    Matcher tpm = TYPE_PARAMS.matcher(signature);
+    while(tpm.find()) {
+      signature = tpm.replaceAll("");
+      tpm = TYPE_PARAMS.matcher(signature);
+    }
+    
+    signature = SQUARE_BRACKET.matcher(signature).replaceAll("\\\\]");
+    
+    signature = CONSTRUCTOR.matcher(signature).replaceAll(mr -> mr.group(1));
+    
+    return signature;
   }
   
   private static class TypeParametersExtractor extends ElementKindVisitor14<Void, Void> {
@@ -239,13 +291,15 @@ public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
   }
   
   
+  
+  
   @Override
   public Void visitDeclared(DeclaredType t, TypeMirror method) {
     logger.debug("visitDeclared({})", t);
     Element elem = t.asElement();
     if (elem instanceof TypeElement) {
       TypeElement te = (TypeElement) elem;
-      String url = linkMaps.getLinkForType(getPackage(te), getClassName(te), null);
+      String url = linkMaps.getUrlForType(getPackage(te), getClassName(te));
       
       if (method != null) {
         url = url + '#' + method.toString();

@@ -59,7 +59,7 @@ public class AsciiDocOptions {
       }
     });
     
-    result.add(new AbstractAsciiDocOption(1, "Map from package names to a URL base to use for links", "--link", "link") {
+    result.add(new AbstractAsciiDocOption(1, "Map from package names to a URL base to use for links", "-link", "link") {
       @Override
       public boolean process(String option, List<String> arguments) {
         for (String arg : arguments) {
