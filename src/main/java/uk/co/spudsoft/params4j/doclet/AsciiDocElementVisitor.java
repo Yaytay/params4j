@@ -29,12 +29,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
-import javax.lang.model.type.NoType;
-import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
-import javax.lang.model.util.ElementKindVisitor14;
 import javax.lang.model.util.SimpleTypeVisitor14;
 import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.DocletEnvironment;
@@ -52,6 +46,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
   private final Reporter reporter;
 
   private Writer writer;
+  private TypeWriter typeWriter;
   
   public AsciiDocElementVisitor(DocletEnvironment environment, AsciiDocOptions options, Reporter reporter) {
     this.environment = environment;
@@ -94,11 +89,11 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
       File output = new File(dir, e.getQualifiedName() + ".adoc");
       try (Writer newWriter = new FileWriter(output)) {
         this.writer = newWriter;
+        this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());
         
         try {
           writer.write("= " + e.getSimpleName());
           writer.write("\n\n");
-
           
           AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));
           DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);
@@ -106,7 +101,6 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
             reporter.print(Diagnostic.Kind.WARNING, "No doc comment for " + e.getSimpleName());
           } else {
             docTreeWalker.scan();
-            // environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
             writer.write("\n");
             writer.write("\n");
 
@@ -167,7 +161,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
         if (typeElement == null) {
           writer.write(variableElement.asType().toString());
         } else {
-          TypeWriter.write(writer, reporter, options.getIncludeClasses(), options.getLinkMaps(), variableElement.asType(), null, null);
+          typeWriter.writeDeclaredType(declaredType);
         }
         writer.write("\n");
         

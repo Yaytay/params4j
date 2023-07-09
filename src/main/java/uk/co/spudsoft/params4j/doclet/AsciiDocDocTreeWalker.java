@@ -21,7 +21,9 @@ import com.sun.source.doctree.DocCommentTree;
 import com.sun.source.doctree.DocTree;
 import com.sun.source.doctree.EndElementTree;
 import com.sun.source.doctree.LinkTree;
+import com.sun.source.doctree.ParamTree;
 import com.sun.source.doctree.ReferenceTree;
+import com.sun.source.doctree.SeeTree;
 import com.sun.source.doctree.StartElementTree;
 import com.sun.source.doctree.TextTree;
 import com.sun.source.util.DocTreePath;
@@ -31,10 +33,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayDeque;
 import java.util.Queue;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
@@ -55,6 +53,7 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   private final Reporter reporter;
   private final TreePath path;
   private DocCommentTree dc;
+  private final TypeWriter typeWriter;
   
   private final Queue<Boolean> listOrderedStack = new ArrayDeque<>();
   
@@ -64,6 +63,7 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     this.writer = writer;
     this.reporter = reporter;
     this.path = path;
+    this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());
   }
   
   public void scan() {
@@ -82,14 +82,10 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     logger.debug("visitEndElement({}, {})", node, p);
     String name = node.getName().toString();
     if (name.equalsIgnoreCase("ul")) {
-      if (!listOrderedStack.peek()) {
-        listOrderedStack.remove();
-      }
+      listOrderedStack.poll();
       write("\n");
     } else if (name.equalsIgnoreCase("ol")) {
-      if (listOrderedStack.peek()) {
-        listOrderedStack.remove();
-      }
+      listOrderedStack.poll();
       write("\n");
     } else if (name.equalsIgnoreCase("a")) {
       write("] ");
@@ -107,60 +103,7 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     logger.debug("path: {} ({})", this.getCurrentPath());
 
     ReferenceTree refTree = node.getReference();
-    Element element = environment.getDocTrees().getElement(new DocTreePath(this.getCurrentPath(), refTree));
-    TypeMirror type = environment.getDocTrees().getType(new DocTreePath(this.getCurrentPath(), refTree));
-    logger.debug("element: {}", element);
-    logger.debug("type: {}", type);
-    if (element instanceof ExecutableElement) {      
-      TypeElement typeElement = (TypeElement) element.getEnclosingElement();
-      ExecutableElement methodElement = (ExecutableElement) element;
-      
-      String url = options.getLinkMaps().getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
-      if (url == null) {
-        if (options.getIncludeClasses().contains(typeElement.getQualifiedName().toString())) {
-          write("xref:");
-          write(typeElement.getQualifiedName().toString());
-          write(".adoc[");
-          // For method links javadoc removes leading packages and type parameters        
-          write(TypeWriter.simplifySignature(refTree.getSignature()));
-          write("] ");
-        } else {
-          write(refTree.getSignature());
-          write(" ");
-        }
-      } else {
-        write("link:");
-        write(options.getLinkMaps().getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement)));
-        write(TypeWriter.getMethodAnchor(methodElement));
-        write("[");
-        // For method links javadoc removes leading packages and type parameters        
-        write(TypeWriter.simplifySignature(refTree.getSignature()));
-        write("] ");
-      }
-    } else if (element instanceof TypeElement) {
-      TypeElement typeElement = (TypeElement) element;
-      
-      String url = options.getLinkMaps().getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
-      if (url == null) {
-        if (options.getIncludeClasses().contains(typeElement.getQualifiedName().toString())) {
-          write("xref:");
-          write(typeElement.getQualifiedName().toString());
-          write(".adoc[");
-          // For method links javadoc removes leading packages and type parameters        
-          write(refTree.getSignature());
-          write("] ");
-        } else {
-          write(refTree.getSignature());
-          write(" ");
-        }
-      } else {
-        write("link:");
-        write(options.getLinkMaps().getUrlForType(TypeWriter.getPackage(element), TypeWriter.getClassName(element)));
-        write("[");
-        write(refTree.getSignature());
-        write("] ");
-      }
-    }
+    typeWriter.writeReferenceTree(environment, this.getCurrentPath(), refTree);
     return super.visitLink(node, p);
   }
 
@@ -207,6 +150,18 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     return super.visitText(node, p);
   }
 
+  @Override
+  public Void visitSee(SeeTree node, Void p) {
+    write("\n\nSee: ");
+    return super.visitSee(node, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+  }
+
+  @Override
+  public Void visitParam(ParamTree node, Void p) {
+    return null;
+  }
+  
+
   private void write(String s) {
     if (s != null) {
       s = s.replaceAll("\n ", " ");
@@ -214,10 +169,10 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
       try {
         writer.write(s);
       } catch (IOException ex) {
-        reporter.print(Diagnostic.Kind.ERROR, "Failed to write: " + ex.getMessage());
+        reporter.print(Diagnostic.Kind.ERROR, new DocTreePath(path, dc), "Failed to write: " + ex.getMessage());
       }
     }
-  }
-  
+  }  
+ 
   
 }

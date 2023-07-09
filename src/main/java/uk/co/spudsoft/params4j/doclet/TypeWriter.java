@@ -16,9 +16,10 @@
  */
 package uk.co.spudsoft.params4j.doclet;
 
+import com.sun.source.doctree.ReferenceTree;
+import com.sun.source.util.DocTreePath;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,17 +27,14 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.ExecutableType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
-import javax.lang.model.util.ElementKindVisitor14;
 import javax.lang.model.util.SimpleTypeVisitor14;
 import javax.tools.Diagnostic;
+import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,7 +43,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author njt
  */
-public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
+public class TypeWriter {
   
   private static final Logger logger = LoggerFactory.getLogger(TypeWriter.class);
   
@@ -57,38 +55,102 @@ public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
   // inlink preventes recursive calls from outputting links
   private boolean inlink;
 
-  public static void write(Writer writer, Reporter reporter, Set<String> includedClasses, AsciiDocLinkMaps linkMaps, TypeMirror classType, ExecutableElement methodElement, ExecutableType methodType) {
-    
-    TypeElement typeElement = classType.accept(new SimpleTypeVisitor14<TypeElement, Void>(){
-      @Override
-      public TypeElement visitDeclared(DeclaredType t, Void p) {
-        return (TypeElement) t.asElement();
-      }
-
-      @Override
-      public TypeElement visitTypeVariable(TypeVariable t, Void p) {
-        return super.visitTypeVariable(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-      }
+  public void writeReferenceTree(DocletEnvironment environment, DocTreePath currentPath, ReferenceTree refTree) {
+    Element element = environment.getDocTrees().getElement(new DocTreePath(currentPath, refTree));
+    TypeMirror type = environment.getDocTrees().getType(new DocTreePath(currentPath, refTree));
+    logger.debug("element: {}", element);
+    logger.debug("type: {}", type);
+    if (element instanceof ExecutableElement) {      
+      TypeElement typeElement = (TypeElement) element.getEnclosingElement();
+      ExecutableElement methodElement = (ExecutableElement) element;
       
-    }, null);
+      String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
+      if (url == null) {
+        if (includedClasses.contains(typeElement.getQualifiedName().toString())) {
+          write("xref:");
+          write(typeElement.getQualifiedName().toString());
+          write(".adoc[");
+          // For method links javadoc removes leading packages and type parameters        
+          write(TypeWriter.simplifySignature(refTree.getSignature()));
+          write("] ");
+        } else {
+          write(refTree.getSignature());
+          write(" ");
+        }
+      } else {
+        write("link:");
+        write(linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement)));
+        write(TypeWriter.getMethodAnchor(methodElement));
+        write("[");
+        // For method links javadoc removes leading packages and type parameters        
+        write(TypeWriter.simplifySignature(refTree.getSignature()));
+        write("] ");
+      }
+    } else if (element instanceof TypeElement) {
+      TypeElement typeElement = (TypeElement) element;
+      
+      String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
+      if (url == null) {
+        if (includedClasses.contains(typeElement.getQualifiedName().toString())) {
+          write("xref:");
+          write(typeElement.getQualifiedName().toString());
+          write(".adoc[");
+          // For method links javadoc removes leading packages and type parameters        
+          write(refTree.getSignature());
+          write("] ");
+        } else {
+          write(refTree.getSignature());
+          write(" ");
+        }
+      } else {
+        write("link:");
+        write(linkMaps.getUrlForType(TypeWriter.getPackage(element), TypeWriter.getClassName(element)));
+        write("[");
+        write(refTree.getSignature());
+        write("] ");
+      }
+    }
+  }
+  
+  
+  public void writeDeclaredType(DeclaredType declaredType) {
     
-    String packageName =  getPackage(typeElement);    
-    String baseClassName = getBaseClassName(typeElement);
-    String fullClassName = getClassName(typeElement);
-    String typeParameters = getTypeParameters(typeElement);
-    if (typeParameters != null) {
-      logger.debug("{}", typeParameters);
+    TypeElement typeElement = (TypeElement) declaredType.asElement();    
+    
+    String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
+
+    if (url != null) {
+      write("link:");
+      write(url);
+      write("[");
+      write(typeElement.getSimpleName().toString());
+      write("]");
+    } else if (includedClasses.contains(typeElement.getQualifiedName().toString())) {
+      write("xref:");
+      write(typeElement.getQualifiedName().toString());
+      write(".adoc[");
+      write(typeElement.getSimpleName().toString());
+      write("]");
+    } else {
+      write(declaredType.toString());
     }
     
-    String methodName = null;
-    String methodParameters = null;
-    if (methodType != null) {
-      methodName = methodElement.getSimpleName().toString();
+    if (!declaredType.getTypeArguments().isEmpty()) {
+      write("<");
+      boolean first = true;
+      for (TypeMirror ta : declaredType.getTypeArguments()) {
+        if (!first) {
+          write(", ");
+        }
+        first = false;
+        if (ta instanceof DeclaredType) {
+          writeDeclaredType((DeclaredType) ta);
+        } else if (ta != null) {
+          write(ta.toString());
+        }
+      }
+      write(">");
     }
-    
-    logger.debug("{} {} {} {} {} {}", packageName, fullClassName, baseClassName, typeParameters, methodName, methodParameters);
-    
-    //            new TypeWriter(writer, reporter, includedClasses, linkMaps), method);
   }      
   
   public TypeWriter(Writer writer, Reporter reporter, Set<String> includedClasses, AsciiDocLinkMaps linkMaps) {
@@ -98,63 +160,6 @@ public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
     this.includedClasses = includedClasses;
     this.linkMaps = linkMaps;
   }
-
-//  @Override
-//  public Void visitIntersection(IntersectionType t, Void p) {
-//    write("visitIntersection(" + t.toString() + ")");
-//    return super.visitIntersection(t, p);
-//  }
-//
-//  @Override
-//  public Void visitUnion(UnionType t, Void p) {
-//    write("visitUnion(" + t.toString() + ")");
-//    return super.visitUnion(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-//  }
-//
-//  @Override
-//  public Void visitNoType(NoType t, Void p) {
-//    write("visitNoType(" + t.toString() + ")");
-//    return super.visitNoType(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-//  }
-//
-  @Override
-  public Void visitExecutable(ExecutableType t, TypeMirror method) {
-    logger.debug("visitExecutable({})", t);
-    logger.debug("Receiver type: {}", t.getReceiverType());
-    write("(");
-    boolean first = true;
-    for (TypeMirror param : t.getParameterTypes()) {
-      if (!first) {
-        write(", ");
-      }
-      first = false;
-      String paramString = param.toString();
-      if (inlink) {
-        paramString = paramString.replaceAll("\\]", "\\\\]");
-      }
-      write(paramString);
-    } 
-    write(")");
-    return super.visitExecutable(t, method); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-  }
-//
-//  @Override
-//  public Void visitWildcard(WildcardType t, Void p) {
-//    write("visitWildcard(" + t.toString() + ")");
-//    return super.visitWildcard(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-//  }
-//
-//  @Override
-//  public Void visitTypeVariable(TypeVariable t, Void p) {
-//    write("visitTypeVariable(" + t.toString() + ")");
-//    return super.visitTypeVariable(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-//  }
-//
-//  @Override
-//  public Void visitError(ErrorType t, Void p) {
-//    write("visitError(" + t.toString() + ")");
-//    return super.visitError(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-//  }
 
   public static String getPackage(Element elem) {
     while (elem != null && !(elem instanceof PackageElement)) {
@@ -234,7 +239,7 @@ public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
     signature = LEADING_PACKAGE.matcher(signature).replaceAll("");
     
     Matcher tpm = TYPE_PARAMS.matcher(signature);
-    while(tpm.find()) {
+    while (tpm.find()) {
       signature = tpm.replaceAll("");
       tpm = TYPE_PARAMS.matcher(signature);
     }
@@ -244,129 +249,6 @@ public class TypeWriter extends SimpleTypeVisitor14<Void, TypeMirror> {
     signature = CONSTRUCTOR.matcher(signature).replaceAll(mr -> mr.group(1));
     
     return signature;
-  }
-  
-  private static class TypeParametersExtractor extends ElementKindVisitor14<Void, Void> {
-    private final StringBuilder builder;
-    private boolean first = true;
-
-    public TypeParametersExtractor(StringBuilder builder) {
-      this.builder = builder;
-    }
-    
-    public String get() {
-      return builder.toString();
-    }
-    
-    @Override
-    public Void visitTypeParameter(TypeParameterElement e, Void p) {
-      if (!first) {
-        builder.append(", ");
-      }
-      first = false;
-      builder.append(e.getSimpleName().toString());
-      return super.visitTypeParameter(e, p);
-    }
-
-    @Override
-    protected Void defaultAction(Element e, Void p) {
-      logger.debug("Got a {}: {}", e.getClass(), e);
-      return super.defaultAction(e, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-    }
-
-  }
-  
-  private static String getTypeParameters(TypeElement elem) {
-    if (elem.getTypeParameters().isEmpty()) {
-      return null;
-    }
-    StringBuilder builder = new StringBuilder();    
-    builder.append("<");
-    TypeParametersExtractor extractor = new TypeParametersExtractor(builder);
-    for (TypeParameterElement tpe : elem.getTypeParameters()) {
-      tpe.accept(extractor, null);
-    }
-    builder.append(">");
-    return builder.toString();
-  }
-  
-  
-  
-  
-  @Override
-  public Void visitDeclared(DeclaredType t, TypeMirror method) {
-    logger.debug("visitDeclared({})", t);
-    Element elem = t.asElement();
-    if (elem instanceof TypeElement) {
-      TypeElement te = (TypeElement) elem;
-      String url = linkMaps.getUrlForType(getPackage(te), getClassName(te));
-      
-      if (method != null) {
-        url = url + '#' + method.toString();
-      }
-      
-      boolean opened = false;
-      
-      if (!inlink) {
-        if (includedClasses.contains(te.getQualifiedName().toString())) {
-          write("xref:");
-          write(te.getQualifiedName().toString());
-          write(".adoc[");
-          opened = true;
-          inlink = true;
-        } else if (url != null) {
-          write("link:");
-          write(url);
-          write("[");
-          opened = true;
-          inlink = true;
-        }
-      }
-      
-      write(te.getSimpleName().toString());
-      List<? extends TypeMirror> typeArguments = t.getTypeArguments();
-      if (typeArguments != null && !typeArguments.isEmpty()) {
-        write("<");
-        boolean first = true;
-        for (TypeMirror child : t.getTypeArguments()) {
-          if (!first) {
-            write(", ");
-          } 
-          first = false;
-          child.accept(this, null);
-        }
-        write(">");
-      }
-      
-      if (method != null) {
-        write(".");
-        method.accept(this, null);
-      }
-      
-      if (opened) {
-        write("]");
-        inlink = false;
-      }
-    }
-    return super.visitDeclared(t, method); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-  }
-
-//  @Override
-//  public Void visitArray(ArrayType t, Void p) {
-//    write("visitArray(" + t.toString() + ")");
-//    return super.visitArray(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-//  }
-//
-//  @Override
-//  public Void visitNull(NullType t, Void p) {
-//    write("visitNull(" + t.toString() + ")");
-//    return super.visitNull(t, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
-//  }
-
-  @Override
-  public Void visitPrimitive(PrimitiveType t, TypeMirror method) {
-    write(t.toString());
-    return super.visitPrimitive(t, method); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
   }
 
   private void write(String s) {

@@ -59,7 +59,11 @@ public class AsciiDocDocletTest {
     public void report(Diagnostic<? extends JavaFileObject> diagnostic) {
       Integer previous = counts.get(diagnostic.getKind());
       counts.put(diagnostic.getKind(), previous + 1);
-      logger.atLevel(convertKind(diagnostic.getKind())).log(diagnostic.getMessage(Locale.ROOT));
+      if (diagnostic.getSource() == null) {
+        logger.atLevel(convertKind(diagnostic.getKind())).log("{}", diagnostic.getMessage(Locale.ROOT));
+      } else {
+        logger.atLevel(convertKind(diagnostic.getKind())).log("{}@{}/{}: {}", diagnostic.getSource().getName(), diagnostic.getLineNumber(), diagnostic.getColumnNumber(), diagnostic.getMessage(Locale.ROOT));
+      }
     }
     
     private Level convertKind(Diagnostic.Kind kind) {
@@ -157,7 +161,7 @@ public class AsciiDocDocletTest {
     assertThat(output, not(containsString("--help")));
     assertEquals(0, diagListener.getCount(Diagnostic.Kind.ERROR));
     assertEquals(0, diagListener.getCount(Diagnostic.Kind.MANDATORY_WARNING));
-    assertEquals(1, diagListener.getCount(Diagnostic.Kind.WARNING));
+    assertEquals(23, diagListener.getCount(Diagnostic.Kind.WARNING));
   }
 
 }

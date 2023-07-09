@@ -85,7 +85,7 @@ public class Parameters {
    * <a href="https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html">HTMLAnchorElement</a>.
    * 
    * @param documentedAlien alien value that cannot be documented further in this codebase
-   * @see https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html
+   * @see <a href="https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html">HTMLAnchorElement.html</a>
    */
   @Comment("configure the alien properties as documented at https://docs.oracle.com/en/java/javase/17/docs/api/jdk.xml.dom/org/w3c/dom/html/HTMLAnchorElement.html")
   public void setDocumentedAlien(HtmlAnchorElement documentedAlien) {
@@ -138,9 +138,9 @@ public class Parameters {
 
   /**
    * The path to the root of the configuration files.
-   * 
+   * <p>
    * The value is a {@link java.io.File}.
-   * 
+   * <p>
    * This is an irrelevant ordered list:
    * <OL>
    * <lI>First
@@ -215,7 +215,10 @@ public class Parameters {
 
   /**
    * login for a system.
+   * <p>
    * A {@link Map<String, Credentials>} of system names to credentials.
+   * <p>
+   * See: {@link commentcap.Credentials}
    * @param logins 
    */
   public void setLogins(Map<String, Credentials> logins) {
