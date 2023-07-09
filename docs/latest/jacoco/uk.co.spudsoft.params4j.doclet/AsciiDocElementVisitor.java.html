@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AsciiDocElementVisitor.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Parameters for Java</a> &gt; <a href="index.source.html" class="el_package">uk.co.spudsoft.params4j.doclet</a> &gt; <span class="el_source">AsciiDocElementVisitor.java</span></div><h1>AsciiDocElementVisitor.java</h1><pre class="source lang-java linenums">/*
+ * Copyright (C) 2023 jtalbut
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package uk.co.spudsoft.params4j.doclet;
+
+import com.sun.source.doctree.DocCommentTree;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.Writer;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementVisitor;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.util.SimpleTypeVisitor14;
+import javax.tools.Diagnostic;
+import jdk.javadoc.doclet.DocletEnvironment;
+import jdk.javadoc.doclet.Reporter;
+import uk.co.spudsoft.params4j.impl.JavadocCapturer;
+
+/**
+ *
+ * @author njt
+ */
+public class AsciiDocElementVisitor implements ElementVisitor&lt;Void, Void&gt; {
+  
+  private final DocletEnvironment environment;
+  private final AsciiDocOptions options;
+  private final Reporter reporter;
+
+  private Writer writer;
+  private TypeWriter typeWriter;
+  
+<span class="fc" id="L51">  public AsciiDocElementVisitor(DocletEnvironment environment, AsciiDocOptions options, Reporter reporter) {</span>
+<span class="fc" id="L52">    this.environment = environment;</span>
+<span class="fc" id="L53">    this.options = options;</span>
+<span class="fc" id="L54">    this.reporter = reporter;</span>
+<span class="fc" id="L55">  }</span>
+  
+  @Override
+  public Void visit(Element e, Void p) {
+<span class="nc" id="L59">    return null;</span>
+  }
+
+  @Override
+  public Void visitPackage(PackageElement e, Void p) {
+<span class="fc" id="L64">    reporter.print(Diagnostic.Kind.NOTE, e, &quot;Visiting Package &quot; + e.getQualifiedName());</span>
+<span class="fc" id="L65">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
+<span class="fc" id="L66">    return null;</span>
+  }
+  
+  private boolean include(TypeElement e) {
+<span class="pc bpc" id="L70" title="1 of 2 branches missed.">    if (options.getIncludeClasses() == null) {</span>
+<span class="nc" id="L71">      return true;</span>
+    }
+<span class="fc" id="L73">    return options.getIncludeClasses().contains(e.getQualifiedName().toString());</span>
+  }
+
+  @Override
+  public Void visitType(TypeElement e, Void p) {
+<span class="fc" id="L78">    reporter.print(Diagnostic.Kind.NOTE, e, &quot;Visiting Type &quot; + e.getQualifiedName());</span>
+<span class="fc" id="L79">    reporter.print(Diagnostic.Kind.NOTE, e, &quot;Docs &quot; + environment.getDocTrees().getDocCommentTree(e));</span>
+    
+<span class="fc bfc" id="L81" title="All 2 branches covered.">    if (include(e)) {  </span>
+<span class="fc" id="L82">      File dir = new File(options.getDestDirName());</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">      if (!dir.exists()) {</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (!dir.mkdirs()) {</span>
+<span class="nc" id="L85">          reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to create directory &quot; + dir.getAbsolutePath());</span>
+<span class="nc" id="L86">          return null;</span>
+        }
+      }
+<span class="fc" id="L89">      File output = new File(dir, e.getQualifiedName() + &quot;.adoc&quot;);</span>
+<span class="fc" id="L90">      try (Writer newWriter = new FileWriter(output)) {</span>
+<span class="fc" id="L91">        this.writer = newWriter;</span>
+<span class="fc" id="L92">        this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());</span>
+        
+        try {
+<span class="fc" id="L95">          writer.write(&quot;= &quot; + e.getSimpleName());</span>
+<span class="fc" id="L96">          writer.write(&quot;\n\n&quot;);</span>
+          
+<span class="fc" id="L98">          AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));</span>
+<span class="fc" id="L99">          DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">          if (docCommentTree == null) {</span>
+<span class="nc" id="L101">            reporter.print(Diagnostic.Kind.WARNING, &quot;No doc comment for &quot; + e.getSimpleName());</span>
+          } else {
+<span class="fc" id="L103">            docTreeWalker.scan();</span>
+<span class="fc" id="L104">            writer.write(&quot;\n&quot;);</span>
+<span class="fc" id="L105">            writer.write(&quot;\n&quot;);</span>
+
+<span class="fc" id="L107">            writer.write(&quot;[cols=\&quot;1,1a,4a\&quot;,table-stripes=even]\n&quot;);</span>
+<span class="fc" id="L108">            writer.write(&quot;|===\n&quot;);</span>
+<span class="fc" id="L109">            writer.write(&quot;| Name\n&quot;);</span>
+<span class="fc" id="L110">            writer.write(&quot;| Type\n&quot;);</span>
+<span class="fc" id="L111">            writer.write(&quot;| Details\n&quot;);</span>
+<span class="fc" id="L112">            writer.write(&quot;\n\n&quot;);</span>
+          }
+<span class="fc" id="L114">          e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
+<span class="nc" id="L115">        } catch (IOException ex) {</span>
+<span class="nc" id="L116">          reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to write to file: &quot; + ex.getMessage());</span>
+<span class="fc" id="L117">        }</span>
+<span class="nc" id="L118">      } catch (IOException ex) {</span>
+<span class="nc" id="L119">        reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to open file &quot; + output.getAbsolutePath());</span>
+<span class="nc" id="L120">        return null;</span>
+      } finally {
+<span class="fc" id="L122">        writer = null;</span>
+      }
+    }
+    
+<span class="fc" id="L126">    return null;</span>
+  }
+
+  @Override
+  public Void visitVariable(VariableElement e, Void p) {
+<span class="fc" id="L131">    reporter.print(Diagnostic.Kind.NOTE, e, &quot;Visiting Variable &quot; + e.getSimpleName());</span>
+<span class="fc" id="L132">    reporter.print(Diagnostic.Kind.NOTE, e, &quot;Docs &quot; + environment.getDocTrees().getDocCommentTree(e));</span>
+    
+<span class="pc" id="L134">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
+<span class="fc" id="L135">    return null;</span>
+  }
+
+  @Override
+  public Void visitExecutable(ExecutableElement e, Void p) {
+<span class="fc" id="L140">    reporter.print(Diagnostic.Kind.NOTE, e, &quot;Visiting Executable &quot; + e.getSimpleName());</span>
+<span class="fc" id="L141">    reporter.print(Diagnostic.Kind.NOTE, e, &quot;Docs &quot; + environment.getDocTrees().getDocCommentTree(e));</span>
+    
+<span class="pc bpc" id="L143" title="1 of 4 branches missed.">    if (e.getSimpleName().toString().startsWith(&quot;set&quot;) &amp;&amp; e.getParameters().size() == 1) {</span>
+      try {
+<span class="fc" id="L145">        writer.write(&quot;| &quot;);</span>
+<span class="fc" id="L146">        writer.write(JavadocCapturer.setterNameToVariableName(e.getSimpleName().toString()));</span>
+<span class="fc" id="L147">        writer.write(&quot;\n&quot;);</span>
+        
+<span class="fc" id="L149">        writer.write(&quot;| &quot;);</span>
+<span class="fc" id="L150">        VariableElement variableElement = (VariableElement) e.getParameters().get(0);</span>
+                
+<span class="fc" id="L152">        DeclaredType declaredType = variableElement.asType().accept(new SimpleTypeVisitor14&lt;DeclaredType, Void&gt;(){</span>
+          @Override
+          public DeclaredType visitDeclared(DeclaredType t, Void p) {
+<span class="fc" id="L155">            return t;</span>
+          }
+          
+        }, null);
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        Element declaredTypeElement = declaredType == null ? null : declaredType.asElement();</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        TypeElement typeElement = declaredTypeElement instanceof TypeElement ? (TypeElement) declaredTypeElement : null;</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        if (typeElement == null) {</span>
+<span class="fc" id="L162">          writer.write(variableElement.asType().toString());</span>
+        } else {
+<span class="fc" id="L164">          typeWriter.writeDeclaredType(declaredType);</span>
+        }
+<span class="fc" id="L166">        writer.write(&quot;\n&quot;);</span>
+        
+<span class="fc" id="L168">        writer.write(&quot;| &quot;);</span>
+<span class="fc" id="L169">        AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));</span>
+<span class="fc" id="L170">        DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if (docCommentTree == null) {</span>
+<span class="fc" id="L172">          reporter.print(Diagnostic.Kind.WARNING, &quot;No doc comment for &quot; + e.getSimpleName());</span>
+        } else {
+<span class="fc" id="L174">          docTreeWalker.scan();</span>
+          // environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
+        }
+<span class="fc" id="L177">        writer.write(&quot;\n&quot;);</span>
+<span class="nc" id="L178">      } catch (IOException ex) {</span>
+<span class="nc" id="L179">        reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to write to file: &quot; + ex.getMessage());</span>
+<span class="fc" id="L180">      }</span>
+      
+<span class="pc" id="L182">      e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));      </span>
+    }
+<span class="fc" id="L184">    return null;</span>
+  }
+  
+  @Override
+  public Void visitTypeParameter(TypeParameterElement e, Void p) {
+<span class="nc" id="L189">    reporter.print(Diagnostic.Kind.NOTE, e, &quot;Visiting TypeParameter &quot; + e.getSimpleName());</span>
+<span class="nc" id="L190">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
+<span class="nc" id="L191">    return null;</span>
+  }
+
+  @Override
+  public Void visitUnknown(Element e, Void p) {
+<span class="nc" id="L196">    reporter.print(Diagnostic.Kind.NOTE, e, &quot;Visiting Unknown &quot; + e.getSimpleName());</span>
+<span class="nc" id="L197">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
+<span class="nc" id="L198">    return null;</span>
+  }
+  
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
