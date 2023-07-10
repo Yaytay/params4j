@@ -17,12 +17,14 @@
 package uk.co.spudsoft.params4j.doclet;
 
 import com.sun.source.doctree.AttributeTree;
+import com.sun.source.doctree.AuthorTree;
 import com.sun.source.doctree.DocCommentTree;
 import com.sun.source.doctree.DocTree;
 import com.sun.source.doctree.EndElementTree;
 import com.sun.source.doctree.LinkTree;
 import com.sun.source.doctree.ParamTree;
 import com.sun.source.doctree.ReferenceTree;
+import com.sun.source.doctree.ReturnTree;
 import com.sun.source.doctree.SeeTree;
 import com.sun.source.doctree.StartElementTree;
 import com.sun.source.doctree.TextTree;
@@ -57,6 +59,8 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   
   private final Queue<Boolean> listOrderedStack = new ArrayDeque<>();
   
+  private boolean inMacro;
+  
   public AsciiDocDocTreeWalker(DocletEnvironment environment, AsciiDocOptions options, Writer writer, Reporter reporter, TreePath path) {
     this.environment = environment;
     this.options = options;
@@ -88,6 +92,7 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
       listOrderedStack.poll();
       write("\n");
     } else if (name.equalsIgnoreCase("a")) {
+      inMacro = false;
       write("] ");
     } else {
       write(node.toString());
@@ -135,6 +140,7 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
         }
       }
       write("[");
+      inMacro = true;
       return null;
     } else {
       write(node.toString());
@@ -146,7 +152,9 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   public Void visitText(TextTree node, Void p) {
     logger.debug("visitText({}, {})", node, p);
     write(node.getBody().trim());
-    write("\n");
+    if (!inMacro) {
+      write("\n");
+    }
     return super.visitText(node, p);
   }
 
@@ -160,7 +168,16 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   public Void visitParam(ParamTree node, Void p) {
     return null;
   }
-  
+
+  @Override
+  public Void visitReturn(ReturnTree node, Void p) {
+    return null;
+  }
+
+  @Override
+  public Void visitAuthor(AuthorTree node, Void p) {
+    return null;
+  }
 
   private void write(String s) {
     if (s != null) {

@@ -61,13 +61,13 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
 
   @Override
   public Void visitPackage(PackageElement e, Void p) {
-    reporter.print(Diagnostic.Kind.NOTE, e, "Visiting Package " + e.getQualifiedName());
+    reporter.print(Diagnostic.Kind.NOTE, "Visiting Package " + e.getQualifiedName());
     e.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
     return null;
   }
   
   private boolean include(TypeElement e) {
-    if (options.getIncludeClasses() == null) {
+    if (options.getIncludeClasses() == null || options.getIncludeClasses().isEmpty()) {
       return true;
     }
     return options.getIncludeClasses().contains(e.getQualifiedName().toString());
@@ -75,8 +75,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
 
   @Override
   public Void visitType(TypeElement e, Void p) {
-    reporter.print(Diagnostic.Kind.NOTE, e, "Visiting Type " + e.getQualifiedName());
-    reporter.print(Diagnostic.Kind.NOTE, e, "Docs " + environment.getDocTrees().getDocCommentTree(e));
+    reporter.print(Diagnostic.Kind.NOTE, "Visiting Type " + e.getQualifiedName());
     
     if (include(e)) {  
       File dir = new File(options.getDestDirName());
@@ -87,6 +86,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
         }
       }
       File output = new File(dir, e.getQualifiedName() + ".adoc");
+      reporter.print(Diagnostic.Kind.NOTE, "Writing file " + output.getAbsolutePath());
       try (Writer newWriter = new FileWriter(output)) {
         this.writer = newWriter;
         this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());
@@ -96,22 +96,20 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
           writer.write("\n\n");
           
           AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));
-          DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);
-          if (docCommentTree == null) {
-            reporter.print(Diagnostic.Kind.WARNING, "No doc comment for " + e.getSimpleName());
-          } else {
-            docTreeWalker.scan();
-            writer.write("\n");
-            writer.write("\n");
+          docTreeWalker.scan();
+          writer.write("\n");
+          writer.write("\n");
 
-            writer.write("[cols=\"1,1a,4a\",table-stripes=even]\n");
-            writer.write("|===\n");
-            writer.write("| Name\n");
-            writer.write("| Type\n");
-            writer.write("| Details\n");
-            writer.write("\n\n");
-          }
+          writer.write("[cols=\"1,1a,4a\",table-stripes=even]\n");
+          writer.write("|===\n");
+          writer.write("| Name\n");
+          writer.write("| Type\n");
+          writer.write("| Details\n");
+          writer.write("\n\n");
+
           e.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
+
+          writer.write("|===\n");
         } catch (IOException ex) {
           reporter.print(Diagnostic.Kind.ERROR, "Failed to write to file: " + ex.getMessage());
         }
@@ -128,18 +126,12 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
 
   @Override
   public Void visitVariable(VariableElement e, Void p) {
-    reporter.print(Diagnostic.Kind.NOTE, e, "Visiting Variable " + e.getSimpleName());
-    reporter.print(Diagnostic.Kind.NOTE, e, "Docs " + environment.getDocTrees().getDocCommentTree(e));
-    
     e.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
     return null;
   }
 
   @Override
   public Void visitExecutable(ExecutableElement e, Void p) {
-    reporter.print(Diagnostic.Kind.NOTE, e, "Visiting Executable " + e.getSimpleName());
-    reporter.print(Diagnostic.Kind.NOTE, e, "Docs " + environment.getDocTrees().getDocCommentTree(e));
-    
     if (e.getSimpleName().toString().startsWith("set") && e.getParameters().size() == 1) {
       try {
         writer.write("| ");
@@ -186,14 +178,12 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
   
   @Override
   public Void visitTypeParameter(TypeParameterElement e, Void p) {
-    reporter.print(Diagnostic.Kind.NOTE, e, "Visiting TypeParameter " + e.getSimpleName());
     e.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
     return null;
   }
 
   @Override
   public Void visitUnknown(Element e, Void p) {
-    reporter.print(Diagnostic.Kind.NOTE, e, "Visiting Unknown " + e.getSimpleName());
     e.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
     return null;
   }

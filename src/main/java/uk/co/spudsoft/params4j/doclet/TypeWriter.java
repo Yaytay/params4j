@@ -52,9 +52,6 @@ public class TypeWriter {
   private final Set<String> includedClasses;
   private final AsciiDocLinkMaps linkMaps;
   
-  // inlink preventes recursive calls from outputting links
-  private boolean inlink;
-
   public void writeReferenceTree(DocletEnvironment environment, DocTreePath currentPath, ReferenceTree refTree) {
     Element element = environment.getDocTrees().getElement(new DocTreePath(currentPath, refTree));
     TypeMirror type = environment.getDocTrees().getType(new DocTreePath(currentPath, refTree));
@@ -248,7 +245,7 @@ public class TypeWriter {
     
     signature = CONSTRUCTOR.matcher(signature).replaceAll(mr -> mr.group(1));
     
-    return signature;
+    return signature.trim();
   }
 
   private void write(String s) {
