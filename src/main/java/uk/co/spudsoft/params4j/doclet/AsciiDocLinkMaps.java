@@ -25,16 +25,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author njt
  */
 public class AsciiDocLinkMaps {
-  
-  private static final Logger logger = LoggerFactory.getLogger(AsciiDocLinkMaps.class);
 
   private static final String MODULE_PREFIX = "module:";
   
@@ -78,7 +74,7 @@ public class AsciiDocLinkMaps {
         readPackageList(baseUrlFromPackage, in, baseUrl);
       }
     } catch (Throwable ex) {
-      logger.debug("Unable to read package list from {}: ", baseUrl, ex);
+      // Silently fail, because failure is quite likely
     }
 
   }
@@ -90,7 +86,7 @@ public class AsciiDocLinkMaps {
         readPackageList(baseUrlFromPackage, in, baseUrl);
       }
     } catch (Throwable ex) {
-      logger.debug("Unable to read package list from {}: ", baseUrl, ex);
+      // Silently fail, because failure is quite likely
     }
   }
 

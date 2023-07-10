@@ -38,17 +38,13 @@ import java.util.Queue;
 import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 
 /**
  *
  * @author njt
  */
 public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
-  
-  private static final Logger logger = LoggerFactory.getLogger(AsciiDocDocTreeWalker.class);
-  
+    
   private final DocletEnvironment environment;  
   private final AsciiDocOptions options;
   private final Writer writer;
@@ -76,14 +72,7 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   }
 
   @Override
-  public Void visitDocComment(DocCommentTree node, Void p) {
-    logger.debug("visitDocComment({}, {})", node, p);
-    return super.visitDocComment(node, p);
-  }
-
-  @Override
   public Void visitEndElement(EndElementTree node, Void p) {
-    logger.debug("visitEndElement({}, {})", node, p);
     String name = node.getName().toString();
     if (name.equalsIgnoreCase("ul")) {
       listOrderedStack.poll();
@@ -103,9 +92,7 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   
   @Override
   public Void visitLink(LinkTree node, Void p) {
-    logger.debug("visitLink({}, {})", node, p);
     scan(node.getReference(), null);
-    logger.debug("path: {} ({})", this.getCurrentPath());
 
     ReferenceTree refTree = node.getReference();
     typeWriter.writeReferenceTree(environment, this.getCurrentPath(), refTree);
@@ -114,7 +101,6 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
 
   @Override
   public Void visitStartElement(StartElementTree node, Void p) {
-    logger.debug("visitStartElement({}, {})", node, p);
     String name = node.getName().toString();
     if (name.equalsIgnoreCase("ul")) {
       listOrderedStack.add(Boolean.FALSE);
@@ -150,7 +136,6 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
 
   @Override
   public Void visitText(TextTree node, Void p) {
-    logger.debug("visitText({}, {})", node, p);
     write(node.getBody().trim());
     if (!inMacro) {
       write("\n");

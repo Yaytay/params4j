@@ -36,16 +36,12 @@ import javax.lang.model.util.SimpleTypeVisitor14;
 import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author njt
  */
 public class TypeWriter {
-  
-  private static final Logger logger = LoggerFactory.getLogger(TypeWriter.class);
   
   private final Writer writer;
   private final Reporter reporter;
@@ -55,8 +51,6 @@ public class TypeWriter {
   public void writeReferenceTree(DocletEnvironment environment, DocTreePath currentPath, ReferenceTree refTree) {
     Element element = environment.getDocTrees().getElement(new DocTreePath(currentPath, refTree));
     TypeMirror type = environment.getDocTrees().getType(new DocTreePath(currentPath, refTree));
-    logger.debug("element: {}", element);
-    logger.debug("type: {}", type);
     if (element instanceof ExecutableElement) {      
       TypeElement typeElement = (TypeElement) element.getEnclosingElement();
       ExecutableElement methodElement = (ExecutableElement) element;
