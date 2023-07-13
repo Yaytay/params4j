@@ -29,7 +29,11 @@ import jdk.javadoc.doclet.Reporter;
  *
  * Although additional classes can be provided it will only record setters and/or fields (preferring setters, but falling back to
  * fields).
- *
+ * 
+ * Runs through the specified elements in the {@link jdk.javadoc.doclet.DocletEnvironment} and 
+ * uses an {@link uk.co.spudsoft.params4j.doclet.AsciiDocElementVisitor} to walk through the 
+ * Java {@link javax.lang.model.element.Element}.
+ * 
  * @author njt
  */
 public class AsciiDocDoclet implements Doclet {
@@ -38,41 +42,41 @@ public class AsciiDocDoclet implements Doclet {
   private Locale locale;
   private Reporter reporter;
   
-<span class="fc" id="L41">  public AsciiDocDoclet() {</span>
-<span class="fc" id="L42">    options = new AsciiDocOptions();</span>
-<span class="fc" id="L43">  }</span>
+<span class="fc" id="L45">  public AsciiDocDoclet() {</span>
+<span class="fc" id="L46">    options = new AsciiDocOptions();</span>
+<span class="fc" id="L47">  }</span>
   
   @Override
   public void init(Locale locale, Reporter reporter) {
-<span class="fc" id="L47">    this.locale = locale;</span>
-<span class="fc" id="L48">    this.reporter = reporter;</span>
-<span class="fc" id="L49">  }</span>
+<span class="fc" id="L51">    this.locale = locale;</span>
+<span class="fc" id="L52">    this.reporter = reporter;</span>
+<span class="fc" id="L53">  }</span>
 
   @Override
   public String getName() {
-<span class="nc" id="L53">    return getClass().getSimpleName();</span>
+<span class="nc" id="L57">    return getClass().getSimpleName();</span>
   }
 
   @Override
   public Set&lt;? extends Option&gt; getSupportedOptions() {
-<span class="fc" id="L58">    return options.getOptions();</span>
+<span class="fc" id="L62">    return options.getOptions();</span>
   }
 
   @Override
   public SourceVersion getSupportedSourceVersion() {
-<span class="nc" id="L63">    return SourceVersion.RELEASE_11;</span>
+<span class="nc" id="L67">    return SourceVersion.RELEASE_11;</span>
   }
 
   private static final boolean OK = true;
 
   @Override
   public boolean run(DocletEnvironment environment) {
-<span class="fc" id="L70">    environment.getSpecifiedElements()</span>
-<span class="fc" id="L71">            .forEach(e -&gt; {</span>
-<span class="fc" id="L72">              reporter.print(Diagnostic.Kind.NOTE, &quot;AsciiDoclet: &quot; + e);</span>
-<span class="fc" id="L73">              e.accept(new AsciiDocElementVisitor(environment, options, reporter), null);</span>
-<span class="fc" id="L74">            });</span>
-<span class="fc" id="L75">    return OK;</span>
+<span class="fc" id="L74">    environment.getSpecifiedElements()</span>
+<span class="fc" id="L75">            .forEach(e -&gt; {</span>
+<span class="fc" id="L76">              reporter.print(Diagnostic.Kind.NOTE, &quot;AsciiDoclet: &quot; + e);</span>
+<span class="fc" id="L77">              e.accept(new AsciiDocElementVisitor(environment, options, reporter), null);</span>
+<span class="fc" id="L78">            });</span>
+<span class="fc" id="L79">    return OK;</span>
   }
 
 }

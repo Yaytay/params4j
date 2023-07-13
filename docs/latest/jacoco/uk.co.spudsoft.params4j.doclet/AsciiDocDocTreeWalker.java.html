@@ -38,158 +38,141 @@ import java.util.Queue;
 import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
-import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 
 /**
  *
  * @author njt
  */
 public class AsciiDocDocTreeWalker extends DocTreePathScanner&lt;Void, Void&gt; {
-  
-<span class="fc" id="L50">  private static final Logger logger = LoggerFactory.getLogger(AsciiDocDocTreeWalker.class);</span>
-  
+    
   private final DocletEnvironment environment;  
-  private final AsciiDocOptions options;
   private final Writer writer;
   private final Reporter reporter;
   private final TreePath path;
   private DocCommentTree dc;
   private final TypeWriter typeWriter;
   
-<span class="fc" id="L60">  private final Queue&lt;Boolean&gt; listOrderedStack = new ArrayDeque&lt;&gt;();</span>
+<span class="fc" id="L55">  private final Queue&lt;Boolean&gt; listOrderedStack = new ArrayDeque&lt;&gt;();</span>
   
   private boolean inMacro;
   
-<span class="fc" id="L64">  public AsciiDocDocTreeWalker(DocletEnvironment environment, AsciiDocOptions options, Writer writer, Reporter reporter, TreePath path) {</span>
-<span class="fc" id="L65">    this.environment = environment;</span>
-<span class="fc" id="L66">    this.options = options;</span>
-<span class="fc" id="L67">    this.writer = writer;</span>
-<span class="fc" id="L68">    this.reporter = reporter;</span>
-<span class="fc" id="L69">    this.path = path;</span>
-<span class="fc" id="L70">    this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());</span>
-<span class="fc" id="L71">  }</span>
+<span class="fc" id="L59">  public AsciiDocDocTreeWalker(DocletEnvironment environment, AsciiDocOptions options, Writer writer, Reporter reporter, TreePath path) {</span>
+<span class="fc" id="L60">    this.environment = environment;</span>
+<span class="fc" id="L61">    this.writer = writer;</span>
+<span class="fc" id="L62">    this.reporter = reporter;</span>
+<span class="fc" id="L63">    this.path = path;</span>
+<span class="fc" id="L64">    this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());</span>
+<span class="fc" id="L65">  }</span>
   
   public void scan() {
-<span class="fc" id="L74">    dc = environment.getDocTrees().getDocCommentTree(path);</span>
-<span class="fc" id="L75">    scan(new DocTreePath(path, dc), null);    </span>
-<span class="fc" id="L76">  }</span>
-
-  @Override
-  public Void visitDocComment(DocCommentTree node, Void p) {
-<span class="fc" id="L80">    logger.debug(&quot;visitDocComment({}, {})&quot;, node, p);</span>
-<span class="fc" id="L81">    return super.visitDocComment(node, p);</span>
-  }
+<span class="fc" id="L68">    dc = environment.getDocTrees().getDocCommentTree(path);</span>
+<span class="fc" id="L69">    scan(new DocTreePath(path, dc), null);    </span>
+<span class="fc" id="L70">  }</span>
 
   @Override
   public Void visitEndElement(EndElementTree node, Void p) {
-<span class="fc" id="L86">    logger.debug(&quot;visitEndElement({}, {})&quot;, node, p);</span>
-<span class="fc" id="L87">    String name = node.getName().toString();</span>
-<span class="fc bfc" id="L88" title="All 2 branches covered.">    if (name.equalsIgnoreCase(&quot;ul&quot;)) {</span>
-<span class="fc" id="L89">      listOrderedStack.poll();</span>
-<span class="fc" id="L90">      write(&quot;\n&quot;);</span>
-<span class="fc bfc" id="L91" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;ol&quot;)) {</span>
-<span class="fc" id="L92">      listOrderedStack.poll();</span>
-<span class="fc" id="L93">      write(&quot;\n&quot;);</span>
-<span class="pc bpc" id="L94" title="1 of 2 branches missed.">    } else if (name.equalsIgnoreCase(&quot;a&quot;)) {</span>
-<span class="fc" id="L95">      inMacro = false;</span>
-<span class="fc" id="L96">      write(&quot;] &quot;);</span>
+<span class="fc" id="L74">    String name = node.getName().toString();</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">    if (name.equalsIgnoreCase(&quot;ul&quot;)) {</span>
+<span class="fc" id="L76">      listOrderedStack.poll();</span>
+<span class="fc" id="L77">      write(&quot;\n&quot;);</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;ol&quot;)) {</span>
+<span class="fc" id="L79">      listOrderedStack.poll();</span>
+<span class="fc" id="L80">      write(&quot;\n&quot;);</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">    } else if (name.equalsIgnoreCase(&quot;a&quot;)) {</span>
+<span class="fc" id="L82">      inMacro = false;</span>
+<span class="fc" id="L83">      write(&quot;] &quot;);</span>
     } else {
-<span class="nc" id="L98">      write(node.toString());</span>
-<span class="nc" id="L99">      write(&quot; &quot;);</span>
+<span class="nc" id="L85">      write(node.toString());</span>
+<span class="nc" id="L86">      write(&quot; &quot;);</span>
     }
-<span class="fc" id="L101">    return super.visitEndElement(node, p);</span>
+<span class="fc" id="L88">    return super.visitEndElement(node, p);</span>
   }
   
   @Override
   public Void visitLink(LinkTree node, Void p) {
-<span class="fc" id="L106">    logger.debug(&quot;visitLink({}, {})&quot;, node, p);</span>
-<span class="fc" id="L107">    scan(node.getReference(), null);</span>
-<span class="fc" id="L108">    logger.debug(&quot;path: {} ({})&quot;, this.getCurrentPath());</span>
+<span class="fc" id="L93">    scan(node.getReference(), null);</span>
 
-<span class="fc" id="L110">    ReferenceTree refTree = node.getReference();</span>
-<span class="fc" id="L111">    typeWriter.writeReferenceTree(environment, this.getCurrentPath(), refTree);</span>
-<span class="fc" id="L112">    return super.visitLink(node, p);</span>
+<span class="fc" id="L95">    ReferenceTree refTree = node.getReference();</span>
+<span class="fc" id="L96">    typeWriter.writeReferenceTree(environment, this.getCurrentPath(), refTree);</span>
+<span class="fc" id="L97">    return super.visitLink(node, p);</span>
   }
 
   @Override
   public Void visitStartElement(StartElementTree node, Void p) {
-<span class="fc" id="L117">    logger.debug(&quot;visitStartElement({}, {})&quot;, node, p);</span>
-<span class="fc" id="L118">    String name = node.getName().toString();</span>
-<span class="fc bfc" id="L119" title="All 2 branches covered.">    if (name.equalsIgnoreCase(&quot;ul&quot;)) {</span>
-<span class="fc" id="L120">      listOrderedStack.add(Boolean.FALSE);</span>
-<span class="fc bfc" id="L121" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;ol&quot;)) {</span>
-<span class="fc" id="L122">      listOrderedStack.add(Boolean.TRUE);      </span>
-<span class="fc bfc" id="L123" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;li&quot;)) {</span>
-<span class="pc bpc" id="L124" title="1 of 4 branches missed.">      if (!listOrderedStack.isEmpty() &amp;&amp; listOrderedStack.peek()) {</span>
-<span class="fc" id="L125">        write(&quot;. &quot;);        </span>
+<span class="fc" id="L102">    String name = node.getName().toString();</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">    if (name.equalsIgnoreCase(&quot;ul&quot;)) {</span>
+<span class="fc" id="L104">      listOrderedStack.add(Boolean.FALSE);</span>
+<span class="fc bfc" id="L105" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;ol&quot;)) {</span>
+<span class="fc" id="L106">      listOrderedStack.add(Boolean.TRUE);      </span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;li&quot;)) {</span>
+<span class="pc bpc" id="L108" title="1 of 4 branches missed.">      if (!listOrderedStack.isEmpty() &amp;&amp; listOrderedStack.peek()) {</span>
+<span class="fc" id="L109">        write(&quot;. &quot;);        </span>
       } else {
-<span class="fc" id="L127">        write(&quot;* &quot;);</span>
+<span class="fc" id="L111">        write(&quot;* &quot;);</span>
       }
-<span class="fc bfc" id="L129" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;p&quot;)) {</span>
-<span class="fc" id="L130">      write(&quot;\n\n&quot;);</span>
-<span class="pc bpc" id="L131" title="1 of 2 branches missed.">    } else if (name.equalsIgnoreCase(&quot;a&quot;)) {</span>
-<span class="fc" id="L132">      write(&quot;link:&quot;);</span>
-<span class="pc bpc" id="L133" title="1 of 2 branches missed.">      for (DocTree attribute : node.getAttributes()) {</span>
-<span class="pc bpc" id="L134" title="1 of 2 branches missed.">        if (attribute instanceof AttributeTree) {</span>
-<span class="fc" id="L135">          AttributeTree attributeTree = (AttributeTree) attribute;</span>
-<span class="pc bpc" id="L136" title="1 of 2 branches missed.">          if (attributeTree.getName().toString().equalsIgnoreCase(&quot;href&quot;)) {</span>
-<span class="fc" id="L137">            write(attributeTree.getValue().toString());</span>
-<span class="fc" id="L138">            break;</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;p&quot;)) {</span>
+<span class="fc" id="L114">      write(&quot;\n\n&quot;);</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">    } else if (name.equalsIgnoreCase(&quot;a&quot;)) {</span>
+<span class="fc" id="L116">      write(&quot;link:&quot;);</span>
+<span class="pc bpc" id="L117" title="1 of 2 branches missed.">      for (DocTree attribute : node.getAttributes()) {</span>
+<span class="pc bpc" id="L118" title="1 of 2 branches missed.">        if (attribute instanceof AttributeTree) {</span>
+<span class="fc" id="L119">          AttributeTree attributeTree = (AttributeTree) attribute;</span>
+<span class="pc bpc" id="L120" title="1 of 2 branches missed.">          if (attributeTree.getName().toString().equalsIgnoreCase(&quot;href&quot;)) {</span>
+<span class="fc" id="L121">            write(attributeTree.getValue().toString());</span>
+<span class="fc" id="L122">            break;</span>
           }
         }
-<span class="nc" id="L141">      }</span>
-<span class="fc" id="L142">      write(&quot;[&quot;);</span>
-<span class="fc" id="L143">      inMacro = true;</span>
-<span class="fc" id="L144">      return null;</span>
+<span class="nc" id="L125">      }</span>
+<span class="fc" id="L126">      write(&quot;[&quot;);</span>
+<span class="fc" id="L127">      inMacro = true;</span>
+<span class="fc" id="L128">      return null;</span>
     } else {
-<span class="nc" id="L146">      write(node.toString());</span>
+<span class="nc" id="L130">      write(node.toString());</span>
     }
-<span class="fc" id="L148">    return super.visitStartElement(node, p);</span>
+<span class="fc" id="L132">    return super.visitStartElement(node, p);</span>
   }
 
   @Override
   public Void visitText(TextTree node, Void p) {
-<span class="fc" id="L153">    logger.debug(&quot;visitText({}, {})&quot;, node, p);</span>
-<span class="fc" id="L154">    write(node.getBody().trim());</span>
-<span class="fc bfc" id="L155" title="All 2 branches covered.">    if (!inMacro) {</span>
-<span class="fc" id="L156">      write(&quot;\n&quot;);</span>
+<span class="fc" id="L137">    write(node.getBody().trim());</span>
+<span class="fc bfc" id="L138" title="All 2 branches covered.">    if (!inMacro) {</span>
+<span class="fc" id="L139">      write(&quot;\n&quot;);</span>
     }
-<span class="fc" id="L158">    return super.visitText(node, p);</span>
+<span class="fc" id="L141">    return super.visitText(node, p);</span>
   }
 
   @Override
   public Void visitSee(SeeTree node, Void p) {
-<span class="fc" id="L163">    write(&quot;\n\nSee: &quot;);</span>
-<span class="fc" id="L164">    return super.visitSee(node, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody</span>
+<span class="fc" id="L146">    write(&quot;\n\nSee: &quot;);</span>
+<span class="fc" id="L147">    return super.visitSee(node, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody</span>
   }
 
   @Override
   public Void visitParam(ParamTree node, Void p) {
-<span class="fc" id="L169">    return null;</span>
+<span class="fc" id="L152">    return null;</span>
   }
 
   @Override
   public Void visitReturn(ReturnTree node, Void p) {
-<span class="nc" id="L174">    return null;</span>
+<span class="nc" id="L157">    return null;</span>
   }
 
   @Override
   public Void visitAuthor(AuthorTree node, Void p) {
-<span class="fc" id="L179">    return null;</span>
+<span class="fc" id="L162">    return null;</span>
   }
 
   private void write(String s) {
-<span class="pc bpc" id="L183" title="1 of 2 branches missed.">    if (s != null) {</span>
-<span class="fc" id="L184">      s = s.replaceAll(&quot;\n &quot;, &quot; &quot;);</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">    if (s != null) {</span>
+<span class="fc" id="L167">      s = s.replaceAll(&quot;\n &quot;, &quot; &quot;);</span>
 
       try {
-<span class="fc" id="L187">        writer.write(s);</span>
-<span class="nc" id="L188">      } catch (IOException ex) {</span>
-<span class="nc" id="L189">        reporter.print(Diagnostic.Kind.ERROR, new DocTreePath(path, dc), &quot;Failed to write: &quot; + ex.getMessage());</span>
-<span class="fc" id="L190">      }</span>
+<span class="fc" id="L170">        writer.write(s);</span>
+<span class="nc" id="L171">      } catch (IOException ex) {</span>
+<span class="nc" id="L172">        reporter.print(Diagnostic.Kind.ERROR, new DocTreePath(path, dc), &quot;Failed to write: &quot; + ex.getMessage());</span>
+<span class="fc" id="L173">      }</span>
     }
-<span class="fc" id="L192">  }  </span>
+<span class="fc" id="L175">  }  </span>
  
   
 }

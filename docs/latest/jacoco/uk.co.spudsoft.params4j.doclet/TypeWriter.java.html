@@ -36,8 +36,6 @@ import javax.lang.model.util.SimpleTypeVisitor14;
 import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -45,182 +43,177 @@ import org.slf4j.LoggerFactory;
  */
 public class TypeWriter {
   
-<span class="fc" id="L48">  private static final Logger logger = LoggerFactory.getLogger(TypeWriter.class);</span>
-  
   private final Writer writer;
   private final Reporter reporter;
   private final Set&lt;String&gt; includedClasses;
   private final AsciiDocLinkMaps linkMaps;
   
   public void writeReferenceTree(DocletEnvironment environment, DocTreePath currentPath, ReferenceTree refTree) {
-<span class="fc" id="L56">    Element element = environment.getDocTrees().getElement(new DocTreePath(currentPath, refTree));</span>
-<span class="fc" id="L57">    TypeMirror type = environment.getDocTrees().getType(new DocTreePath(currentPath, refTree));</span>
-<span class="fc" id="L58">    logger.debug(&quot;element: {}&quot;, element);</span>
-<span class="fc" id="L59">    logger.debug(&quot;type: {}&quot;, type);</span>
-<span class="fc bfc" id="L60" title="All 2 branches covered.">    if (element instanceof ExecutableElement) {      </span>
-<span class="fc" id="L61">      TypeElement typeElement = (TypeElement) element.getEnclosingElement();</span>
-<span class="fc" id="L62">      ExecutableElement methodElement = (ExecutableElement) element;</span>
+<span class="fc" id="L52">    Element element = environment.getDocTrees().getElement(new DocTreePath(currentPath, refTree));</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">    if (element instanceof ExecutableElement) {      </span>
+<span class="fc" id="L54">      TypeElement typeElement = (TypeElement) element.getEnclosingElement();</span>
+<span class="fc" id="L55">      ExecutableElement methodElement = (ExecutableElement) element;</span>
       
-<span class="fc" id="L64">      String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));</span>
-<span class="fc bfc" id="L65" title="All 2 branches covered.">      if (url == null) {</span>
-<span class="pc bpc" id="L66" title="1 of 2 branches missed.">        if (includedClasses.contains(typeElement.getQualifiedName().toString())) {</span>
-<span class="fc" id="L67">          write(&quot;xref:&quot;);</span>
-<span class="fc" id="L68">          write(typeElement.getQualifiedName().toString());</span>
-<span class="fc" id="L69">          write(&quot;.adoc[&quot;);</span>
+<span class="fc" id="L57">      String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">      if (url == null) {</span>
+<span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if (includedClasses.contains(typeElement.getQualifiedName().toString())) {</span>
+<span class="fc" id="L60">          write(&quot;xref:&quot;);</span>
+<span class="fc" id="L61">          write(typeElement.getQualifiedName().toString());</span>
+<span class="fc" id="L62">          write(&quot;.adoc[&quot;);</span>
           // For method links javadoc removes leading packages and type parameters        
-<span class="fc" id="L71">          write(TypeWriter.simplifySignature(refTree.getSignature()));</span>
-<span class="fc" id="L72">          write(&quot;] &quot;);</span>
+<span class="fc" id="L64">          write(TypeWriter.simplifySignature(refTree.getSignature()));</span>
+<span class="fc" id="L65">          write(&quot;] &quot;);</span>
         } else {
-<span class="nc" id="L74">          write(refTree.getSignature());</span>
-<span class="nc" id="L75">          write(&quot; &quot;);</span>
+<span class="nc" id="L67">          write(refTree.getSignature());</span>
+<span class="nc" id="L68">          write(&quot; &quot;);</span>
         }
       } else {
-<span class="fc" id="L78">        write(&quot;link:&quot;);</span>
-<span class="fc" id="L79">        write(linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement)));</span>
-<span class="fc" id="L80">        write(TypeWriter.getMethodAnchor(methodElement));</span>
-<span class="fc" id="L81">        write(&quot;[&quot;);</span>
+<span class="fc" id="L71">        write(&quot;link:&quot;);</span>
+<span class="fc" id="L72">        write(linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement)));</span>
+<span class="fc" id="L73">        write(TypeWriter.getMethodAnchor(methodElement));</span>
+<span class="fc" id="L74">        write(&quot;[&quot;);</span>
         // For method links javadoc removes leading packages and type parameters        
-<span class="fc" id="L83">        write(TypeWriter.simplifySignature(refTree.getSignature()));</span>
-<span class="fc" id="L84">        write(&quot;] &quot;);</span>
+<span class="fc" id="L76">        write(TypeWriter.simplifySignature(refTree.getSignature()));</span>
+<span class="fc" id="L77">        write(&quot;] &quot;);</span>
       }
-<span class="pc bpc" id="L86" title="1 of 2 branches missed.">    } else if (element instanceof TypeElement) {</span>
-<span class="fc" id="L87">      TypeElement typeElement = (TypeElement) element;</span>
+<span class="pc bpc" id="L79" title="1 of 2 branches missed.">    } else if (element instanceof TypeElement) {</span>
+<span class="fc" id="L80">      TypeElement typeElement = (TypeElement) element;</span>
       
-<span class="fc" id="L89">      String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));</span>
-<span class="fc bfc" id="L90" title="All 2 branches covered.">      if (url == null) {</span>
-<span class="fc bfc" id="L91" title="All 2 branches covered.">        if (includedClasses.contains(typeElement.getQualifiedName().toString())) {</span>
-<span class="fc" id="L92">          write(&quot;xref:&quot;);</span>
-<span class="fc" id="L93">          write(typeElement.getQualifiedName().toString());</span>
-<span class="fc" id="L94">          write(&quot;.adoc[&quot;);</span>
+<span class="fc" id="L82">      String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">      if (url == null) {</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        if (includedClasses.contains(typeElement.getQualifiedName().toString())) {</span>
+<span class="fc" id="L85">          write(&quot;xref:&quot;);</span>
+<span class="fc" id="L86">          write(typeElement.getQualifiedName().toString());</span>
+<span class="fc" id="L87">          write(&quot;.adoc[&quot;);</span>
           // For method links javadoc removes leading packages and type parameters        
-<span class="fc" id="L96">          write(refTree.getSignature());</span>
-<span class="fc" id="L97">          write(&quot;] &quot;);</span>
+<span class="fc" id="L89">          write(refTree.getSignature());</span>
+<span class="fc" id="L90">          write(&quot;] &quot;);</span>
         } else {
-<span class="fc" id="L99">          write(refTree.getSignature());</span>
-<span class="fc" id="L100">          write(&quot; &quot;);</span>
+<span class="fc" id="L92">          write(refTree.getSignature());</span>
+<span class="fc" id="L93">          write(&quot; &quot;);</span>
         }
       } else {
-<span class="fc" id="L103">        write(&quot;link:&quot;);</span>
-<span class="fc" id="L104">        write(linkMaps.getUrlForType(TypeWriter.getPackage(element), TypeWriter.getClassName(element)));</span>
-<span class="fc" id="L105">        write(&quot;[&quot;);</span>
-<span class="fc" id="L106">        write(refTree.getSignature());</span>
-<span class="fc" id="L107">        write(&quot;] &quot;);</span>
+<span class="fc" id="L96">        write(&quot;link:&quot;);</span>
+<span class="fc" id="L97">        write(linkMaps.getUrlForType(TypeWriter.getPackage(element), TypeWriter.getClassName(element)));</span>
+<span class="fc" id="L98">        write(&quot;[&quot;);</span>
+<span class="fc" id="L99">        write(refTree.getSignature());</span>
+<span class="fc" id="L100">        write(&quot;] &quot;);</span>
       }
     }
-<span class="fc" id="L110">  }</span>
+<span class="fc" id="L103">  }</span>
   
   
   public void writeDeclaredType(DeclaredType declaredType) {
     
-<span class="fc" id="L115">    TypeElement typeElement = (TypeElement) declaredType.asElement();    </span>
+<span class="fc" id="L108">    TypeElement typeElement = (TypeElement) declaredType.asElement();    </span>
     
-<span class="fc" id="L117">    String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));</span>
+<span class="fc" id="L110">    String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));</span>
 
-<span class="fc bfc" id="L119" title="All 2 branches covered.">    if (url != null) {</span>
-<span class="fc" id="L120">      write(&quot;link:&quot;);</span>
-<span class="fc" id="L121">      write(url);</span>
-<span class="fc" id="L122">      write(&quot;[&quot;);</span>
-<span class="fc" id="L123">      write(typeElement.getSimpleName().toString());</span>
-<span class="fc" id="L124">      write(&quot;]&quot;);</span>
-<span class="fc bfc" id="L125" title="All 2 branches covered.">    } else if (includedClasses.contains(typeElement.getQualifiedName().toString())) {</span>
-<span class="fc" id="L126">      write(&quot;xref:&quot;);</span>
-<span class="fc" id="L127">      write(typeElement.getQualifiedName().toString());</span>
-<span class="fc" id="L128">      write(&quot;.adoc[&quot;);</span>
-<span class="fc" id="L129">      write(typeElement.getSimpleName().toString());</span>
-<span class="fc" id="L130">      write(&quot;]&quot;);</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">    if (url != null) {</span>
+<span class="fc" id="L113">      write(&quot;link:&quot;);</span>
+<span class="fc" id="L114">      write(url);</span>
+<span class="fc" id="L115">      write(&quot;[&quot;);</span>
+<span class="fc" id="L116">      write(typeElement.getSimpleName().toString());</span>
+<span class="fc" id="L117">      write(&quot;]&quot;);</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">    } else if (includedClasses.contains(typeElement.getQualifiedName().toString())) {</span>
+<span class="fc" id="L119">      write(&quot;xref:&quot;);</span>
+<span class="fc" id="L120">      write(typeElement.getQualifiedName().toString());</span>
+<span class="fc" id="L121">      write(&quot;.adoc[&quot;);</span>
+<span class="fc" id="L122">      write(typeElement.getSimpleName().toString());</span>
+<span class="fc" id="L123">      write(&quot;]&quot;);</span>
     } else {
-<span class="fc" id="L132">      write(declaredType.toString());</span>
+<span class="fc" id="L125">      write(declaredType.toString());</span>
     }
     
-<span class="fc bfc" id="L135" title="All 2 branches covered.">    if (!declaredType.getTypeArguments().isEmpty()) {</span>
-<span class="fc" id="L136">      write(&quot;&lt;&quot;);</span>
-<span class="fc" id="L137">      boolean first = true;</span>
-<span class="fc bfc" id="L138" title="All 2 branches covered.">      for (TypeMirror ta : declaredType.getTypeArguments()) {</span>
-<span class="fc bfc" id="L139" title="All 2 branches covered.">        if (!first) {</span>
-<span class="fc" id="L140">          write(&quot;, &quot;);</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">    if (!declaredType.getTypeArguments().isEmpty()) {</span>
+<span class="fc" id="L129">      write(&quot;&lt;&quot;);</span>
+<span class="fc" id="L130">      boolean first = true;</span>
+<span class="fc bfc" id="L131" title="All 2 branches covered.">      for (TypeMirror ta : declaredType.getTypeArguments()) {</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        if (!first) {</span>
+<span class="fc" id="L133">          write(&quot;, &quot;);</span>
         }
-<span class="fc" id="L142">        first = false;</span>
-<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if (ta instanceof DeclaredType) {</span>
-<span class="fc" id="L144">          writeDeclaredType((DeclaredType) ta);</span>
-<span class="nc bnc" id="L145" title="All 2 branches missed.">        } else if (ta != null) {</span>
-<span class="nc" id="L146">          write(ta.toString());</span>
+<span class="fc" id="L135">        first = false;</span>
+<span class="pc bpc" id="L136" title="1 of 2 branches missed.">        if (ta instanceof DeclaredType) {</span>
+<span class="fc" id="L137">          writeDeclaredType((DeclaredType) ta);</span>
+<span class="nc bnc" id="L138" title="All 2 branches missed.">        } else if (ta != null) {</span>
+<span class="nc" id="L139">          write(ta.toString());</span>
         }
-<span class="fc" id="L148">      }</span>
-<span class="fc" id="L149">      write(&quot;&gt;&quot;);</span>
+<span class="fc" id="L141">      }</span>
+<span class="fc" id="L142">      write(&quot;&gt;&quot;);</span>
     }
-<span class="fc" id="L151">  }      </span>
+<span class="fc" id="L144">  }      </span>
   
   public TypeWriter(Writer writer, Reporter reporter, Set&lt;String&gt; includedClasses, AsciiDocLinkMaps linkMaps) {
-<span class="fc" id="L154">    super();</span>
-<span class="fc" id="L155">    this.writer = writer;</span>
-<span class="fc" id="L156">    this.reporter = reporter;</span>
-<span class="fc" id="L157">    this.includedClasses = includedClasses;</span>
-<span class="fc" id="L158">    this.linkMaps = linkMaps;</span>
-<span class="fc" id="L159">  }</span>
+<span class="fc" id="L147">    super();</span>
+<span class="fc" id="L148">    this.writer = writer;</span>
+<span class="fc" id="L149">    this.reporter = reporter;</span>
+<span class="fc" id="L150">    this.includedClasses = includedClasses;</span>
+<span class="fc" id="L151">    this.linkMaps = linkMaps;</span>
+<span class="fc" id="L152">  }</span>
 
   public static String getPackage(Element elem) {
-<span class="pc bpc" id="L162" title="1 of 4 branches missed.">    while (elem != null &amp;&amp; !(elem instanceof PackageElement)) {</span>
-<span class="fc" id="L163">      elem = elem.getEnclosingElement();</span>
+<span class="pc bpc" id="L155" title="1 of 4 branches missed.">    while (elem != null &amp;&amp; !(elem instanceof PackageElement)) {</span>
+<span class="fc" id="L156">      elem = elem.getEnclosingElement();</span>
     }
-<span class="pc bpc" id="L165" title="1 of 2 branches missed.">    if (elem instanceof PackageElement) {</span>
-<span class="fc" id="L166">      return ((PackageElement) elem).getQualifiedName().toString();</span>
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">    if (elem instanceof PackageElement) {</span>
+<span class="fc" id="L159">      return ((PackageElement) elem).getQualifiedName().toString();</span>
     }
     
-<span class="nc" id="L169">    return null;</span>
+<span class="nc" id="L162">    return null;</span>
   }
   
   public static String getMethodAnchor(ExecutableElement methodElement) {
-<span class="fc" id="L173">    StringBuilder builder = new StringBuilder();</span>
-<span class="fc" id="L174">    builder.append(&quot;#&quot;);</span>
-<span class="fc" id="L175">    builder.append(methodElement.getSimpleName());</span>
-<span class="fc" id="L176">    builder.append(&quot;(&quot;);</span>
-<span class="fc" id="L177">    boolean first = true;</span>
-<span class="fc bfc" id="L178" title="All 2 branches covered.">    for (VariableElement ve : methodElement.getParameters()) {</span>
-<span class="fc bfc" id="L179" title="All 2 branches covered.">      if (!first) {</span>
-<span class="fc" id="L180">        builder.append(&quot;,&quot;);</span>
+<span class="fc" id="L166">    StringBuilder builder = new StringBuilder();</span>
+<span class="fc" id="L167">    builder.append(&quot;#&quot;);</span>
+<span class="fc" id="L168">    builder.append(methodElement.getSimpleName());</span>
+<span class="fc" id="L169">    builder.append(&quot;(&quot;);</span>
+<span class="fc" id="L170">    boolean first = true;</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">    for (VariableElement ve : methodElement.getParameters()) {</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">      if (!first) {</span>
+<span class="fc" id="L173">        builder.append(&quot;,&quot;);</span>
       }
-<span class="fc" id="L182">      first = false;</span>
-<span class="fc" id="L183">      String type = ve.asType().accept(new SimpleTypeVisitor14&lt;String, Void&gt;(){</span>
+<span class="fc" id="L175">      first = false;</span>
+<span class="fc" id="L176">      String type = ve.asType().accept(new SimpleTypeVisitor14&lt;String, Void&gt;(){</span>
         @Override
         public String visitDeclared(DeclaredType t, Void p) {
-<span class="fc" id="L186">          return t.asElement().toString();</span>
+<span class="fc" id="L179">          return t.asElement().toString();</span>
         }        
         @Override
         public String visitArray(ArrayType t, Void p) {
-<span class="fc" id="L190">          return t.toString().replaceAll(&quot;\\[\\]&quot;, &quot;%5B%5D&quot;);</span>
+<span class="fc" id="L183">          return t.toString().replaceAll(&quot;\\[\\]&quot;, &quot;%5B%5D&quot;);</span>
         }
         @Override
         public String visitPrimitive(PrimitiveType t, Void p) {
-<span class="fc" id="L194">          return t.toString();</span>
+<span class="fc" id="L187">          return t.toString();</span>
         }
       }, null);
-<span class="fc" id="L197">      builder.append(type);</span>
-<span class="fc" id="L198">    }</span>
-<span class="fc" id="L199">    builder.append(&quot;)&quot;);</span>
-<span class="fc" id="L200">    return builder.toString();</span>
+<span class="fc" id="L190">      builder.append(type);</span>
+<span class="fc" id="L191">    }</span>
+<span class="fc" id="L192">    builder.append(&quot;)&quot;);</span>
+<span class="fc" id="L193">    return builder.toString();</span>
   }
   
   public static String getBaseClassName(Element elem) {
-<span class="nc" id="L204">    Element lastElem = elem;</span>
-<span class="nc bnc" id="L205" title="All 2 branches missed.">    while (elem instanceof TypeElement) {</span>
-<span class="nc" id="L206">      elem = elem.getEnclosingElement();</span>
-<span class="nc bnc" id="L207" title="All 2 branches missed.">      if (elem instanceof TypeElement) {</span>
-<span class="nc" id="L208">        lastElem = elem;</span>
+<span class="nc" id="L197">    Element lastElem = elem;</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">    while (elem instanceof TypeElement) {</span>
+<span class="nc" id="L199">      elem = elem.getEnclosingElement();</span>
+<span class="nc bnc" id="L200" title="All 2 branches missed.">      if (elem instanceof TypeElement) {</span>
+<span class="nc" id="L201">        lastElem = elem;</span>
       }
     }    
-<span class="nc" id="L211">    return lastElem.getSimpleName().toString();</span>
+<span class="nc" id="L204">    return lastElem.getSimpleName().toString();</span>
   }
   
   public static String getClassName(Element elem) {
-<span class="fc" id="L215">    StringBuilder builder = new StringBuilder();</span>
-<span class="fc bfc" id="L216" title="All 2 branches covered.">    while (elem instanceof TypeElement) {</span>
-<span class="fc bfc" id="L217" title="All 2 branches covered.">      if (!builder.isEmpty()) {</span>
-<span class="fc" id="L218">        builder.insert(0, &quot;.&quot;);</span>
+<span class="fc" id="L208">    StringBuilder builder = new StringBuilder();</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">    while (elem instanceof TypeElement) {</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">      if (!builder.isEmpty()) {</span>
+<span class="fc" id="L211">        builder.insert(0, &quot;.&quot;);</span>
       }
-<span class="fc" id="L220">      builder.insert(0, elem.getSimpleName());</span>
-<span class="fc" id="L221">      elem = elem.getEnclosingElement();</span>
+<span class="fc" id="L213">      builder.insert(0, elem.getSimpleName());</span>
+<span class="fc" id="L214">      elem = elem.getEnclosingElement();</span>
     }    
-<span class="fc" id="L223">    return builder.toString();</span>
+<span class="fc" id="L216">    return builder.toString();</span>
   }
   
   /**
@@ -228,35 +221,35 @@ public class TypeWriter {
    * @param signature The signature to be simplified.
    * @return A  simpler signature.
    */
-<span class="fc" id="L231">  private static final Pattern LEADING_PACKAGE = Pattern.compile(&quot;^([a-z][a-zA-Z0-9]+\\.)+&quot;);</span>
-<span class="fc" id="L232">  private static final Pattern TYPE_PARAMS = Pattern.compile(&quot;(&lt;[^&lt;]+&gt;)&quot;);</span>
-<span class="fc" id="L233">  private static final Pattern SQUARE_BRACKET = Pattern.compile(&quot;\\]&quot;);</span>
-<span class="fc" id="L234">  private static final Pattern CONSTRUCTOR = Pattern.compile(&quot;^([a-zA-Z0-9]+)#\\1&quot;);</span>
+<span class="fc" id="L224">  private static final Pattern LEADING_PACKAGE = Pattern.compile(&quot;^([a-z][a-zA-Z0-9]+\\.)+&quot;);</span>
+<span class="fc" id="L225">  private static final Pattern TYPE_PARAMS = Pattern.compile(&quot;(&lt;[^&lt;]+&gt;)&quot;);</span>
+<span class="fc" id="L226">  private static final Pattern SQUARE_BRACKET = Pattern.compile(&quot;\\]&quot;);</span>
+<span class="fc" id="L227">  private static final Pattern CONSTRUCTOR = Pattern.compile(&quot;^([a-zA-Z0-9]+)#\\1&quot;);</span>
   public static String simplifySignature(String signature) {
-<span class="fc" id="L236">    signature = LEADING_PACKAGE.matcher(signature).replaceAll(&quot;&quot;);</span>
+<span class="fc" id="L229">    signature = LEADING_PACKAGE.matcher(signature).replaceAll(&quot;&quot;);</span>
     
-<span class="fc" id="L238">    Matcher tpm = TYPE_PARAMS.matcher(signature);</span>
-<span class="fc bfc" id="L239" title="All 2 branches covered.">    while (tpm.find()) {</span>
-<span class="fc" id="L240">      signature = tpm.replaceAll(&quot;&quot;);</span>
-<span class="fc" id="L241">      tpm = TYPE_PARAMS.matcher(signature);</span>
+<span class="fc" id="L231">    Matcher tpm = TYPE_PARAMS.matcher(signature);</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">    while (tpm.find()) {</span>
+<span class="fc" id="L233">      signature = tpm.replaceAll(&quot;&quot;);</span>
+<span class="fc" id="L234">      tpm = TYPE_PARAMS.matcher(signature);</span>
     }
     
-<span class="fc" id="L244">    signature = SQUARE_BRACKET.matcher(signature).replaceAll(&quot;\\\\]&quot;);</span>
+<span class="fc" id="L237">    signature = SQUARE_BRACKET.matcher(signature).replaceAll(&quot;\\\\]&quot;);</span>
     
-<span class="fc" id="L246">    signature = CONSTRUCTOR.matcher(signature).replaceAll(mr -&gt; mr.group(1));</span>
+<span class="fc" id="L239">    signature = CONSTRUCTOR.matcher(signature).replaceAll(mr -&gt; mr.group(1));</span>
     
-<span class="fc" id="L248">    return signature.trim();</span>
+<span class="fc" id="L241">    return signature.trim();</span>
   }
 
   private void write(String s) {
-<span class="fc" id="L252">    s = s.replaceAll(&quot;\n &quot;, &quot;\n&quot;);</span>
+<span class="fc" id="L245">    s = s.replaceAll(&quot;\n &quot;, &quot;\n&quot;);</span>
     
     try {
-<span class="fc" id="L255">      writer.write(s);</span>
-<span class="nc" id="L256">    } catch (IOException ex) {</span>
-<span class="nc" id="L257">      reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to write: &quot; + ex.getMessage());</span>
-<span class="fc" id="L258">    }</span>
-<span class="fc" id="L259">  }</span>
+<span class="fc" id="L248">      writer.write(s);</span>
+<span class="nc" id="L249">    } catch (IOException ex) {</span>
+<span class="nc" id="L250">      reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to write: &quot; + ex.getMessage());</span>
+<span class="fc" id="L251">    }</span>
+<span class="fc" id="L252">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.10.202304240956</span></div></body></html>
