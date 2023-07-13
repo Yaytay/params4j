@@ -102,7 +102,7 @@ public class AsciiDocDocletTest {
             , "-d"
             , "target/parameter-docs"
             , "--include-classes"
-            , "commentcap.Parameters,commentcap.Credentials"
+            , "commentcap.Parameters,commentcap.Credentials,commentcap.ProtectedCredentials"
             , "--include-classes"
             , "commentcap.DataSource"
             , "-link"

@@ -29,7 +29,11 @@ import jdk.javadoc.doclet.Reporter;
  *
  * Although additional classes can be provided it will only record setters and/or fields (preferring setters, but falling back to
  * fields).
- *
+ * 
+ * Runs through the specified elements in the {@link jdk.javadoc.doclet.DocletEnvironment} and 
+ * uses an {@link uk.co.spudsoft.params4j.doclet.AsciiDocElementVisitor} to walk through the 
+ * Java {@link javax.lang.model.element.Element}.
+ * 
  * @author njt
  */
 public class AsciiDocDoclet implements Doclet {

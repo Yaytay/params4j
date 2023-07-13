@@ -21,7 +21,8 @@ import java.util.List;
 import jdk.javadoc.doclet.Doclet;
 
 /**
- *
+ * Abstract option for configuring a {@link jdk.javadoc.doclet.Doclet}.
+ * 
  * @author njt
  */
 public abstract class AbstractAsciiDocOption implements Doclet.Option {
@@ -31,6 +32,14 @@ public abstract class AbstractAsciiDocOption implements Doclet.Option {
   private final List<String> names;
   private final String parameters;
 
+  /**
+   * Constructor.
+   * 
+   * @param argumentCount The number of arguments, this option will consume.
+   * @param description Description of the argument.
+   * @param name The parameter as it would be specified on the command line (or in addiitonalOptions in the maven plugin).
+   * @param parameters The name of the parameter to the option.
+   */
   public AbstractAsciiDocOption(int argumentCount, String description, String name, String parameters) {
     this.argumentCount = argumentCount;
     this.description = description;

@@ -29,6 +29,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleTypeVisitor14;
 import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.DocletEnvironment;
@@ -109,6 +110,18 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
 
           e.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
 
+          for (TypeMirror superMirror = e.getSuperclass(); superMirror != null;) {
+
+            Element superElement = environment.getTypeUtils().asElement(superMirror);
+            if (superElement instanceof TypeElement) {
+              TypeElement superTypeElement = (TypeElement) superElement;
+              superTypeElement.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
+              superMirror = superTypeElement.getSuperclass();
+            } else {
+              superMirror = null;
+            }
+          }
+          
           writer.write("|===\n");
         } catch (IOException ex) {
           reporter.print(Diagnostic.Kind.ERROR, "Failed to write to file: " + ex.getMessage());

@@ -46,7 +46,6 @@ import jdk.javadoc.doclet.Reporter;
 public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     
   private final DocletEnvironment environment;  
-  private final AsciiDocOptions options;
   private final Writer writer;
   private final Reporter reporter;
   private final TreePath path;
@@ -59,7 +58,6 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   
   public AsciiDocDocTreeWalker(DocletEnvironment environment, AsciiDocOptions options, Writer writer, Reporter reporter, TreePath path) {
     this.environment = environment;
-    this.options = options;
     this.writer = writer;
     this.reporter = reporter;
     this.path = path;

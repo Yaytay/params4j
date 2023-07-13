@@ -50,7 +50,6 @@ public class TypeWriter {
   
   public void writeReferenceTree(DocletEnvironment environment, DocTreePath currentPath, ReferenceTree refTree) {
     Element element = environment.getDocTrees().getElement(new DocTreePath(currentPath, refTree));
-    TypeMirror type = environment.getDocTrees().getType(new DocTreePath(currentPath, refTree));
     if (element instanceof ExecutableElement) {      
       TypeElement typeElement = (TypeElement) element.getEnclosingElement();
       ExecutableElement methodElement = (ExecutableElement) element;

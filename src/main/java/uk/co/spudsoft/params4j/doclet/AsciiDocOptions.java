@@ -23,6 +23,7 @@ import java.util.Set;
 import jdk.javadoc.doclet.Doclet.Option;
 
 /**
+ * All the options for configuration the {@link uk.co.spudsoft.params4j.doclet.AsciiDocDoclet}.
  *
  * @author njt
  */
