@@ -100,7 +100,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
           writer.write("\n");
           writer.write("\n");
 
-          writer.write("[cols=\"1,1a,4a\",table-stripes=even]\n");
+          writer.write("[cols=\"1,1a,4a\",stripes=even]\n");
           writer.write("|===\n");
           writer.write("| Name\n");
           writer.write("| Type\n");
