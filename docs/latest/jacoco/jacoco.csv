@@ -22,12 +22,14 @@ Parameters for Java,uk.co.spudsoft.params4j.impl,DirGatherer,6,100,2,10,2,20,2,7
 Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocOptions,0,71,0,0,0,13,0,6,0,6
 Parameters for Java,uk.co.spudsoft.params4j.doclet,TypeWriter.new SimpleTypeVisitor14() {...},0,16,0,0,0,4,0,4,0,4
 Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocLinkMaps,16,159,5,17,5,41,5,13,0,7
-Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocElementVisitor,79,364,4,22,15,71,11,18,7,9
-Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocDocTreeWalker,29,266,7,23,7,62,8,18,1,10
+Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocElementVisitor,89,504,6,36,18,106,12,25,6,10
+Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocDocTreeWalker,59,401,10,44,11,101,11,31,1,14
 Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocOptions.new AbstractAsciiDocOption() {...},0,19,0,0,0,3,0,2,0,2
 Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocOptions.new AbstractAsciiDocOption() {...},0,50,0,4,0,7,0,4,0,2
 Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocOptions.new AbstractAsciiDocOption() {...},0,48,0,4,0,7,0,4,0,2
 Parameters for Java,uk.co.spudsoft.params4j.doclet,TypeWriter,42,444,11,35,13,110,9,25,1,10
 Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocElementVisitor.new SimpleTypeVisitor14() {...},0,8,0,0,0,2,0,2,0,2
+Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocElementVisitor.new SimpleTypeVisitor14() {...},0,8,0,0,0,2,0,2,0,2
 Parameters for Java,uk.co.spudsoft.params4j.doclet,AsciiDocDoclet,6,46,0,0,2,13,2,5,2,5
 Parameters for Java,uk.co.spudsoft.params4j.doclet,AbstractAsciiDocOption,0,35,0,0,0,11,0,6,0,6
+Parameters for Java,uk.co.spudsoft.params4j.doclet,HtmlEntities,0,74,0,0,0,16,0,3,0,3

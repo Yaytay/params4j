@@ -21,7 +21,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashSet;
+import java.util.Set;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
@@ -48,157 +51,219 @@ public class AsciiDocElementVisitor implements ElementVisitor&lt;Void, Void&gt; 
 
   private Writer writer;
   private TypeWriter typeWriter;
+<span class="fc" id="L54">  private final Set&lt;String&gt; fields = new HashSet&lt;&gt;();</span>
   
-<span class="fc" id="L52">  public AsciiDocElementVisitor(DocletEnvironment environment, AsciiDocOptions options, Reporter reporter) {</span>
-<span class="fc" id="L53">    this.environment = environment;</span>
-<span class="fc" id="L54">    this.options = options;</span>
-<span class="fc" id="L55">    this.reporter = reporter;</span>
-<span class="fc" id="L56">  }</span>
+<span class="fc" id="L56">  public AsciiDocElementVisitor(DocletEnvironment environment, AsciiDocOptions options, Reporter reporter) {</span>
+<span class="fc" id="L57">    this.environment = environment;</span>
+<span class="fc" id="L58">    this.options = options;</span>
+<span class="fc" id="L59">    this.reporter = reporter;</span>
+<span class="fc" id="L60">  }</span>
   
   @Override
   public Void visit(Element e, Void p) {
-<span class="nc" id="L60">    return null;</span>
+<span class="nc" id="L64">    return null;</span>
   }
 
   @Override
   public Void visitPackage(PackageElement e, Void p) {
-<span class="fc" id="L65">    reporter.print(Diagnostic.Kind.NOTE, &quot;Visiting Package &quot; + e.getQualifiedName());</span>
-<span class="fc" id="L66">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
-<span class="fc" id="L67">    return null;</span>
+<span class="fc" id="L69">    reporter.print(Diagnostic.Kind.NOTE, &quot;Visiting Package &quot; + e.getQualifiedName());</span>
+<span class="fc" id="L70">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
+<span class="fc" id="L71">    return null;</span>
   }
   
   private boolean include(TypeElement e) {
-<span class="pc bpc" id="L71" title="2 of 4 branches missed.">    if (options.getIncludeClasses() == null || options.getIncludeClasses().isEmpty()) {</span>
-<span class="nc" id="L72">      return true;</span>
+<span class="pc bpc" id="L75" title="2 of 4 branches missed.">    if (options.getIncludeClasses() == null || options.getIncludeClasses().isEmpty()) {</span>
+<span class="nc" id="L76">      return true;</span>
     }
-<span class="fc" id="L74">    return options.getIncludeClasses().contains(e.getQualifiedName().toString());</span>
+<span class="fc" id="L78">    return options.getIncludeClasses().contains(e.getQualifiedName().toString());</span>
   }
 
   @Override
   public Void visitType(TypeElement e, Void p) {
-<span class="fc" id="L79">    reporter.print(Diagnostic.Kind.NOTE, &quot;Visiting Type &quot; + e.getQualifiedName());</span>
+<span class="fc" id="L83">    reporter.print(Diagnostic.Kind.NOTE, &quot;Visiting Type &quot; + e.getQualifiedName());</span>
     
-<span class="fc bfc" id="L81" title="All 2 branches covered.">    if (include(e)) {  </span>
-<span class="fc" id="L82">      File dir = new File(options.getDestDirName());</span>
-<span class="fc bfc" id="L83" title="All 2 branches covered.">      if (!dir.exists()) {</span>
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">        if (!dir.mkdirs()) {</span>
-<span class="nc" id="L85">          reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to create directory &quot; + dir.getAbsolutePath());</span>
-<span class="nc" id="L86">          return null;</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">    if (include(e)) {  </span>
+<span class="fc" id="L86">      File dir = new File(options.getDestDirName());</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">      if (!dir.exists()) {</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        if (!dir.mkdirs()) {</span>
+<span class="nc" id="L89">          reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to create directory &quot; + dir.getAbsolutePath());</span>
+<span class="nc" id="L90">          return null;</span>
         }
       }
-<span class="fc" id="L89">      File output = new File(dir, e.getQualifiedName() + &quot;.adoc&quot;);</span>
-<span class="fc" id="L90">      reporter.print(Diagnostic.Kind.NOTE, &quot;Writing file &quot; + output.getAbsolutePath());</span>
-<span class="fc" id="L91">      try (Writer newWriter = new FileWriter(output)) {</span>
-<span class="fc" id="L92">        this.writer = newWriter;</span>
-<span class="fc" id="L93">        this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());</span>
+<span class="fc" id="L93">      fields.clear();</span>
+<span class="fc" id="L94">      File output = new File(dir, e.getQualifiedName() + &quot;.adoc&quot;);</span>
+<span class="fc" id="L95">      reporter.print(Diagnostic.Kind.NOTE, &quot;Writing file &quot; + output.getAbsolutePath());</span>
+<span class="fc" id="L96">      try (Writer newWriter = new FileWriter(output)) {</span>
+<span class="fc" id="L97">        this.writer = newWriter;</span>
+<span class="fc" id="L98">        this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());</span>
         
         try {
-<span class="fc" id="L96">          writer.write(&quot;= &quot; + e.getSimpleName());</span>
-<span class="fc" id="L97">          writer.write(&quot;\n\n&quot;);</span>
+<span class="fc" id="L101">          writer.write(&quot;= &quot; + e.getSimpleName());</span>
+<span class="fc" id="L102">          writer.write(&quot;\n\n&quot;);</span>
           
-<span class="fc" id="L99">          AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));</span>
-<span class="fc" id="L100">          docTreeWalker.scan();</span>
-<span class="fc" id="L101">          writer.write(&quot;\n&quot;);</span>
-<span class="fc" id="L102">          writer.write(&quot;\n&quot;);</span>
+<span class="fc" id="L104">          AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));</span>
+<span class="fc" id="L105">          docTreeWalker.scan();</span>
+<span class="fc" id="L106">          writer.write(&quot;\n&quot;);</span>
+<span class="fc" id="L107">          writer.write(&quot;\n&quot;);</span>
 
-<span class="fc" id="L104">          writer.write(&quot;[cols=\&quot;1,1a,4a\&quot;,stripes=even]\n&quot;);</span>
-<span class="fc" id="L105">          writer.write(&quot;|===\n&quot;);</span>
-<span class="fc" id="L106">          writer.write(&quot;| Name\n&quot;);</span>
-<span class="fc" id="L107">          writer.write(&quot;| Type\n&quot;);</span>
-<span class="fc" id="L108">          writer.write(&quot;| Details\n&quot;);</span>
-<span class="fc" id="L109">          writer.write(&quot;\n\n&quot;);</span>
+<span class="fc" id="L109">          writer.write(&quot;[cols=\&quot;1,1a,4a\&quot;,stripes=even]\n&quot;);</span>
+<span class="fc" id="L110">          writer.write(&quot;|===\n&quot;);</span>
+<span class="fc" id="L111">          writer.write(&quot;| Name\n&quot;);</span>
+<span class="fc" id="L112">          writer.write(&quot;| Type\n&quot;);</span>
+<span class="fc" id="L113">          writer.write(&quot;| Details\n&quot;);</span>
+<span class="fc" id="L114">          writer.write(&quot;\n\n&quot;);</span>
 
-<span class="fc" id="L111">          e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
+<span class="fc" id="L116">          documentFields(e);</span>
 
-<span class="fc bfc" id="L113" title="All 2 branches covered.">          for (TypeMirror superMirror = e.getSuperclass(); superMirror != null;) {</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">          for (TypeMirror superMirror = e.getSuperclass(); superMirror != null;) {</span>
 
-<span class="fc" id="L115">            Element superElement = environment.getTypeUtils().asElement(superMirror);</span>
-<span class="fc bfc" id="L116" title="All 2 branches covered.">            if (superElement instanceof TypeElement) {</span>
-<span class="fc" id="L117">              TypeElement superTypeElement = (TypeElement) superElement;</span>
-<span class="fc" id="L118">              superTypeElement.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
-<span class="fc" id="L119">              superMirror = superTypeElement.getSuperclass();</span>
-<span class="fc" id="L120">            } else {</span>
-<span class="fc" id="L121">              superMirror = null;</span>
+<span class="fc" id="L120">            Element superElement = environment.getTypeUtils().asElement(superMirror);</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">            if (superElement instanceof TypeElement) {</span>
+<span class="fc" id="L122">              TypeElement superTypeElement = (TypeElement) superElement;</span>
+<span class="fc" id="L123">              documentFields(superTypeElement);</span>
+<span class="fc" id="L124">              superMirror = superTypeElement.getSuperclass();</span>
+<span class="fc" id="L125">            } else {</span>
+<span class="fc" id="L126">              superMirror = null;</span>
             }
-<span class="fc" id="L123">          }</span>
+<span class="fc" id="L128">          }</span>
           
-<span class="fc" id="L125">          writer.write(&quot;|===\n&quot;);</span>
-<span class="nc" id="L126">        } catch (IOException ex) {</span>
-<span class="nc" id="L127">          reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to write to file: &quot; + ex.getMessage());</span>
-<span class="fc" id="L128">        }</span>
-<span class="nc" id="L129">      } catch (IOException ex) {</span>
-<span class="nc" id="L130">        reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to open file &quot; + output.getAbsolutePath());</span>
-<span class="nc" id="L131">        return null;</span>
+<span class="fc" id="L130">          writer.write(&quot;|===\n&quot;);</span>
+<span class="nc" id="L131">        } catch (IOException ex) {</span>
+<span class="nc" id="L132">          reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to write to file: &quot; + ex.getMessage());</span>
+<span class="fc" id="L133">        }</span>
+<span class="nc" id="L134">      } catch (IOException ex) {</span>
+<span class="nc" id="L135">        reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to open file &quot; + output.getAbsolutePath());</span>
+<span class="nc" id="L136">        return null;</span>
       } finally {
-<span class="fc" id="L133">        writer = null;</span>
+<span class="fc" id="L138">        writer = null;</span>
       }
     }
     
-<span class="fc" id="L137">    return null;</span>
+<span class="fc" id="L142">    return null;</span>
   }
+  
+  private void documentFields(TypeElement type) {
+<span class="fc" id="L146">    type.getEnclosedElements().forEach(enclosed -&gt; {</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">      if (enclosed.getKind() == ElementKind.METHOD) {</span>
+<span class="fc" id="L148">        enclosed.accept(this, null);</span>
+      }
+<span class="fc" id="L150">    });    </span>
+<span class="fc" id="L151">    type.getEnclosedElements().forEach(enclosed -&gt; {</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">      if (enclosed.getKind() == ElementKind.FIELD) {</span>
+<span class="fc" id="L153">        enclosed.accept(this, null);</span>
+      }
+<span class="fc" id="L155">    });    </span>
+<span class="fc" id="L156">  }</span>
+  
+  
 
   @Override
   public Void visitVariable(VariableElement e, Void p) {
-<span class="pc" id="L142">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
-<span class="fc" id="L143">    return null;</span>
+    try {
+<span class="fc" id="L163">      String fieldName = e.getSimpleName().toString();</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">      if (!this.fields.contains(fieldName)) {</span>
+<span class="fc" id="L165">        this.fields.add(fieldName);</span>
+
+<span class="fc" id="L167">        writer.write(&quot;| &quot;);</span>
+<span class="fc" id="L168">        writer.write(fieldName);</span>
+<span class="fc" id="L169">        writer.write(&quot;\n&quot;);</span>
+
+<span class="fc" id="L171">        writer.write(&quot;| &quot;);</span>
+<span class="fc" id="L172">        VariableElement variableElement = e;</span>
+
+<span class="fc" id="L174">        DeclaredType declaredType = variableElement.asType().accept(new SimpleTypeVisitor14&lt;DeclaredType, Void&gt;(){</span>
+          @Override
+          public DeclaredType visitDeclared(DeclaredType t, Void p) {
+<span class="fc" id="L177">            return t;</span>
+          }
+
+        }, null);
+<span class="fc bfc" id="L181" title="All 2 branches covered.">        Element declaredTypeElement = declaredType == null ? null : declaredType.asElement();</span>
+<span class="fc bfc" id="L182" title="All 2 branches covered.">        TypeElement typeElement = declaredTypeElement instanceof TypeElement ? (TypeElement) declaredTypeElement : null;</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        if (typeElement == null) {</span>
+<span class="fc" id="L184">          writer.write(variableElement.asType().toString());</span>
+        } else {
+<span class="fc" id="L186">          typeWriter.writeDeclaredType(declaredType);</span>
+        }
+<span class="fc" id="L188">        writer.write(&quot;\n&quot;);</span>
+
+<span class="fc" id="L190">        writer.write(&quot;| &quot;);</span>
+<span class="fc" id="L191">        AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));</span>
+<span class="fc" id="L192">        DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);</span>
+<span class="pc bpc" id="L193" title="1 of 2 branches missed.">        if (docCommentTree == null) {</span>
+<span class="nc" id="L194">          reporter.print(Diagnostic.Kind.WARNING, &quot;No doc comment for &quot; + e.getSimpleName());</span>
+        } else {
+<span class="fc" id="L196">          docTreeWalker.scan();</span>
+          // environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
+        }
+<span class="fc" id="L199">        writer.write(&quot;\n\n&quot;);</span>
+      }
+<span class="nc" id="L201">    } catch (IOException ex) {</span>
+<span class="nc" id="L202">      reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to write to file: &quot; + ex.getMessage());</span>
+<span class="fc" id="L203">    }</span>
+<span class="fc" id="L204">    return null;</span>
   }
 
   @Override
   public Void visitExecutable(ExecutableElement e, Void p) {
-<span class="pc bpc" id="L148" title="1 of 4 branches missed.">    if (e.getSimpleName().toString().startsWith(&quot;set&quot;) &amp;&amp; e.getParameters().size() == 1) {</span>
+<span class="pc bpc" id="L209" title="1 of 4 branches missed.">    if (e.getSimpleName().toString().startsWith(&quot;set&quot;) &amp;&amp; e.getParameters().size() == 1) {</span>
       try {
-<span class="fc" id="L150">        writer.write(&quot;| &quot;);</span>
-<span class="fc" id="L151">        writer.write(JavadocCapturer.setterNameToVariableName(e.getSimpleName().toString()));</span>
-<span class="fc" id="L152">        writer.write(&quot;\n&quot;);</span>
-        
-<span class="fc" id="L154">        writer.write(&quot;| &quot;);</span>
-<span class="fc" id="L155">        VariableElement variableElement = (VariableElement) e.getParameters().get(0);</span>
-                
-<span class="fc" id="L157">        DeclaredType declaredType = variableElement.asType().accept(new SimpleTypeVisitor14&lt;DeclaredType, Void&gt;(){</span>
-          @Override
-          public DeclaredType visitDeclared(DeclaredType t, Void p) {
-<span class="fc" id="L160">            return t;</span>
+<span class="fc" id="L211">        String fieldName = JavadocCapturer.setterNameToVariableName(e.getSimpleName().toString());</span>
+<span class="pc bpc" id="L212" title="1 of 2 branches missed.">        if (!this.fields.contains(fieldName)) {</span>
+<span class="fc" id="L213">          this.fields.add(fieldName);</span>
+
+<span class="fc" id="L215">          writer.write(&quot;| &quot;);</span>
+<span class="fc" id="L216">          writer.write(fieldName);</span>
+<span class="fc" id="L217">          writer.write(&quot;\n&quot;);</span>
+
+<span class="fc" id="L219">          writer.write(&quot;| &quot;);</span>
+<span class="fc" id="L220">          VariableElement variableElement = (VariableElement) e.getParameters().get(0);</span>
+
+<span class="fc" id="L222">          DeclaredType declaredType = variableElement.asType().accept(new SimpleTypeVisitor14&lt;DeclaredType, Void&gt;(){</span>
+            @Override
+            public DeclaredType visitDeclared(DeclaredType t, Void p) {
+<span class="fc" id="L225">              return t;</span>
+            }
+
+          }, null);
+<span class="fc bfc" id="L229" title="All 2 branches covered.">          Element declaredTypeElement = declaredType == null ? null : declaredType.asElement();</span>
+<span class="fc bfc" id="L230" title="All 2 branches covered.">          TypeElement typeElement = declaredTypeElement instanceof TypeElement ? (TypeElement) declaredTypeElement : null;</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">          if (typeElement == null) {</span>
+<span class="fc" id="L232">            writer.write(variableElement.asType().toString());</span>
+          } else {
+<span class="fc" id="L234">            typeWriter.writeDeclaredType(declaredType);</span>
           }
-          
-        }, null);
-<span class="fc bfc" id="L164" title="All 2 branches covered.">        Element declaredTypeElement = declaredType == null ? null : declaredType.asElement();</span>
-<span class="fc bfc" id="L165" title="All 2 branches covered.">        TypeElement typeElement = declaredTypeElement instanceof TypeElement ? (TypeElement) declaredTypeElement : null;</span>
-<span class="fc bfc" id="L166" title="All 2 branches covered.">        if (typeElement == null) {</span>
-<span class="fc" id="L167">          writer.write(variableElement.asType().toString());</span>
-        } else {
-<span class="fc" id="L169">          typeWriter.writeDeclaredType(declaredType);</span>
+<span class="fc" id="L236">          writer.write(&quot;\n&quot;);</span>
+
+<span class="fc" id="L238">          writer.write(&quot;| &quot;);</span>
+<span class="fc" id="L239">          AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));</span>
+<span class="fc" id="L240">          DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">          if (docCommentTree == null) {</span>
+<span class="fc" id="L242">            reporter.print(Diagnostic.Kind.WARNING, &quot;No doc comment for &quot; + e.getSimpleName());</span>
+          } else {
+<span class="fc" id="L244">            docTreeWalker.scan();</span>
+            // environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
+          }
+<span class="fc" id="L247">          writer.write(&quot;\n&quot;);</span>
         }
-<span class="fc" id="L171">        writer.write(&quot;\n&quot;);</span>
-        
-<span class="fc" id="L173">        writer.write(&quot;| &quot;);</span>
-<span class="fc" id="L174">        AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));</span>
-<span class="fc" id="L175">        DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);</span>
-<span class="fc bfc" id="L176" title="All 2 branches covered.">        if (docCommentTree == null) {</span>
-<span class="fc" id="L177">          reporter.print(Diagnostic.Kind.WARNING, &quot;No doc comment for &quot; + e.getSimpleName());</span>
-        } else {
-<span class="fc" id="L179">          docTreeWalker.scan();</span>
-          // environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
-        }
-<span class="fc" id="L182">        writer.write(&quot;\n&quot;);</span>
-<span class="nc" id="L183">      } catch (IOException ex) {</span>
-<span class="nc" id="L184">        reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to write to file: &quot; + ex.getMessage());</span>
-<span class="fc" id="L185">      }</span>
-      
-<span class="pc" id="L187">      e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));      </span>
+<span class="nc" id="L249">      } catch (IOException ex) {</span>
+<span class="nc" id="L250">        reporter.print(Diagnostic.Kind.ERROR, &quot;Failed to write to file: &quot; + ex.getMessage());</span>
+<span class="fc" id="L251">      }</span>
+<span class="pc" id="L252">      e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));      </span>
     }
-<span class="fc" id="L189">    return null;</span>
+<span class="fc" id="L254">    return null;</span>
   }
   
   @Override
   public Void visitTypeParameter(TypeParameterElement e, Void p) {
-<span class="nc" id="L194">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
-<span class="nc" id="L195">    return null;</span>
+<span class="nc" id="L259">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
+<span class="nc" id="L260">    return null;</span>
   }
 
   @Override
   public Void visitUnknown(Element e, Void p) {
-<span class="nc" id="L200">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
-<span class="nc" id="L201">    return null;</span>
+<span class="nc" id="L265">    e.getEnclosedElements().forEach(enclosed -&gt; enclosed.accept(this, null));</span>
+<span class="nc" id="L266">    return null;</span>
   }
   
 }
