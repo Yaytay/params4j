@@ -21,7 +21,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.HashSet;
+import java.util.Set;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.PackageElement;
@@ -48,6 +51,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
 
   private Writer writer;
   private TypeWriter typeWriter;
+  private final Set<String> fields = new HashSet<>();
   
   public AsciiDocElementVisitor(DocletEnvironment environment, AsciiDocOptions options, Reporter reporter) {
     this.environment = environment;
@@ -86,6 +90,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
           return null;
         }
       }
+      fields.clear();
       File output = new File(dir, e.getQualifiedName() + ".adoc");
       reporter.print(Diagnostic.Kind.NOTE, "Writing file " + output.getAbsolutePath());
       try (Writer newWriter = new FileWriter(output)) {
@@ -108,14 +113,14 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
           writer.write("| Details\n");
           writer.write("\n\n");
 
-          e.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
+          documentFields(e);
 
           for (TypeMirror superMirror = e.getSuperclass(); superMirror != null;) {
 
             Element superElement = environment.getTypeUtils().asElement(superMirror);
             if (superElement instanceof TypeElement) {
               TypeElement superTypeElement = (TypeElement) superElement;
-              superTypeElement.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
+              documentFields(superTypeElement);
               superMirror = superTypeElement.getSuperclass();
             } else {
               superMirror = null;
@@ -136,30 +141,42 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
     
     return null;
   }
+  
+  private void documentFields(TypeElement type) {
+    type.getEnclosedElements().forEach(enclosed -> {
+      if (enclosed.getKind() == ElementKind.METHOD) {
+        enclosed.accept(this, null);
+      }
+    });    
+    type.getEnclosedElements().forEach(enclosed -> {
+      if (enclosed.getKind() == ElementKind.FIELD) {
+        enclosed.accept(this, null);
+      }
+    });    
+  }
+  
+  
 
   @Override
   public Void visitVariable(VariableElement e, Void p) {
-    e.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));
-    return null;
-  }
+    try {
+      String fieldName = e.getSimpleName().toString();
+      if (!this.fields.contains(fieldName)) {
+        this.fields.add(fieldName);
 
-  @Override
-  public Void visitExecutable(ExecutableElement e, Void p) {
-    if (e.getSimpleName().toString().startsWith("set") && e.getParameters().size() == 1) {
-      try {
         writer.write("| ");
-        writer.write(JavadocCapturer.setterNameToVariableName(e.getSimpleName().toString()));
+        writer.write(fieldName);
         writer.write("\n");
-        
+
         writer.write("| ");
-        VariableElement variableElement = (VariableElement) e.getParameters().get(0);
-                
+        VariableElement variableElement = e;
+
         DeclaredType declaredType = variableElement.asType().accept(new SimpleTypeVisitor14<DeclaredType, Void>(){
           @Override
           public DeclaredType visitDeclared(DeclaredType t, Void p) {
             return t;
           }
-          
+
         }, null);
         Element declaredTypeElement = declaredType == null ? null : declaredType.asElement();
         TypeElement typeElement = declaredTypeElement instanceof TypeElement ? (TypeElement) declaredTypeElement : null;
@@ -169,7 +186,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
           typeWriter.writeDeclaredType(declaredType);
         }
         writer.write("\n");
-        
+
         writer.write("| ");
         AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));
         DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);
@@ -179,11 +196,59 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
           docTreeWalker.scan();
           // environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
         }
-        writer.write("\n");
+        writer.write("\n\n");
+      }
+    } catch (IOException ex) {
+      reporter.print(Diagnostic.Kind.ERROR, "Failed to write to file: " + ex.getMessage());
+    }
+    return null;
+  }
+
+  @Override
+  public Void visitExecutable(ExecutableElement e, Void p) {
+    if (e.getSimpleName().toString().startsWith("set") && e.getParameters().size() == 1) {
+      try {
+        String fieldName = JavadocCapturer.setterNameToVariableName(e.getSimpleName().toString());
+        if (!this.fields.contains(fieldName)) {
+          this.fields.add(fieldName);
+
+          writer.write("| ");
+          writer.write(fieldName);
+          writer.write("\n");
+
+          writer.write("| ");
+          VariableElement variableElement = (VariableElement) e.getParameters().get(0);
+
+          DeclaredType declaredType = variableElement.asType().accept(new SimpleTypeVisitor14<DeclaredType, Void>(){
+            @Override
+            public DeclaredType visitDeclared(DeclaredType t, Void p) {
+              return t;
+            }
+
+          }, null);
+          Element declaredTypeElement = declaredType == null ? null : declaredType.asElement();
+          TypeElement typeElement = declaredTypeElement instanceof TypeElement ? (TypeElement) declaredTypeElement : null;
+          if (typeElement == null) {
+            writer.write(variableElement.asType().toString());
+          } else {
+            typeWriter.writeDeclaredType(declaredType);
+          }
+          writer.write("\n");
+
+          writer.write("| ");
+          AsciiDocDocTreeWalker docTreeWalker = new AsciiDocDocTreeWalker(environment, options, writer, reporter, environment.getDocTrees().getPath(e));
+          DocCommentTree docCommentTree = environment.getDocTrees().getDocCommentTree(e);
+          if (docCommentTree == null) {
+            reporter.print(Diagnostic.Kind.WARNING, "No doc comment for " + e.getSimpleName());
+          } else {
+            docTreeWalker.scan();
+            // environment.getDocTrees().getDocCommentTree(e).accept(docTreeWalker, null);
+          }
+          writer.write("\n");
+        }
       } catch (IOException ex) {
         reporter.print(Diagnostic.Kind.ERROR, "Failed to write to file: " + ex.getMessage());
       }
-      
       e.getEnclosedElements().forEach(enclosed -> enclosed.accept(this, null));      
     }
     return null;

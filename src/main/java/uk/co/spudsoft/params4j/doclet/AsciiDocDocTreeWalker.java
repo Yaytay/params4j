@@ -21,7 +21,9 @@ import com.sun.source.doctree.AuthorTree;
 import com.sun.source.doctree.DocCommentTree;
 import com.sun.source.doctree.DocTree;
 import com.sun.source.doctree.EndElementTree;
+import com.sun.source.doctree.EntityTree;
 import com.sun.source.doctree.LinkTree;
+import com.sun.source.doctree.LiteralTree;
 import com.sun.source.doctree.ParamTree;
 import com.sun.source.doctree.ReferenceTree;
 import com.sun.source.doctree.ReturnTree;
@@ -35,6 +37,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
@@ -54,7 +58,8 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   
   private final Queue<Boolean> listOrderedStack = new ArrayDeque<>();
   
-  private boolean inMacro;
+  private boolean inPara;
+  private boolean inSource;
   
   public AsciiDocDocTreeWalker(DocletEnvironment environment, AsciiDocOptions options, Writer writer, Reporter reporter, TreePath path) {
     this.environment = environment;
@@ -79,8 +84,12 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
       listOrderedStack.poll();
       write("\n");
     } else if (name.equalsIgnoreCase("a")) {
-      inMacro = false;
       write("] ");
+    } else if (name.equalsIgnoreCase("pre") || name.equalsIgnoreCase("code")) {
+      if (inSource) {
+        inSource = false;
+        write("\n----\n");
+      }
     } else {
       write(node.toString());
       write(" ");
@@ -114,37 +123,99 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
       write("\n\n");
     } else if (name.equalsIgnoreCase("a")) {
       write("link:");
-      for (DocTree attribute : node.getAttributes()) {
-        if (attribute instanceof AttributeTree) {
-          AttributeTree attributeTree = (AttributeTree) attribute;
-          if (attributeTree.getName().toString().equalsIgnoreCase("href")) {
-            write(attributeTree.getValue().toString());
-            break;
-          }
-        }
+      String attributeValue = findAttribute(node, "href");
+      if (attributeValue != null) {
+        write(attributeValue);
       }
       write("[");
-      inMacro = true;
       return null;
+    } else if (name.equalsIgnoreCase("pre") || name.equalsIgnoreCase("code")) {
+      if (!inSource) {
+        inSource = true;
+        write("\n[source");
+        String attributeValue = findAttribute(node, "data-lang");
+        if (attributeValue != null) {
+          write(",");
+          write(attributeValue);
+        }
+        write("]\n");
+        write("----\n");
+        return null;
+      }      
     } else {
+      reporter.print(Diagnostic.Kind.WARNING, new DocTreePath(path, dc), "Unrecognised HTML tag (" + name + ").");
       write(node.toString());
     }
     return super.visitStartElement(node, p);
   }
+  
+  String findAttribute(StartElementTree node, String requiredAttribute) {
+    for (DocTree attribute : node.getAttributes()) {
+      if (attribute instanceof AttributeTree) {
+        AttributeTree attributeTree = (AttributeTree) attribute;
+        if (attributeTree.getName().toString().equalsIgnoreCase(requiredAttribute)) {
+          return attributeTree.getValue().toString();
+        }
+      }
+    }
+    return null;
+  }
 
   @Override
   public Void visitText(TextTree node, Void p) {
-    write(node.getBody().trim());
-    if (!inMacro) {
-      write("\n");
+    String text = node.getBody();
+    if (!inPara) {
+      text = text.stripLeading();
     }
+            
+    write(text);
     return super.visitText(node, p);
   }
 
   @Override
+  public Void visitLiteral(LiteralTree node, Void p) {
+    write("`+");
+    super.visitLiteral(node, p);
+    write("+`");
+    return null;
+  }
+
+  private static final Pattern NUMERIC_ENTITY = Pattern.compile("&#([0-9]{1,6});");
+  private static final Pattern TEXT_ENTITY = Pattern.compile("&([a-zA-Z]{1,6});");
+  
+  @Override
+  public Void visitEntity(EntityTree node, Void p) {
+    String entityRef = node.toString();
+    
+    try {
+      Matcher matcher = NUMERIC_ENTITY.matcher(entityRef);
+      if (matcher.matches()) {
+        String ref = matcher.group(1);
+        int code = Integer.parseInt(ref);
+        write(Character.toString(code));
+        return null;
+      }
+      matcher = TEXT_ENTITY.matcher(entityRef);
+      if (matcher.matches()) {
+        String ref = matcher.group(1).toLowerCase();        
+        String character = HtmlEntities.lookupEntity(ref);
+        if (character != null) {
+          write(character);
+          return null;
+        }
+      }
+    } catch (Throwable ex) {
+      reporter.print(Diagnostic.Kind.ERROR, new DocTreePath(path, dc), "Failed to process entity: " + node.toString());
+    }
+    
+    write(node.toString());
+    return null;
+  }
+  
+  @Override
   public Void visitSee(SeeTree node, Void p) {
     write("\n\nSee: ");
-    return super.visitSee(node, p); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/OverriddenMethodBody
+    return super.visitSee(node, p);
   }
 
   @Override
@@ -164,8 +235,7 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
 
   private void write(String s) {
     if (s != null) {
-      s = s.replaceAll("\n ", " ");
-
+      inPara = !s.endsWith("\n");
       try {
         writer.write(s);
       } catch (IOException ex) {

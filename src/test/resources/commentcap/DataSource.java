@@ -32,6 +32,35 @@ public class DataSource {
   
   /**
    * The credentials to use for preparing the database (DDL).
+   * 
+   * <p>
+   * This could be used in some &quot;Java&quot; like this:
+   * <pre data-lang="java">
+   * &#64;Test
+   * public void testGetAdminUser() {
+   *   DataSourceConfig ds = new DataSourceConfig().setAdminUser(new Credentials().setUsername("admin"));
+   *   assertThat(ds.getAdminUser().getUsername(), equalTo("admin"));
+   * }
+   * </pre>
+   * or just by calling {@code ds.getAdminUser()}.
+   * <p>
+   * Note that entity references work in the &lt;pre&gt; as demonstrated by the &quot;&#64;Test&quot;.
+   * Inside the &lt;pre&gt; only a limited set of named entity references work, but AsciiDoctor will work with any outside of the &lt;pre&gt; &lpar;see: &Hat;&verbar;&copy;&rpar;.
+   * <p>
+   * If you want to know more about formatting code in Javadocs please see
+   * <a href="https://reflectoring.io/howto-format-code-snippets-in-javadoc/">howto-format-code-snippets-in-javadoc</a>.
+   * <p>
+   * Note that the above code block is declared with the data-lang attribute on the 'pre' element:
+   * <pre data-lang="html"><code>
+   * &lt;pre data-lang="java">&lt;code>
+   * public void testGetAdminUser() {
+   *   DataSourceConfig ds = new DataSourceConfig().setAdminUser(new Credentials().setUsername("admin"));
+   *   assertThat(ds.getAdminUser().getUsername(), equalTo("admin"));
+   * }
+   * &lt;/code>&lt;/pre>
+   * </code></pre>
+   * 
+   * 
    **/
   private final Credentials adminUser;
   
