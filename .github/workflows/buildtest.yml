@@ -61,8 +61,10 @@ jobs:
       uses: actions/delete-package-versions@v5
       with: 
         package-name: 'uk.co.spudsoft.params4j'
+        package-type: maven
         min-versions-to-keep: 10
         delete-only-pre-release-versions: "true" 
+        num-old-versions-to-delete: 0
                 
     - name: Clean up settings.xml
       run: |
