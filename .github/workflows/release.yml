@@ -104,12 +104,12 @@ jobs:
     - name: Create release
       uses: ncipollo/release-action@v1
       with:
-        artifacts: "target/xlsx-writer*.jar*"
+        artifacts: "target/params4j*.jar*"
         token: ${{ github.token }} 
         
     - uses: actions/delete-package-versions@v3
       with: 
-        package-name: 'uk.co.spudsoft.xlsx'
+        package-name: 'uk.co.spudsoft.params4j'
         min-versions-to-keep: 10
         delete-only-pre-release-versions: "true" 
         
