@@ -21,10 +21,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.tools.Diagnostic;
+import jdk.javadoc.doclet.Reporter;
 
 /**
  *
@@ -42,12 +45,12 @@ public class AsciiDocLinkMaps {
     configuredBaseUrls.add(baseUrl);
   }
 
-  public String getUrlForPackage(String packageName) {
+  public String getUrlForPackage(Reporter reporter, String packageName) {
     if (!configuredBaseUrls.isEmpty() && !packageListsRead) {
       packageListsRead = true;
       for (String cofiguredBaseUrl : configuredBaseUrls) {
-        readPackageList(baseUrlFromPackage, cofiguredBaseUrl);
-        readElementList(baseUrlFromPackage, cofiguredBaseUrl);
+        readPackageList(reporter, baseUrlFromPackage, cofiguredBaseUrl);
+        readElementList(reporter, baseUrlFromPackage, cofiguredBaseUrl);
       }
     }
     String baseUrl = baseUrlFromPackage.get(packageName);
@@ -58,8 +61,8 @@ public class AsciiDocLinkMaps {
     }
   }
 
-  public String getUrlForType(String packageName, String className) {
-    String packageUrl = getUrlForPackage(packageName);
+  public String getUrlForType(Reporter reporter, String packageName, String className) {
+    String packageUrl = getUrlForPackage(reporter, packageName);
     if (packageUrl == null) {
       return null;
     } else {
@@ -67,26 +70,34 @@ public class AsciiDocLinkMaps {
     }
   }
   
-  static void readPackageList(Map<String, String> baseUrlFromPackage, String baseUrl) {
+  static void readPackageList(Reporter reporter, Map<String, String> baseUrlFromPackage, String baseUrl) {
+    String url = baseUrl.endsWith("/") ? baseUrl + "package-list" : baseUrl + "/package-list";
     try {
-      URL link = new URL(baseUrl.endsWith("/") ? baseUrl + "package-list" : baseUrl + "/package-list");
-      try (InputStream in = link.openStream()) {
+      URL link = new URL(url);
+      URLConnection con = link.openConnection();
+      con.setConnectTimeout(2000);
+      con.setReadTimeout(2000);
+      try (InputStream in = con.getInputStream()) {
         readPackageList(baseUrlFromPackage, in, baseUrl);
       }
     } catch (Throwable ex) {
-      // Silently fail, because failure is quite likely
+      reporter.print(Diagnostic.Kind.NOTE, "Failed to download from URL " + url + " (" + ex.toString() + ")");
     }
 
   }
 
-  static void readElementList(Map<String, String> baseUrlFromPackage, String baseUrl) {
+  static void readElementList(Reporter reporter, Map<String, String> baseUrlFromPackage, String baseUrl) {
+    String url = baseUrl.endsWith("/") ? baseUrl + "element-list" : baseUrl + "/element-list";
     try {
-      URL link = new URL(baseUrl.endsWith("/") ? baseUrl + "element-list" : baseUrl + "/element-list");
-      try (InputStream in = link.openStream()) {
+      URL link = new URL(url);
+      URLConnection con = link.openConnection();
+      con.setConnectTimeout(2000);
+      con.setReadTimeout(2000);
+      try (InputStream in = con.getInputStream()) {
         readPackageList(baseUrlFromPackage, in, baseUrl);
       }
     } catch (Throwable ex) {
-      // Silently fail, because failure is quite likely
+      reporter.print(Diagnostic.Kind.NOTE, "Failed to download from URL " + url + " (" + ex.toString() + ")");
     }
   }
 

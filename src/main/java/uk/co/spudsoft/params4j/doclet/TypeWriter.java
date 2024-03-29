@@ -54,7 +54,7 @@ public class TypeWriter {
       TypeElement typeElement = (TypeElement) element.getEnclosingElement();
       ExecutableElement methodElement = (ExecutableElement) element;
       
-      String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
+      String url = linkMaps.getUrlForType(reporter, TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
       if (url == null) {
         if (includedClasses.contains(typeElement.getQualifiedName().toString())) {
           write("xref:");
@@ -69,7 +69,7 @@ public class TypeWriter {
         }
       } else {
         write("link:");
-        write(linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement)));
+        write(linkMaps.getUrlForType(reporter, TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement)));
         write(TypeWriter.getMethodAnchor(methodElement));
         write("[");
         // For method links javadoc removes leading packages and type parameters        
@@ -79,7 +79,7 @@ public class TypeWriter {
     } else if (element instanceof TypeElement) {
       TypeElement typeElement = (TypeElement) element;
       
-      String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
+      String url = linkMaps.getUrlForType(reporter, TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
       if (url == null) {
         if (includedClasses.contains(typeElement.getQualifiedName().toString())) {
           write("xref:");
@@ -94,7 +94,7 @@ public class TypeWriter {
         }
       } else {
         write("link:");
-        write(linkMaps.getUrlForType(TypeWriter.getPackage(element), TypeWriter.getClassName(element)));
+        write(linkMaps.getUrlForType(reporter, TypeWriter.getPackage(element), TypeWriter.getClassName(element)));
         write("[");
         write(refTree.getSignature());
         write("] ");
@@ -107,7 +107,7 @@ public class TypeWriter {
     
     TypeElement typeElement = (TypeElement) declaredType.asElement();    
     
-    String url = linkMaps.getUrlForType(TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
+    String url = linkMaps.getUrlForType(reporter, TypeWriter.getPackage(typeElement), TypeWriter.getClassName(typeElement));
 
     if (url != null) {
       write("link:");
