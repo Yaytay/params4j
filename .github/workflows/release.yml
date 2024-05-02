@@ -107,11 +107,16 @@ jobs:
         artifacts: "target/params4j*.jar*"
         token: ${{ github.token }} 
         
-    - uses: actions/delete-package-versions@v5
+    - name: Tidy up old package versions
+      uses: actions/delete-package-versions@v5
+      continue-on-error: true
       with: 
-        package-name: 'uk.co.spudsoft.params4j'
-        min-versions-to-keep: 10
+        package-name: 'params4j'
+        package-type: container
+        min-versions-to-keep: 4
+        num-old-versions-to-delete: 0
         delete-only-pre-release-versions: "true" 
+        
         
     - name: Checkout GitHub Pages
       uses: actions/checkout@v4
