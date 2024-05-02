@@ -164,7 +164,9 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
       if (!this.fields.contains(fieldName)) {
         this.fields.add(fieldName);
 
-        writer.write("| ");
+        writer.write("| [[");
+        writer.write(fieldName);
+        writer.write("]]");
         writer.write(fieldName);
         writer.write("\n");
 
@@ -212,7 +214,9 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
         if (!this.fields.contains(fieldName)) {
           this.fields.add(fieldName);
 
-          writer.write("| ");
+          writer.write("| [[");
+          writer.write(fieldName);
+          writer.write("]]");
           writer.write(fieldName);
           writer.write("\n");
 
