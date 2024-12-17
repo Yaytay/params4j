@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -59,7 +60,7 @@ import uk.co.spudsoft.params4j.Params4JSpi;
  * 
  * @param <P> The type of the parameters object.
  */
-public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
+public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
 
   private static final Logger logger = LoggerFactory.getLogger(Params4JImpl.class);
   
@@ -71,6 +72,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
   private final ObjectMapper yamlMapper;
   private final FileWatcher fileWatcher;
   private Consumer<P> changeHappenedHandler;
+  private final Object lock = new Object();
   private final AtomicReference<ObjectNode> lastValue = new AtomicReference<>();
   
   private static final Set<String> TERMINAL_TYPES = buildTerminalTypes();
@@ -139,6 +141,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
    * @param mixIns The custom MixIns that are added to the default JSON mapper (if one is not passed in).
    * @param yamlMapper The yaml mapper that is made available to the gatherers via the Params4JSpi.
    */
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Externable objects are mutable")
   public Params4JImpl(Supplier<P> constructor
           , List<ParameterGatherer<P>> gatherers
           , DeserializationProblemHandler problemHandler
@@ -171,16 +174,19 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
   }
 
   @Override
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Externable object is mutable")
   public JavaPropsMapper getPropsMapper() {
     return propsMapper;
   }
 
   @Override
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Externable object is mutable")
   public ObjectMapper getJsonMapper() {
     return jsonMapper;
   }
 
   @Override
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Externable object is mutable")
   public ObjectMapper getYamlMapper() {
     return yamlMapper;
   }
@@ -251,7 +257,7 @@ public class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
   }
     
   private void changeNotificationHandler() {
-    synchronized (lastValue) {
+    synchronized (lock) {
       P newValue = gatherParameters();
       ObjectNode newNode = jsonMapper.convertValue(newValue, ObjectNode.class);
       if (newNode.equals(lastValue.get())) {

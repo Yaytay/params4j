@@ -16,7 +16,9 @@
  */
 package uk.co.spudsoft.params4j.doclet;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -85,9 +87,10 @@ public class AsciiDocOptions {
   }
 
   public Set<String> getIncludeClasses() {
-    return includeClasses;
+    return Collections.unmodifiableSet(includeClasses);
   }
 
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "The link map may be modified")
   public AsciiDocLinkMaps getLinkMaps() {
     return linkMaps;
   }

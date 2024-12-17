@@ -17,10 +17,12 @@
 package uk.co.spudsoft.params4j.doclet;
 
 import com.sun.source.doctree.DocCommentTree;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Set;
 import javax.lang.model.element.Element;
@@ -79,6 +81,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
   }
 
   @Override
+  @SuppressFBWarnings(value = "PATH_TRAVERSAL_IN", justification = "The point of this class is to write to that file, ensure it is correct")
   public Void visitType(TypeElement e, Void p) {
     reporter.print(Diagnostic.Kind.NOTE, "Visiting Type " + e.getQualifiedName());
     
@@ -93,7 +96,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {
       fields.clear();
       File output = new File(dir, e.getQualifiedName() + ".adoc");
       reporter.print(Diagnostic.Kind.NOTE, "Writing file " + output.getAbsolutePath());
-      try (Writer newWriter = new FileWriter(output)) {
+      try (Writer newWriter = new FileWriter(output, StandardCharsets.UTF_8)) {
         this.writer = newWriter;
         this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());
         

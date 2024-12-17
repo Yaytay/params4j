@@ -6,6 +6,7 @@ package uk.co.spudsoft.params4j.impl;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -45,6 +46,7 @@ public class SystemPropertiesGatherer<P> implements ParameterGatherer<P> {
    * @param props Properties data to process.
    * @param namePrefix The prefix to use to filter out system properties that should not be considered.
    */
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Externable objects are mutable")
   public SystemPropertiesGatherer(Properties props,  String namePrefix) {
     this.sysProps = props;
     this.propertyPrefix = namePrefix;

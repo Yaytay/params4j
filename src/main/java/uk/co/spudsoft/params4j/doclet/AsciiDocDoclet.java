@@ -39,7 +39,6 @@ import jdk.javadoc.doclet.Reporter;
 public class AsciiDocDoclet implements Doclet {
 
   private final AsciiDocOptions options;
-  private Locale locale;
   private Reporter reporter;
   
   public AsciiDocDoclet() {
@@ -48,7 +47,6 @@ public class AsciiDocDoclet implements Doclet {
   
   @Override
   public void init(Locale locale, Reporter reporter) {
-    this.locale = locale;
     this.reporter = reporter;
   }
 

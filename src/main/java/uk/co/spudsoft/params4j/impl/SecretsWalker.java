@@ -18,6 +18,7 @@ package uk.co.spudsoft.params4j.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -62,6 +63,7 @@ public class SecretsWalker extends SimpleFileVisitor<Path> {
    * @param charset The charset to use when reading the file.
    * @param dirHandler Optional consumer called for each directory that is entered.
    */
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Externable objects are mutable")
   public SecretsWalker(Path root, ObjectMapper objectMapper, int fileSizeLimit, int fileCountLimit, Charset charset, Consumer<Path> dirHandler) {
     this.root = root;
     this.objectMapper = objectMapper;
@@ -77,6 +79,7 @@ public class SecretsWalker extends SimpleFileVisitor<Path> {
    * Get the ObjectNode that reflects the directory/file structure underneath the root path.
    * @return the ObjectNode constructed by walking the file tree.
    */
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "Externable object is mutable")
   public ObjectNode getObjectNode() {
     return objectNode;
   }
@@ -94,19 +97,22 @@ public class SecretsWalker extends SimpleFileVisitor<Path> {
     if (attrs.isDirectory()) {
       logger.trace("Ignoring file {} because it is a directory (can be caused by max depth being exceeded)", file);
     } else {
-      String filename = file.getFileName().toString();
-      if (filename.startsWith(".")) {
-        logger.trace("Ignoring file {} because it is hidden", file);
-      } else if (attrs.size() > fileSizeLimit) {
-        logger.trace("Ignoring file {} because it is larger than the maximum size ({} > {})", file, attrs.size(), fileSizeLimit);
-      } else if (++fileCount > fileCountLimit) {
-        logger.trace("Ignoring file {} because too many files have been processed ({} > {})", file, fileCount, fileCountLimit);
-      } else {
-        try (FileInputStream fis = new FileInputStream(file.toFile())) {
-          String value = new String(fis.readAllBytes(), charset);
-          current.put(filename, value);
-        } catch (Throwable ex) {
-          logger.trace("Ignoring file {} because it could not be read: ", file, ex);
+      Path pathFileName = file.getFileName();
+      if (pathFileName != null) {
+        String filename = pathFileName.toString();
+        if (filename.startsWith(".")) {
+          logger.trace("Ignoring file {} because it is hidden", file);
+        } else if (attrs.size() > fileSizeLimit) {
+          logger.trace("Ignoring file {} because it is larger than the maximum size ({} > {})", file, attrs.size(), fileSizeLimit);
+        } else if (++fileCount > fileCountLimit) {
+          logger.trace("Ignoring file {} because too many files have been processed ({} > {})", file, fileCount, fileCountLimit);
+        } else {
+          try (FileInputStream fis = new FileInputStream(file.toFile())) {
+            String value = new String(fis.readAllBytes(), charset);
+            current.put(filename, value);
+          } catch (Throwable ex) {
+            logger.trace("Ignoring file {} because it could not be read: ", file, ex);
+          }
         }
       }
     }
@@ -114,23 +120,28 @@ public class SecretsWalker extends SimpleFileVisitor<Path> {
   }
 
   @Override
-  public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-    String dirname = dir.getFileName().toString();
-    if (dir.equals(root)) {
-      return FileVisitResult.CONTINUE;
-    } else if (dirname.startsWith(".") || dir.equals(root)) {
-      logger.trace("Ignoring dir {} because it is hidden", dir);
-      return FileVisitResult.SKIP_SUBTREE;
-    } else {
-      logger.trace("Entering dir: {}", dir);
-      if (dirHandler != null) {
-        dirHandler.accept(dir);
+  public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {    
+    Path pathFileName = dir.getFileName();
+    if (pathFileName != null) {
+      String dirname = pathFileName.toString();
+      if (dir.equals(root)) {
+        return FileVisitResult.CONTINUE;
+      } else if (dirname.startsWith(".") || dir.equals(root)) {
+        logger.trace("Ignoring dir {} because it is hidden", dir);
+        return FileVisitResult.SKIP_SUBTREE;
+      } else {
+        logger.trace("Entering dir: {}", dir);
+        if (dirHandler != null) {
+          dirHandler.accept(dir);
+        }
+        ObjectNode dirNode = objectMapper.createObjectNode();
+        current.set(dirname, dirNode);
+        nodes.put(dir, current);
+        current = dirNode;
+        return FileVisitResult.CONTINUE;
       }
-      ObjectNode dirNode = objectMapper.createObjectNode();
-      current.set(dirname, dirNode);
-      nodes.put(dir, current);
-      current = dirNode;
-      return FileVisitResult.CONTINUE;
+    } else {
+      return FileVisitResult.TERMINATE;
     }
   }
 

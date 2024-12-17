@@ -16,12 +16,15 @@
  */
 package uk.co.spudsoft.params4j.doclet;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -70,10 +73,11 @@ public class AsciiDocLinkMaps {
     }
   }
   
+  @SuppressFBWarnings(value = "URLCONNECTION_SSRF_FD", justification = "Attempting to read package list from related documentation")
   static void readPackageList(Reporter reporter, Map<String, String> baseUrlFromPackage, String baseUrl) {
     String url = baseUrl.endsWith("/") ? baseUrl + "package-list" : baseUrl + "/package-list";
     try {
-      URL link = new URL(url);
+      URL link = new URI(url).toURL();
       URLConnection con = link.openConnection();
       con.setConnectTimeout(2000);
       con.setReadTimeout(2000);
@@ -86,10 +90,11 @@ public class AsciiDocLinkMaps {
 
   }
 
+  @SuppressFBWarnings(value = "URLCONNECTION_SSRF_FD", justification = "Attempting to read element list from related documentation")
   static void readElementList(Reporter reporter, Map<String, String> baseUrlFromPackage, String baseUrl) {
     String url = baseUrl.endsWith("/") ? baseUrl + "element-list" : baseUrl + "/element-list";
     try {
-      URL link = new URL(url);
+      URL link = new URI(url).toURL();
       URLConnection con = link.openConnection();
       con.setConnectTimeout(2000);
       con.setReadTimeout(2000);
@@ -112,7 +117,7 @@ public class AsciiDocLinkMaps {
    */
   static void readPackageList(Map<String, String> baseUrlFromPackage, InputStream input, String url) throws IOException {
 
-    try (BufferedReader in = new BufferedReader(new InputStreamReader(input))) {
+    try (BufferedReader in = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {
       String line;
       String moduleUrl = url;
       if (!url.endsWith("/")) {

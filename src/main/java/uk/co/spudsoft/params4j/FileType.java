@@ -5,7 +5,9 @@
 package uk.co.spudsoft.params4j;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -60,6 +62,7 @@ public enum FileType {
    * Get the list of ends of file names that indicate this file type.
    * @return the list of filename extensions that indicate this file type.
    */
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP", justification = "extenstions can only be an UnmodifiableList")
   public List<String> getExtensions() {
     return extensions;
   }
@@ -79,7 +82,7 @@ public enum FileType {
    * @param objectMapGetter function to object the appropriate ObjectMapper from the service provider interface.
    */
   FileType(List<String> extensions, Function<Params4JSpi, ObjectMapper> objectMapGetter) {
-    this.extensions = extensions;
+    this.extensions = Collections.unmodifiableList(extensions);
     this.objectMapGetter = objectMapGetter;
   }
   

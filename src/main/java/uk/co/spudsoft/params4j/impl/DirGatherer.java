@@ -52,25 +52,27 @@ public class DirGatherer<P> implements ParameterGatherer<P> {
     
     if (dir.isDirectory()) {
       File[] files = dir.listFiles();
-      Arrays.sort(files);  // To ensure consistent behaviour across systems
-      for (FileType type : fileTypes) {
-        for (File file : files) {
-          for (String extension : type.getExtensions()) {
-            if (file.exists() && file.getName().endsWith(extension)) {
-              try {
-                ObjectReader reader = type.getObjectMapper(spi).readerForUpdating(base);
-    
-                try (InputStream stream = new FileInputStream(file)) {
-                  base = reader.readValue(stream);
+      if (files != null) {
+        Arrays.sort(files);  // To ensure consistent behaviour across systems
+        for (FileType type : fileTypes) {
+          for (File file : files) {
+            for (String extension : type.getExtensions()) {
+              if (file.exists() && file.getName().endsWith(extension)) {
+                try {
+                  ObjectReader reader = type.getObjectMapper(spi).readerForUpdating(base);
+
+                  try (InputStream stream = new FileInputStream(file)) {
+                    base = reader.readValue(stream);
+                  }
+                } catch (Throwable ex) {
+                  logger.error("Failed to process file {}: ", file, ex);
                 }
-              } catch (Throwable ex) {
-                logger.error("Failed to process file {}: ", file, ex);
               }
             }
           }
         }
+        spi.watch(dir.toPath());
       }
-      spi.watch(dir.toPath());
     }
     
     return base;    

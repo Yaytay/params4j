@@ -33,6 +33,7 @@ import com.sun.source.doctree.TextTree;
 import com.sun.source.util.DocTreePath;
 import com.sun.source.util.DocTreePathScanner;
 import com.sun.source.util.TreePath;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayDeque;
@@ -61,6 +62,7 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   private boolean inPara;
   private boolean inSource;
   
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "The writer should be considered dedicated to this purpose whilst this walker is in operation.")  
   public AsciiDocDocTreeWalker(DocletEnvironment environment, AsciiDocOptions options, Writer writer, Reporter reporter, TreePath path) {
     this.environment = environment;
     this.writer = writer;

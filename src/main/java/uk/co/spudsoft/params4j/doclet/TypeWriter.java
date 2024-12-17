@@ -18,6 +18,7 @@ package uk.co.spudsoft.params4j.doclet;
 
 import com.sun.source.doctree.ReferenceTree;
 import com.sun.source.util.DocTreePath;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Set;
@@ -38,7 +39,7 @@ import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 
 /**
- *
+ * Write out AsciiDoc of types found.
  * @author njt
  */
 public class TypeWriter {
@@ -143,6 +144,7 @@ public class TypeWriter {
     }
   }      
   
+  @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Objects are not POJOs and may be accessed (and modified) during the life of this object")
   public TypeWriter(Writer writer, Reporter reporter, Set<String> includedClasses, AsciiDocLinkMaps linkMaps) {
     super();
     this.writer = writer;
@@ -155,7 +157,7 @@ public class TypeWriter {
     while (elem != null && !(elem instanceof PackageElement)) {
       elem = elem.getEnclosingElement();
     }
-    if (elem instanceof PackageElement) {
+    if (elem != null) {
       return ((PackageElement) elem).getQualifiedName().toString();
     }
     
@@ -221,12 +223,15 @@ public class TypeWriter {
    * @param signature The signature to be simplified.
    * @return A  simpler signature.
    */
-  private static final Pattern LEADING_PACKAGE = Pattern.compile("^([a-z][a-zA-Z0-9]+\\.)+");
+  private static final Pattern LEADING_PACKAGE = Pattern.compile("^([a-z][a-zA-Z0-9]+\\.)");
   private static final Pattern TYPE_PARAMS = Pattern.compile("(<[^<]+>)");
   private static final Pattern SQUARE_BRACKET = Pattern.compile("\\]");
   private static final Pattern CONSTRUCTOR = Pattern.compile("^([a-zA-Z0-9]+)#\\1");
   public static String simplifySignature(String signature) {
-    signature = LEADING_PACKAGE.matcher(signature).replaceAll("");
+    Matcher matcher;
+    while ((matcher = LEADING_PACKAGE.matcher(signature)).find()) {
+      signature = matcher.replaceAll("");
+    }
     
     Matcher tpm = TYPE_PARAMS.matcher(signature);
     while (tpm.find()) {

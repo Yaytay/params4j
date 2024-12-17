@@ -16,7 +16,7 @@
  */
 package uk.co.spudsoft.params4j.doclet;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import jdk.javadoc.doclet.Doclet;
 
@@ -43,7 +43,7 @@ public abstract class AbstractAsciiDocOption implements Doclet.Option {
   public AbstractAsciiDocOption(int argumentCount, String description, String name, String parameters) {
     this.argumentCount = argumentCount;
     this.description = description;
-    this.names = Arrays.asList(name);
+    this.names = Collections.singletonList(name);
     this.parameters = parameters;
   }
 
