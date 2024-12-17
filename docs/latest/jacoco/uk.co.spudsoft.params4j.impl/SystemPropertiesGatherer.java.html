@@ -6,6 +6,7 @@ package uk.co.spudsoft.params4j.impl;
 
 import com.fasterxml.jackson.databind.ObjectReader;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.IOException;
 import java.util.Map.Entry;
 import java.util.Properties;
@@ -34,8 +35,8 @@ public class SystemPropertiesGatherer&lt;P&gt; implements ParameterGatherer&lt;P
    * @param namePrefix The prefix to use to filter out system properties that should not be considered.
    */
   public SystemPropertiesGatherer(String namePrefix) {
-<span class="nc" id="L37">    this(System.getProperties(), namePrefix);</span>
-<span class="nc" id="L38">  }</span>
+<span class="nc" id="L38">    this(System.getProperties(), namePrefix);</span>
+<span class="nc" id="L39">  }</span>
 
   /**
    * Constructor.
@@ -45,23 +46,24 @@ public class SystemPropertiesGatherer&lt;P&gt; implements ParameterGatherer&lt;P
    * @param props Properties data to process.
    * @param namePrefix The prefix to use to filter out system properties that should not be considered.
    */
-<span class="fc" id="L48">  public SystemPropertiesGatherer(Properties props,  String namePrefix) {</span>
-<span class="fc" id="L49">    this.sysProps = props;</span>
-<span class="fc" id="L50">    this.propertyPrefix = namePrefix;</span>
-<span class="fc" id="L51">  }</span>
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable objects are mutable&quot;)
+<span class="fc" id="L50">  public SystemPropertiesGatherer(Properties props,  String namePrefix) {</span>
+<span class="fc" id="L51">    this.sysProps = props;</span>
+<span class="fc" id="L52">    this.propertyPrefix = namePrefix;</span>
+<span class="fc" id="L53">  }</span>
   
   @Override
   public P gatherParameters(Params4JSpi spi, P base) throws IOException {
-<span class="fc" id="L55">    ObjectReader reader = spi.getPropsMapper()</span>
-<span class="fc" id="L56">            .readerForUpdating(base)</span>
-<span class="fc" id="L57">            .with(new JavaPropsSchema().withPathSeparatorEscapeChar('\\'))</span>
+<span class="fc" id="L57">    ObjectReader reader = spi.getPropsMapper()</span>
+<span class="fc" id="L58">            .readerForUpdating(base)</span>
+<span class="fc" id="L59">            .with(new JavaPropsSchema().withPathSeparatorEscapeChar('\\'))</span>
             ;
     
-<span class="fc" id="L60">    byte[] props = spi.prepareProperties(&quot;System properties&quot;, sysProps.entrySet(), Entry::getKey, Entry::getValue, propertyPrefix);</span>
-<span class="fc bfc" id="L61" title="All 2 branches covered.">    if (props.length &gt; 0) {</span>
-<span class="fc" id="L62">      return reader.readValue(props);</span>
+<span class="fc" id="L62">    byte[] props = spi.prepareProperties(&quot;System properties&quot;, sysProps.entrySet(), Entry::getKey, Entry::getValue, propertyPrefix);</span>
+<span class="fc bfc" id="L63" title="All 2 branches covered.">    if (props.length &gt; 0) {</span>
+<span class="fc" id="L64">      return reader.readValue(props);</span>
     } else {
-<span class="fc" id="L64">      return base;</span>
+<span class="fc" id="L66">      return base;</span>
     }
        
   }

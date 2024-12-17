@@ -52,28 +52,30 @@ public class DirGatherer&lt;P&gt; implements ParameterGatherer&lt;P&gt; {
     
 <span class="pc bpc" id="L53" title="1 of 2 branches missed.">    if (dir.isDirectory()) {</span>
 <span class="fc" id="L54">      File[] files = dir.listFiles();</span>
-<span class="fc" id="L55">      Arrays.sort(files);  // To ensure consistent behaviour across systems</span>
-<span class="fc bfc" id="L56" title="All 2 branches covered.">      for (FileType type : fileTypes) {</span>
-<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (File file : files) {</span>
-<span class="fc bfc" id="L58" title="All 2 branches covered.">          for (String extension : type.getExtensions()) {</span>
-<span class="pc bpc" id="L59" title="1 of 4 branches missed.">            if (file.exists() &amp;&amp; file.getName().endsWith(extension)) {</span>
-              try {
-<span class="fc" id="L61">                ObjectReader reader = type.getObjectMapper(spi).readerForUpdating(base);</span>
-    
-<span class="fc" id="L63">                try (InputStream stream = new FileInputStream(file)) {</span>
-<span class="fc" id="L64">                  base = reader.readValue(stream);</span>
-                }
-<span class="nc" id="L66">              } catch (Throwable ex) {</span>
-<span class="nc" id="L67">                logger.error(&quot;Failed to process file {}: &quot;, file, ex);</span>
-<span class="fc" id="L68">              }</span>
-            }
-<span class="fc" id="L70">          }</span>
-        }
-<span class="fc" id="L72">      }</span>
-<span class="fc" id="L73">      spi.watch(dir.toPath());</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">      if (files != null) {</span>
+<span class="fc" id="L56">        Arrays.sort(files);  // To ensure consistent behaviour across systems</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        for (FileType type : fileTypes) {</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">          for (File file : files) {</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">            for (String extension : type.getExtensions()) {</span>
+<span class="pc bpc" id="L60" title="1 of 4 branches missed.">              if (file.exists() &amp;&amp; file.getName().endsWith(extension)) {</span>
+                try {
+<span class="fc" id="L62">                  ObjectReader reader = type.getObjectMapper(spi).readerForUpdating(base);</span>
+
+<span class="fc" id="L64">                  try (InputStream stream = new FileInputStream(file)) {</span>
+<span class="fc" id="L65">                    base = reader.readValue(stream);</span>
+                  }
+<span class="nc" id="L67">                } catch (Throwable ex) {</span>
+<span class="nc" id="L68">                  logger.error(&quot;Failed to process file {}: &quot;, file, ex);</span>
+<span class="fc" id="L69">                }</span>
+              }
+<span class="fc" id="L71">            }</span>
+          }
+<span class="fc" id="L73">        }</span>
+<span class="fc" id="L74">        spi.watch(dir.toPath());</span>
+      }
     }
     
-<span class="fc" id="L76">    return base;    </span>
+<span class="fc" id="L78">    return base;    </span>
   }
 
 }

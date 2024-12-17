@@ -39,44 +39,42 @@ import jdk.javadoc.doclet.Reporter;
 public class AsciiDocDoclet implements Doclet {
 
   private final AsciiDocOptions options;
-  private Locale locale;
   private Reporter reporter;
   
-<span class="fc" id="L45">  public AsciiDocDoclet() {</span>
-<span class="fc" id="L46">    options = new AsciiDocOptions();</span>
-<span class="fc" id="L47">  }</span>
+<span class="fc" id="L44">  public AsciiDocDoclet() {</span>
+<span class="fc" id="L45">    options = new AsciiDocOptions();</span>
+<span class="fc" id="L46">  }</span>
   
   @Override
   public void init(Locale locale, Reporter reporter) {
-<span class="fc" id="L51">    this.locale = locale;</span>
-<span class="fc" id="L52">    this.reporter = reporter;</span>
-<span class="fc" id="L53">  }</span>
+<span class="fc" id="L50">    this.reporter = reporter;</span>
+<span class="fc" id="L51">  }</span>
 
   @Override
   public String getName() {
-<span class="nc" id="L57">    return getClass().getSimpleName();</span>
+<span class="nc" id="L55">    return getClass().getSimpleName();</span>
   }
 
   @Override
   public Set&lt;? extends Option&gt; getSupportedOptions() {
-<span class="fc" id="L62">    return options.getOptions();</span>
+<span class="fc" id="L60">    return options.getOptions();</span>
   }
 
   @Override
   public SourceVersion getSupportedSourceVersion() {
-<span class="nc" id="L67">    return SourceVersion.RELEASE_11;</span>
+<span class="nc" id="L65">    return SourceVersion.RELEASE_11;</span>
   }
 
   private static final boolean OK = true;
 
   @Override
   public boolean run(DocletEnvironment environment) {
-<span class="fc" id="L74">    environment.getSpecifiedElements()</span>
-<span class="fc" id="L75">            .forEach(e -&gt; {</span>
-<span class="fc" id="L76">              reporter.print(Diagnostic.Kind.NOTE, &quot;AsciiDoclet: &quot; + e);</span>
-<span class="fc" id="L77">              e.accept(new AsciiDocElementVisitor(environment, options, reporter), null);</span>
-<span class="fc" id="L78">            });</span>
-<span class="fc" id="L79">    return OK;</span>
+<span class="fc" id="L72">    environment.getSpecifiedElements()</span>
+<span class="fc" id="L73">            .forEach(e -&gt; {</span>
+<span class="fc" id="L74">              reporter.print(Diagnostic.Kind.NOTE, &quot;AsciiDoclet: &quot; + e);</span>
+<span class="fc" id="L75">              e.accept(new AsciiDocElementVisitor(environment, options, reporter), null);</span>
+<span class="fc" id="L76">            });</span>
+<span class="fc" id="L77">    return OK;</span>
   }
 
 }

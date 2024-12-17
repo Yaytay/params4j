@@ -16,12 +16,15 @@
  */
 package uk.co.spudsoft.params4j.doclet;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,73 +36,75 @@ import jdk.javadoc.doclet.Reporter;
  *
  * @author njt
  */
-<span class="fc" id="L36">public class AsciiDocLinkMaps {</span>
+<span class="fc" id="L39">public class AsciiDocLinkMaps {</span>
 
   private static final String MODULE_PREFIX = &quot;module:&quot;;
   
-<span class="fc" id="L40">  private final List&lt;String&gt; configuredBaseUrls = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L41">  private final Map&lt;String, String&gt; baseUrlFromPackage = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L42">  private boolean packageListsRead = false;</span>
+<span class="fc" id="L43">  private final List&lt;String&gt; configuredBaseUrls = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L44">  private final Map&lt;String, String&gt; baseUrlFromPackage = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L45">  private boolean packageListsRead = false;</span>
 
   public void addConfiguredBaseUrl(String baseUrl) {
-<span class="fc" id="L45">    configuredBaseUrls.add(baseUrl);</span>
-<span class="fc" id="L46">  }</span>
+<span class="fc" id="L48">    configuredBaseUrls.add(baseUrl);</span>
+<span class="fc" id="L49">  }</span>
 
   public String getUrlForPackage(Reporter reporter, String packageName) {
-<span class="pc bpc" id="L49" title="1 of 4 branches missed.">    if (!configuredBaseUrls.isEmpty() &amp;&amp; !packageListsRead) {</span>
-<span class="fc" id="L50">      packageListsRead = true;</span>
-<span class="fc bfc" id="L51" title="All 2 branches covered.">      for (String cofiguredBaseUrl : configuredBaseUrls) {</span>
-<span class="fc" id="L52">        readPackageList(reporter, baseUrlFromPackage, cofiguredBaseUrl);</span>
-<span class="fc" id="L53">        readElementList(reporter, baseUrlFromPackage, cofiguredBaseUrl);</span>
-<span class="fc" id="L54">      }</span>
+<span class="pc bpc" id="L52" title="1 of 4 branches missed.">    if (!configuredBaseUrls.isEmpty() &amp;&amp; !packageListsRead) {</span>
+<span class="fc" id="L53">      packageListsRead = true;</span>
+<span class="fc bfc" id="L54" title="All 2 branches covered.">      for (String cofiguredBaseUrl : configuredBaseUrls) {</span>
+<span class="fc" id="L55">        readPackageList(reporter, baseUrlFromPackage, cofiguredBaseUrl);</span>
+<span class="fc" id="L56">        readElementList(reporter, baseUrlFromPackage, cofiguredBaseUrl);</span>
+<span class="fc" id="L57">      }</span>
     }
-<span class="fc" id="L56">    String baseUrl = baseUrlFromPackage.get(packageName);</span>
-<span class="fc bfc" id="L57" title="All 2 branches covered.">    if (baseUrl == null) {</span>
-<span class="fc" id="L58">      return null;</span>
+<span class="fc" id="L59">    String baseUrl = baseUrlFromPackage.get(packageName);</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">    if (baseUrl == null) {</span>
+<span class="fc" id="L61">      return null;</span>
     } else {
-<span class="fc" id="L60">      return baseUrl + packageName.replace('.', '/') + &quot;/&quot;;</span>
+<span class="fc" id="L63">      return baseUrl + packageName.replace('.', '/') + &quot;/&quot;;</span>
     }
   }
 
   public String getUrlForType(Reporter reporter, String packageName, String className) {
-<span class="fc" id="L65">    String packageUrl = getUrlForPackage(reporter, packageName);</span>
-<span class="fc bfc" id="L66" title="All 2 branches covered.">    if (packageUrl == null) {</span>
-<span class="fc" id="L67">      return null;</span>
+<span class="fc" id="L68">    String packageUrl = getUrlForPackage(reporter, packageName);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">    if (packageUrl == null) {</span>
+<span class="fc" id="L70">      return null;</span>
     } else {
-<span class="fc" id="L69">      return packageUrl + className + &quot;.html&quot;;</span>
+<span class="fc" id="L72">      return packageUrl + className + &quot;.html&quot;;</span>
     }
   }
   
+  @SuppressFBWarnings(value = &quot;URLCONNECTION_SSRF_FD&quot;, justification = &quot;Attempting to read package list from related documentation&quot;)
   static void readPackageList(Reporter reporter, Map&lt;String, String&gt; baseUrlFromPackage, String baseUrl) {
-<span class="pc bpc" id="L74" title="1 of 2 branches missed.">    String url = baseUrl.endsWith(&quot;/&quot;) ? baseUrl + &quot;package-list&quot; : baseUrl + &quot;/package-list&quot;;</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">    String url = baseUrl.endsWith(&quot;/&quot;) ? baseUrl + &quot;package-list&quot; : baseUrl + &quot;/package-list&quot;;</span>
     try {
-<span class="fc" id="L76">      URL link = new URL(url);</span>
-<span class="fc" id="L77">      URLConnection con = link.openConnection();</span>
-<span class="fc" id="L78">      con.setConnectTimeout(2000);</span>
-<span class="fc" id="L79">      con.setReadTimeout(2000);</span>
-<span class="fc" id="L80">      try (InputStream in = con.getInputStream()) {</span>
-<span class="fc" id="L81">        readPackageList(baseUrlFromPackage, in, baseUrl);</span>
+<span class="fc" id="L80">      URL link = new URI(url).toURL();</span>
+<span class="fc" id="L81">      URLConnection con = link.openConnection();</span>
+<span class="fc" id="L82">      con.setConnectTimeout(2000);</span>
+<span class="fc" id="L83">      con.setReadTimeout(2000);</span>
+<span class="fc" id="L84">      try (InputStream in = con.getInputStream()) {</span>
+<span class="fc" id="L85">        readPackageList(baseUrlFromPackage, in, baseUrl);</span>
       }
-<span class="nc" id="L83">    } catch (Throwable ex) {</span>
-<span class="nc" id="L84">      reporter.print(Diagnostic.Kind.NOTE, &quot;Failed to download from URL &quot; + url + &quot; (&quot; + ex.toString() + &quot;)&quot;);</span>
-<span class="fc" id="L85">    }</span>
+<span class="nc" id="L87">    } catch (Throwable ex) {</span>
+<span class="nc" id="L88">      reporter.print(Diagnostic.Kind.NOTE, &quot;Failed to download from URL &quot; + url + &quot; (&quot; + ex.toString() + &quot;)&quot;);</span>
+<span class="fc" id="L89">    }</span>
 
-<span class="fc" id="L87">  }</span>
+<span class="fc" id="L91">  }</span>
 
+  @SuppressFBWarnings(value = &quot;URLCONNECTION_SSRF_FD&quot;, justification = &quot;Attempting to read element list from related documentation&quot;)
   static void readElementList(Reporter reporter, Map&lt;String, String&gt; baseUrlFromPackage, String baseUrl) {
-<span class="pc bpc" id="L90" title="1 of 2 branches missed.">    String url = baseUrl.endsWith(&quot;/&quot;) ? baseUrl + &quot;element-list&quot; : baseUrl + &quot;/element-list&quot;;</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">    String url = baseUrl.endsWith(&quot;/&quot;) ? baseUrl + &quot;element-list&quot; : baseUrl + &quot;/element-list&quot;;</span>
     try {
-<span class="fc" id="L92">      URL link = new URL(url);</span>
-<span class="fc" id="L93">      URLConnection con = link.openConnection();</span>
-<span class="fc" id="L94">      con.setConnectTimeout(2000);</span>
-<span class="fc" id="L95">      con.setReadTimeout(2000);</span>
-<span class="fc" id="L96">      try (InputStream in = con.getInputStream()) {</span>
-<span class="fc" id="L97">        readPackageList(baseUrlFromPackage, in, baseUrl);</span>
+<span class="fc" id="L97">      URL link = new URI(url).toURL();</span>
+<span class="fc" id="L98">      URLConnection con = link.openConnection();</span>
+<span class="fc" id="L99">      con.setConnectTimeout(2000);</span>
+<span class="fc" id="L100">      con.setReadTimeout(2000);</span>
+<span class="fc" id="L101">      try (InputStream in = con.getInputStream()) {</span>
+<span class="fc" id="L102">        readPackageList(baseUrlFromPackage, in, baseUrl);</span>
       }
-<span class="nc" id="L99">    } catch (Throwable ex) {</span>
-<span class="nc" id="L100">      reporter.print(Diagnostic.Kind.NOTE, &quot;Failed to download from URL &quot; + url + &quot; (&quot; + ex.toString() + &quot;)&quot;);</span>
-<span class="fc" id="L101">    }</span>
-<span class="fc" id="L102">  }</span>
+<span class="nc" id="L104">    } catch (Throwable ex) {</span>
+<span class="nc" id="L105">      reporter.print(Diagnostic.Kind.NOTE, &quot;Failed to download from URL &quot; + url + &quot; (&quot; + ex.toString() + &quot;)&quot;);</span>
+<span class="fc" id="L106">    }</span>
+<span class="fc" id="L107">  }</span>
 
   /**
    * Read the file &quot;element-list&quot; and for each element name found, create Extern object and associate it with the element name in
@@ -112,25 +117,25 @@ import jdk.javadoc.doclet.Reporter;
    */
   static void readPackageList(Map&lt;String, String&gt; baseUrlFromPackage, InputStream input, String url) throws IOException {
 
-<span class="fc" id="L115">    try (BufferedReader in = new BufferedReader(new InputStreamReader(input))) {</span>
+<span class="fc" id="L120">    try (BufferedReader in = new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8))) {</span>
       String line;
-<span class="fc" id="L117">      String moduleUrl = url;</span>
-<span class="pc bpc" id="L118" title="1 of 2 branches missed.">      if (!url.endsWith(&quot;/&quot;)) {</span>
-<span class="nc" id="L119">        url = url + &quot;/&quot;;</span>
+<span class="fc" id="L122">      String moduleUrl = url;</span>
+<span class="pc bpc" id="L123" title="1 of 2 branches missed.">      if (!url.endsWith(&quot;/&quot;)) {</span>
+<span class="nc" id="L124">        url = url + &quot;/&quot;;</span>
       }
-<span class="fc bfc" id="L121" title="All 2 branches covered.">      while ((line = in.readLine()) != null) {</span>
-<span class="fc bfc" id="L122" title="All 2 branches covered.">        if (!line.isBlank()) {</span>
-<span class="fc bfc" id="L123" title="All 2 branches covered.">          if (line.startsWith(MODULE_PREFIX)) {</span>
-<span class="fc" id="L124">            String moduleName = line.substring(MODULE_PREFIX.length());</span>
-<span class="fc" id="L125">            moduleUrl = url + moduleName + &quot;/&quot;;</span>
-<span class="fc" id="L126">          } else {</span>
-<span class="fc" id="L127">            String packageName = line;</span>
-<span class="fc" id="L128">            baseUrlFromPackage.put(packageName, moduleUrl);</span>
-<span class="fc" id="L129">          }</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">      while ((line = in.readLine()) != null) {</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        if (!line.isBlank()) {</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">          if (line.startsWith(MODULE_PREFIX)) {</span>
+<span class="fc" id="L129">            String moduleName = line.substring(MODULE_PREFIX.length());</span>
+<span class="fc" id="L130">            moduleUrl = url + moduleName + &quot;/&quot;;</span>
+<span class="fc" id="L131">          } else {</span>
+<span class="fc" id="L132">            String packageName = line;</span>
+<span class="fc" id="L133">            baseUrlFromPackage.put(packageName, moduleUrl);</span>
+<span class="fc" id="L134">          }</span>
         }
       }
     }
-<span class="fc" id="L133">  }</span>
+<span class="fc" id="L138">  }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>

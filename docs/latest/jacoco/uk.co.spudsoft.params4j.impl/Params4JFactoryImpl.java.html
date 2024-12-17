@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.DeserializationProblemHandler;
 import com.fasterxml.jackson.dataformat.javaprop.JavaPropsMapper;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
@@ -28,100 +29,114 @@ import uk.co.spudsoft.params4j.Params4JFactory;
  * 
  * @param &lt;P&gt; The type of the parameters object.
 */
-<span class="fc" id="L31">public class Params4JFactoryImpl&lt;P&gt; implements Params4JFactory&lt;P&gt; {</span>
+<span class="fc" id="L32">public class Params4JFactoryImpl&lt;P&gt; implements Params4JFactory&lt;P&gt; {</span>
   
   private Supplier&lt;P&gt; constructor;
-<span class="fc" id="L34">  private List&lt;ParameterGatherer&lt;P&gt;&gt; gatherers = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L35">  private List&lt;ParameterGatherer&lt;P&gt;&gt; gatherers = new ArrayList&lt;&gt;();</span>
   private DeserializationProblemHandler problemHandler;
   private JavaPropsMapper propsMapper;
   private ObjectMapper jsonMapper;
-<span class="fc" id="L38">  private List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L39">  private List&lt;MixIn&gt; mixIns = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L39">  private List&lt;com.fasterxml.jackson.databind.Module&gt; customJsonModules = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L40">  private List&lt;MixIn&gt; mixIns = new ArrayList&lt;&gt;();</span>
   private ObjectMapper yamlMapper;
   
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withConstructor(Supplier&lt;P&gt; supplier) {
-<span class="fc" id="L44">    this.constructor = supplier;</span>
-<span class="fc" id="L45">    return this;</span>
+<span class="fc" id="L46">    this.constructor = supplier;</span>
+<span class="fc" id="L47">    return this;</span>
   }
   
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withGatherer(ParameterGatherer&lt;P&gt; gatherer) {
-<span class="fc" id="L50">    gatherers.add(gatherer);</span>
-<span class="fc" id="L51">    return this;</span>
+<span class="fc" id="L53">    gatherers.add(gatherer);</span>
+<span class="fc" id="L54">    return this;</span>
   }
 
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withProblemHandler(DeserializationProblemHandler problemHandler) {
-<span class="fc" id="L56">    this.problemHandler = problemHandler;</span>
-<span class="fc" id="L57">    return this;</span>
+<span class="fc" id="L60">    this.problemHandler = problemHandler;</span>
+<span class="fc" id="L61">    return this;</span>
   }
 
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withPropsMapper(JavaPropsMapper propsMapper) {
-<span class="fc" id="L62">    this.propsMapper = propsMapper;</span>
-<span class="fc" id="L63">    return this;</span>
+<span class="fc" id="L67">    this.propsMapper = propsMapper;</span>
+<span class="fc" id="L68">    return this;</span>
   }
 
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withJsonMapper(ObjectMapper jsonMapper) {
-<span class="fc" id="L68">    this.jsonMapper = jsonMapper;</span>
-<span class="fc" id="L69">    return this;</span>
-  }
-
-  @Override
-  public Params4JFactory&lt;P&gt; withCustomJsonModule(Module module) {
-<span class="fc" id="L74">    this.customJsonModules.add(module);</span>
+<span class="fc" id="L74">    this.jsonMapper = jsonMapper;</span>
 <span class="fc" id="L75">    return this;</span>
   }
 
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
+  public Params4JFactory&lt;P&gt; withCustomJsonModule(Module module) {
+<span class="fc" id="L81">    this.customJsonModules.add(module);</span>
+<span class="fc" id="L82">    return this;</span>
+  }
+
+  @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withMixIn(Class&lt;?&gt; target, Class&lt;?&gt; mixinSource) {
-<span class="fc" id="L80">    this.mixIns.add(new MixIn(target, mixinSource));</span>
-<span class="fc" id="L81">    return this;</span>
+<span class="fc" id="L88">    this.mixIns.add(new MixIn(target, mixinSource));</span>
+<span class="fc" id="L89">    return this;</span>
   }
   
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withYamlMapper(ObjectMapper yamlMapper) {
-<span class="fc" id="L86">    this.yamlMapper = yamlMapper;</span>
-<span class="fc" id="L87">    return this;</span>
+<span class="fc" id="L95">    this.yamlMapper = yamlMapper;</span>
+<span class="fc" id="L96">    return this;</span>
   }
 
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withResourceGatherer(String resource, FileType fileType) {
-<span class="nc" id="L92">    return withGatherer(new ResourceGatherer&lt;&gt;(resource, fileType));</span>
+<span class="nc" id="L102">    return withGatherer(new ResourceGatherer&lt;&gt;(resource, fileType));</span>
   }
 
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withDirGatherer(File dir, FileType... fileTypes) {
-<span class="nc" id="L97">    return withGatherer(new DirGatherer&lt;&gt;(dir, fileTypes));</span>
+<span class="nc" id="L108">    return withGatherer(new DirGatherer&lt;&gt;(dir, fileTypes));</span>
   }
 
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withEnvironmentVariablesGatherer(String namePrefix, boolean toLowerCase) {
-<span class="nc" id="L102">    return withGatherer(new EnvironmentVariablesGatherer&lt;&gt;(namePrefix, toLowerCase));</span>
+<span class="nc" id="L114">    return withGatherer(new EnvironmentVariablesGatherer&lt;&gt;(namePrefix, toLowerCase));</span>
   }
 
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withSystemPropertiesGatherer(String namePrefix) {
-<span class="nc" id="L107">    return withGatherer(new SystemPropertiesGatherer&lt;&gt;(namePrefix));</span>
+<span class="nc" id="L120">    return withGatherer(new SystemPropertiesGatherer&lt;&gt;(namePrefix));</span>
   }
 
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withCommandLineArgumentsGatherer(String[] args, String namePrefix) {
-<span class="fc" id="L112">    return withGatherer(new CommandLineArgumentsGatherer&lt;&gt;(args, namePrefix));</span>
+<span class="fc" id="L126">    return withGatherer(new CommandLineArgumentsGatherer&lt;&gt;(args, namePrefix));</span>
   }
   
   
   @Override
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;Externable object is mutable&quot;)
   public Params4JFactory&lt;P&gt; withSecretsGatherer(Path root, int fileSizeLimit, int fileCountLimit, int fileDepthLimit, Charset charset) {
-<span class="nc" id="L118">    return withGatherer(new SecretsGatherer&lt;&gt;(root, fileSizeLimit, fileCountLimit, fileDepthLimit, charset));</span>
+<span class="nc" id="L133">    return withGatherer(new SecretsGatherer&lt;&gt;(root, fileSizeLimit, fileCountLimit, fileDepthLimit, charset));</span>
   }
   
   @Override
   public Params4J&lt;P&gt; create() {
-<span class="fc" id="L123">    return new Params4JImpl&lt;&gt;(constructor</span>
-<span class="fc" id="L124">            , Collections.unmodifiableList(gatherers)</span>
+<span class="fc" id="L138">    return new Params4JImpl&lt;&gt;(constructor</span>
+<span class="fc" id="L139">            , Collections.unmodifiableList(gatherers)</span>
             , problemHandler
             , propsMapper
             , jsonMapper
