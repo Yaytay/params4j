@@ -47,7 +47,7 @@
     <jdk.version>17</jdk.version>
     <jackson.version>[2.15.0,)</jackson.version>
     <slf4j.version>[1.7,)</slf4j.version>
-    <logback.version>1.5.12</logback.version>
+    <logback.version>1.5.17</logback.version>
     <junit-jupiter.version>5.12.0</junit-jupiter.version>
     <junit-platform.version>1.12.0</junit-platform.version>
   </properties>
@@ -83,7 +83,7 @@
     <dependency>
       <groupId>com.github.spotbugs</groupId>
       <artifactId>spotbugs-annotations</artifactId>
-      <version>4.9.1</version>
+      <version>4.9.2</version>
     </dependency>
 
 
@@ -133,7 +133,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.15.2</version>
+      <version>5.16.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -267,7 +267,7 @@
       <plugin>
         <groupId>com.github.spotbugs</groupId>
         <artifactId>spotbugs-maven-plugin</artifactId>
-        <version>4.9.1.0</version>
+        <version>4.9.2.0</version>
         <configuration>
           <fork>true</fork>
           <effort>Max</effort>
@@ -316,7 +316,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>10.21.0</version>
+            <version>10.21.4</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -524,7 +524,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
-        <version>3.8.0</version>
+        <version>3.9.0</version>
       </plugin>
 
       <plugin>
