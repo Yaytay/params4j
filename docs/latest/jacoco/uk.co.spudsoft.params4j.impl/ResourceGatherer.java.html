@@ -49,8 +49,15 @@ public class ResourceGatherer&lt;P&gt; implements ParameterGatherer&lt;P&gt; {
     
 <span class="fc" id="L50">    try (InputStream stream = this.getClass().getResourceAsStream(resource)) {</span>
 <span class="fc" id="L51">      return reader.readValue(stream);</span>
+<span class="nc" id="L52">    } catch (Throwable ex) {</span>
+<span class="nc" id="L53">      logger.debug(&quot;Unable to read resource: {}&quot;, resource);</span>
+<span class="nc" id="L54">      return base;</span>
     }
   }
 
+  @Override
+  public String toString() {
+<span class="fc" id="L60">    return &quot;Resource (&quot; + resource + &quot;)&quot;;</span>
+  }
 }
-</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
