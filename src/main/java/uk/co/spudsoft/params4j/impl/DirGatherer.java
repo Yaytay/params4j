@@ -11,7 +11,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +52,7 @@ public class DirGatherer<P> implements ParameterGatherer<P> {
   @Override
   public P gatherParameters(Params4JSpi spi, P base) throws IOException {
     
+    Set<File> usedFiles = new HashSet<>();
     if (dir.isDirectory()) {
       File[] files = dir.listFiles();
       if (files != null) {
@@ -58,6 +61,8 @@ public class DirGatherer<P> implements ParameterGatherer<P> {
           for (File file : files) {
             for (String extension : type.getExtensions()) {
               if (file.exists() && file.getName().endsWith(extension)) {
+                logger.debug("Reading file {}", file);
+                usedFiles.add(file);
                 try {
                   ObjectReader reader = type.getObjectMapper(spi).readerForUpdating(base);
 
@@ -71,11 +76,25 @@ public class DirGatherer<P> implements ParameterGatherer<P> {
             }
           }
         }
+        for (File file : files) {
+          if (!usedFiles.contains(file)) {
+            logger.trace("Skipped the file {}, not of recognised type ({})", file, fileTypes);        
+          }
+        }
         spi.watch(dir.toPath());
+      } else {
+        logger.debug("No files in directory \"{}\"", dir);        
       }
+    } else {
+      logger.debug("Config directory \"{}\" is not a directory", dir);
     }
     
     return base;    
   }
 
+  @Override
+  public String toString() {
+    return "Dir (" + dir + ")";
+  }
+  
 }

@@ -49,7 +49,14 @@ public class ResourceGatherer<P> implements ParameterGatherer<P> {
     
     try (InputStream stream = this.getClass().getResourceAsStream(resource)) {
       return reader.readValue(stream);
+    } catch (Throwable ex) {
+      logger.debug("Unable to read resource: {}", resource);
+      return base;
     }
   }
 
+  @Override
+  public String toString() {
+    return "Resource (" + resource + ")";
+  }
 }

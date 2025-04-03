@@ -71,8 +71,13 @@ public class CommandLineArgumentsGatherer<P> implements ParameterGatherer<P> {
       return reader.readValue(props);
     } else {
       return base;
-    }
-    
+    }    
   }
+
+  @Override
+  public String toString() {
+    return "Command line arguments";
+  }
+  
 
 }

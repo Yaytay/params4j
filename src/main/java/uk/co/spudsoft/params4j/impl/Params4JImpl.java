@@ -210,16 +210,21 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
             String key = getKeyAsPrefixedString(keyGetter, entry, propertyPrefix);
             if (key != null) {
               String value = (String) valueGetter.apply(entry);
-              logger.trace("{}: {} = {}", name, key, value);
+              logger.debug("{}: {} = {}", name, key, value);
               writer.append(key)
                   .append(" = ")
                   .append(value)
                   .append("\r\n");
+            } else {
+              logger.trace("{}: skipping entry: {}", name, entry);
             }
           } catch (ClassCastException ex) {
             logger.warn("{} unable to get key or value as a string from {}", name, entry);
           }
         }
+      }
+      if (logger.isTraceEnabled()) {
+        logger.warn("{}: result as properties: {}", name, baos.toString(StandardCharsets.UTF_8));
       }
       return baos.toByteArray();
     }
@@ -242,6 +247,9 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     for (ParameterGatherer<P> gatherer : gatherers) {
       try {
         value = gatherer.gatherParameters(this, value);
+        if (logger.isTraceEnabled()) {
+          logger.trace("Parameters after {}: {}", gatherer, jsonMapper.writeValueAsString(value));
+        }
       } catch (Throwable ex) {
         logger.warn("Failed to process: ", ex);
       }

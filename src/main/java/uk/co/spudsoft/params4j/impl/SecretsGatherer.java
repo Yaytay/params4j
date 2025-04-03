@@ -82,4 +82,9 @@ public class SecretsGatherer<P> implements ParameterGatherer<P> {
     return base;
   }
   
+  @Override
+  public String toString() {
+    return "Secrets (" + root + ")";
+  }
+  
 }
