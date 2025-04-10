@@ -133,7 +133,7 @@
     <dependency>
       <groupId>org.mockito</groupId>
       <artifactId>mockito-core</artifactId>
-      <version>5.16.1</version>
+      <version>5.17.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -432,7 +432,7 @@
       <plugin>
         <groupId>org.owasp</groupId>
         <artifactId>dependency-check-maven</artifactId>
-        <version>12.1.0</version>
+        <version>12.1.1</version>
         <configuration>
           <failBuildOnCVSS>8</failBuildOnCVSS>
           <failOnError>false</failOnError>
@@ -554,7 +554,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.12</version>
+        <version>0.8.13</version>
         <reportSets>
           <reportSet>
             <reports>
