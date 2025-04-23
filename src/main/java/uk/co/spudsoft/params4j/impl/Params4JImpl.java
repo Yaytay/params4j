@@ -22,6 +22,7 @@ import java.io.OutputStreamWriter;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -87,6 +88,7 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     tt.add("java.lang.Integer");
     tt.add("java.lang.Long");
     tt.add("java.io.File");
+    tt.add("java.util.regex.Pattern");
     return Collections.unmodifiableSet(tt);
   }
   
@@ -388,7 +390,7 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     Properties classDocProperties = loadDocProperties(docProperties, clazz);
     Set<String> propsDone = new HashSet<>();
     for (Method method : clazz.getMethods()) {
-      if (method.getParameters().length == 1 && method.getName().startsWith("set")) {
+      if (method.getParameters().length == 1 && method.getName().startsWith("set") && ((method.getModifiers() & Modifier.PRIVATE) == 0)) {
         Parameter parameter = method.getParameters()[0];
         
         Class<?> fieldType = parameter.getType();
@@ -411,12 +413,13 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
         );
       }
     }
+
     for (Field field : clazz.getDeclaredFields()) {
       Class<?> fieldType = field.getType();
       String fieldName = field.getName();      
       Object defaultValue = getValue(defaultInstance, field);
 
-      if (!propsDone.contains(fieldName)) {
+      if (!propsDone.contains(fieldName) && ((field.getModifiers() & Modifier.PRIVATE) == 0)) {
         documentField(properties
                 , docProperties
                 , classDocProperties
@@ -439,6 +442,43 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
         );
       }
     }
+    
+    for (Method method : clazz.getMethods()) {
+      if (method.getParameters().length == 0
+              && (method.getName().startsWith("get") || method.getName().startsWith("is"))
+              && ((method.getModifiers() & Modifier.PRIVATE) == 0)
+              && (!method.getDeclaringClass().equals(java.lang.Object.class))
+              ) {
+        
+        Class<?> fieldType = method.getReturnType();
+        String fieldName = JavadocCapturer.getterNameToVariableName(method.getName());
+        if (!propsDone.contains(fieldName)) {
+          Object defaultValue = getValue(defaultInstance, method.getName());
+
+          propsDone.add(fieldName);
+          documentField(properties
+                  , docProperties
+                  , classDocProperties
+                  , prefix
+                  , propertyStates
+                  , terminalClasses
+                  , undocumentedClasses
+                  , method
+                  , fieldName
+                  , fieldType
+                  , defaultValue
+                  , () -> {
+                    Type genericType = method.getGenericReturnType();
+                    if (genericType instanceof ParameterizedType) {
+                      return (ParameterizedType) genericType;             
+                    } else {
+                      return null;
+                    }
+                  }
+          );
+        }
+      }
+    }    
   }
 
   private void documentField(
@@ -547,6 +587,7 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
             .type(type)
             .build();
     properties.add(prop);
+    logger.debug("Added property {} (resulting in {} entries)", prop, properties.size());
   }
   
 }

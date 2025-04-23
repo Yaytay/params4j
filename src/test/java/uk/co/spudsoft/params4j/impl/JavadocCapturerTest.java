@@ -129,7 +129,7 @@ public class JavadocCapturerTest {
     List<ConfigurationProperty> docs = (List<ConfigurationProperty>) testDocsClass.getMethod("getDocs").invoke(object);
     assertNotNull(docs);
     for (ConfigurationProperty cp : docs) {
-      logger.trace("Configuration property: {}", OBJECT_MAPPER.writeValueAsString(cp));
+      logger.trace("Configuration property: {}", cp);
     }
     assertThat(docs, hasSize(21));
     // Convert from array to map because the order isn't stable with reflection

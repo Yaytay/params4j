@@ -320,5 +320,12 @@ public class ConfigurationProperty {
       builder.append(lineTerminator);
     }
   }
+
+  @Override
+  public String toString() {
+    return name + "{" + type + "; " + canBeEnvVar + "; " + undocumented + "; " + defaultValue + "; " + comment + "}";
+  }
+  
+  
   
 }

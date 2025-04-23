@@ -60,42 +60,42 @@
     "name": "--auditDataSource.user.group",
     "canBeEnvVar": true,
     "undocumented": false,
-    "comment": "datasource used for recording activity, credentials to use for standard actions (DML), group",
+    "comment": "datasource used for recording activity, credentials to use for standard actions (DML), group (setter)",
     "defaultValue": null
   }, {
     "type": "java.lang.String",
     "name": "--auditDataSource.user.password",
     "canBeEnvVar": true,
     "undocumented": false,
-    "comment": "datasource used for recording activity, credentials to use for standard actions (DML), password",
+    "comment": "datasource used for recording activity, credentials to use for standard actions (DML), password (field; setter has no Javadoc)",
     "defaultValue": null
   }, {
     "type": "java.lang.String",
     "name": "--auditDataSource.user.username",
     "canBeEnvVar": true,
     "undocumented": false,
-    "comment": "datasource used for recording activity, credentials to use for standard actions (DML), username",
+    "comment": "datasource used for recording activity, credentials to use for standard actions (DML), username (setter)",
     "defaultValue": null
   }, {
     "type": "java.lang.String",
     "name": "--auditDataSource.adminUser.group",
     "canBeEnvVar": true,
     "undocumented": false,
-    "comment": "datasource used for recording activity, credentials to use for preparing the database (DDL), group",
+    "comment": "datasource used for recording activity, credentials to use for preparing the database (DDL), group (setter)",
     "defaultValue": null
   }, {
     "type": "java.lang.String",
     "name": "--auditDataSource.adminUser.password",
     "canBeEnvVar": true,
     "undocumented": false,
-    "comment": "datasource used for recording activity, credentials to use for preparing the database (DDL), password",
+    "comment": "datasource used for recording activity, credentials to use for preparing the database (DDL), password (field; setter has no Javadoc)",
     "defaultValue": null
   }, {
     "type": "java.lang.String",
     "name": "--auditDataSource.adminUser.username",
     "canBeEnvVar": true,
     "undocumented": false,
-    "comment": "datasource used for recording activity, credentials to use for preparing the database (DDL), username",
+    "comment": "datasource used for recording activity, credentials to use for preparing the database (DDL), username (setter)",
     "defaultValue": null
   }, {
     "type": "int",
@@ -109,21 +109,21 @@
     "name": "--logins.<xxx>.group",
     "canBeEnvVar": true,
     "undocumented": false,
-    "comment": "login for a system, group",
+    "comment": "login for a system, group (setter)",
     "defaultValue": null
   }, {
     "type": "java.lang.String",
     "name": "--logins.<xxx>.password",
     "canBeEnvVar": true,
     "undocumented": false,
-    "comment": "login for a system, password",
+    "comment": "login for a system, password (field; setter has no Javadoc)",
     "defaultValue": null
   }, {
     "type": "java.lang.String",
     "name": "--logins.<xxx>.username",
     "canBeEnvVar": true,
     "undocumented": false,
-    "comment": "login for a system, username",
+    "comment": "login for a system, username (setter)",
     "defaultValue": null
   }, {
     "type": "boolean",
