@@ -336,7 +336,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Boolean> {
     if (!e.getModifiers().contains(Modifier.PRIVATE) 
             && (e.getSimpleName().toString().startsWith("get") || e.getSimpleName().toString().startsWith("is"))
             && e.getParameters().isEmpty()
-            && !e.getEnclosingElement().getSimpleName().toString().equals("Class")
+            && !e.getEnclosingElement().getSimpleName().toString().equals("Object")
             ) {
       try {
         String fieldName = JavadocCapturer.getterNameToVariableName(e.getSimpleName().toString());
