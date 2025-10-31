@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import jdk.javadoc.doclet.Doclet.Option;
 import jdk.javadoc.doclet.Doclet.Option.Kind;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.Test;
 
 /**
@@ -39,7 +40,7 @@ public class AbstractAsciiDocOptionTest {
   
   @Test
   public void testOptionGetters() {
-    assertEquals(3, OPTIONS.size());
+    assertEquals(4, OPTIONS.size());
     
     Option option = OPTIONS.get(0);
     assertEquals(1, option.getNames().size());
@@ -59,12 +60,19 @@ public class AbstractAsciiDocOptionTest {
     
     option = OPTIONS.get(2);
     assertEquals(1, option.getNames().size());
+    assertEquals("--no-fonts", option.getNames().get(0));
+    assertEquals(0, option.getArgumentCount());
+    assertEquals(Kind.STANDARD,  option.getKind());
+    assertEquals("Disable font embedding in output",  option.getDescription());
+    assertNull(option.getParameters());
+    
+    option = OPTIONS.get(3);
+    assertEquals(1, option.getNames().size());
     assertEquals("--include-classes", option.getNames().get(0));
     assertEquals(1, option.getArgumentCount());
     assertEquals(Kind.STANDARD,  option.getKind());
     assertEquals("If set, only the listed classes will be processed",  option.getDescription());
     assertEquals("include-classes",  option.getParameters());
-    
     
   }
 

@@ -75,6 +75,13 @@ public class AsciiDocOptions {
       }
     });
     
+    result.add(new AbstractAsciiDocOption(0, "Disable font embedding in output", "--no-fonts", null) {
+      @Override
+      public boolean process(String option, List<String> arguments) {
+        return true;
+      }
+    });
+
     return result;
   }
 

@@ -31,7 +31,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
-import org.junit.Ignore;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -106,6 +105,7 @@ public class AsciiDocDocletTest {
             , "commentcap.Parameters,commentcap.Credentials,commentcap.ProtectedCredentials"
             , "--include-classes"
             , "commentcap.DataSource"
+            , "--no-fonts"
             , "-link"
             , "https://docs.oracle.com/en/java/javase/20/docs/api/"
             , "commentcap"
