@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>EnvironmentVariablesGatherer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Parameters for Java</a> &gt; <a href="index.source.html" class="el_package">uk.co.spudsoft.params4j.impl</a> &gt; <span class="el_source">EnvironmentVariablesGatherer.java</span></div><h1>EnvironmentVariablesGatherer.java</h1><pre class="source lang-java linenums">/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package uk.co.spudsoft.params4j.impl;
+
+import com.fasterxml.jackson.databind.ObjectReader;
+import com.fasterxml.jackson.dataformat.javaprop.JavaPropsSchema;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import uk.co.spudsoft.params4j.ParameterGatherer;
+import uk.co.spudsoft.params4j.Params4JSpi;
+
+/**
+ * ParameterGather that gathers parameters from environment variables.
+ * 
+ * Note that on Linux (which include docker on Windows) shells usually have constraints on environment variable names.
+ * Specifically names can only consist of letters, digits and the underscore.
+ * Furthermore lowercase variable names should be used for local variables, not one that are passed between processes.
+ * 
+ * Given that params4j expects keys like &quot;prefix.list[1]&quot; this can be a problem.
+ * Typically docker and kubernetes do not enforce constraints on the environment variable keys, but if your container
+ * uses a shell script to bootstrap your service then it probably is affected.
+ * 
+ * This class takes two steps to workaround these limitations:
+ * 1. Any underscores in environment variable key names are replaced with a dot (&quot;.&quot;).
+ * 2. Optionally, all keys can be converted to lower case (using the default locale).
+ * 
+ * If this not enough to enable an environment variable to be used for a given value then another approach will have to be found.
+ * In particular list values (&quot;list[1]&quot;) are not going to work as environment variables if they have to processed by a shell.
+ * 
+ * To avoid trying to process all environment variables as parameters the namePrefix can be used to filter environment variables.
+ * If the namePrefix is supplied (is not null or empty) only environment variables that begin with the prefix will be considered.
+ * The prefix will be removed before mapping variables to the parameters object.
+ * The prefix is always considered to have a trailing dot (&quot;.&quot;), this does not have to be specified in the namePrefix argument.
+ * 
+ * @author jtalbut
+ * 
+ * @param &lt;P&gt; The type of the parameters object.
+ */
+public class EnvironmentVariablesGatherer&lt;P&gt; implements ParameterGatherer&lt;P&gt; {
+
+  private final Map&lt;String, String&gt; map;
+  private final String namePrefix;
+  
+  /**
+   * Constructor using the default environment.
+   * 
+   * @param namePrefix The prefix that can be used to filter environment variables.
+   * @param toLowerCase If true all environment variable names will be converted to lower case before passing to Jackson.
+   */
+  public EnvironmentVariablesGatherer(String namePrefix, boolean toLowerCase) {
+<span class="nc" id="L55">    this(System.getenv(), namePrefix, toLowerCase);</span>
+<span class="nc" id="L56">  }</span>
+
+  /**
+   * Constructor using a custom environment.
+   * 
+   * @param map The environment variables.
+   * @param namePrefix The prefix that can be used to filter environment variables.
+   * @param toLowerCase If true all environment variable names will be converted to lower case before passing to Jackson.
+   */
+<span class="fc" id="L65">  public EnvironmentVariablesGatherer(Map&lt;String, String&gt; map,  String namePrefix, boolean toLowerCase) {</span>
+<span class="fc" id="L66">    this.map = new HashMap&lt;&gt;();</span>
+<span class="fc bfc" id="L67" title="All 2 branches covered.">    for (Entry&lt;String, String&gt; entry : map.entrySet()) {</span>
+<span class="fc" id="L68">      String key = entry.getKey().replaceAll(&quot;_&quot;, &quot;.&quot;);</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">      if (toLowerCase) {</span>
+<span class="fc" id="L70">        key = key.toLowerCase();</span>
+      }
+<span class="fc" id="L72">      this.map.put(key, entry.getValue());</span>
+<span class="fc" id="L73">    }</span>
+<span class="fc" id="L74">    this.namePrefix = namePrefix;</span>
+<span class="fc" id="L75">  }</span>
+  
+  @Override
+  public P gatherParameters(Params4JSpi spi, P base) throws IOException {
+<span class="fc" id="L79">    ObjectReader reader = spi.getPropsMapper()</span>
+<span class="fc" id="L80">            .readerForUpdating(base)</span>
+<span class="fc" id="L81">            .with(new JavaPropsSchema().withPathSeparatorEscapeChar('\\'))</span>
+            ;
+    
+<span class="fc" id="L84">    byte[] props = spi.prepareProperties(&quot;Environment variables&quot;, map.entrySet(), Entry::getKey, Entry::getValue, namePrefix);</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">    if (props.length &gt; 0) {</span>
+<span class="fc" id="L86">      return reader.readValue(props);</span>
+    } else {
+<span class="fc" id="L88">      return base;</span>
+    }
+  }
+
+  @Override
+  public String toString() {
+<span class="nc" id="L94">    return &quot;Environment variables&quot;;</span>
+  }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

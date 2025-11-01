@@ -1,0 +1,206 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JavadocCapturer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Parameters for Java</a> &gt; <a href="index.source.html" class="el_package">uk.co.spudsoft.params4j.impl</a> &gt; <span class="el_source">JavadocCapturer.java</span></div><h1>JavadocCapturer.java</h1><pre class="source lang-java linenums">/*
+ * Copyright (C) 2022 jtalbut
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package uk.co.spudsoft.params4j.impl;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.Properties;
+import java.util.Set;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.tools.Diagnostic;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
+import uk.co.spudsoft.params4j.JavadocCapture;
+
+
+/**
+ * Annotation processor for capturing Javadoc comments and converting them to annotations that can be understood by Params4J.
+ * This provides a simple mechanism for document parameters both in Javadoc and on the command line in one go.
+ * @author jtalbut
+ */
+@SupportedAnnotationTypes(&quot;uk.co.spudsoft.params4j.JavadocCapture&quot;)
+<span class="fc" id="L47">public class JavadocCapturer extends AbstractProcessor {</span>
+
+  @Override
+  public boolean process(Set&lt;? extends TypeElement&gt; annnotations, RoundEnvironment re) {
+<span class="fc bfc" id="L51" title="All 2 branches covered.">    for (TypeElement annotation : annnotations) {</span>
+<span class="pc bpc" id="L52" title="1 of 2 branches missed.">      if (annotation.getQualifiedName().toString().equals(JavadocCapture.class.getName())) {</span>
+<span class="fc bfc" id="L53" title="All 2 branches covered.">        for (Element e : re.getElementsAnnotatedWith(annotation)) {</span>
+<span class="pc bpc" id="L54" title="1 of 2 branches missed.">          if (e.getKind() == ElementKind.CLASS) {</span>
+<span class="fc" id="L55">            generateCommentProperties(new HashSet&lt;&gt;(), (TypeElement) e);</span>
+          }
+<span class="fc" id="L57">        }</span>
+      }
+<span class="fc" id="L59">    }</span>
+    
+<span class="fc" id="L61">    return true;</span>
+  }
+
+  @Override
+  public SourceVersion getSupportedSourceVersion() {
+<span class="fc" id="L66">    return SourceVersion.latestSupported();</span>
+  }
+  
+  private void writeDocProperties(PackageElement packageElement, TypeElement classElement, Properties commentProps) {
+    try {
+<span class="fc" id="L71">      FileObject fo = processingEnv.getFiler().createResource(</span>
+              StandardLocation.CLASS_OUTPUT
+<span class="fc" id="L73">              , packageElement.getQualifiedName()</span>
+<span class="fc" id="L74">              , classElement.getSimpleName() + &quot;-doc.properties&quot;</span>
+              , classElement
+      );
+<span class="fc" id="L77">      try (OutputStream out = fo.openOutputStream()) {</span>
+<span class="fc" id="L78">        commentProps.store(out, &quot;Documentation properties for &quot; + classElement.getQualifiedName());</span>
+      }
+<span class="fc" id="L80">      processingEnv.getMessager().printMessage(Diagnostic.Kind.OTHER, &quot;Output written to &quot; + fo.toUri());</span>
+<span class="nc" id="L81">    } catch (IOException ex) {</span>
+<span class="nc" id="L82">      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, &quot;Unable to write to resource file: &quot; + ex.getMessage());</span>
+<span class="fc" id="L83">    }</span>
+<span class="fc" id="L84">  }</span>
+  
+  private PackageElement getPackage(Element element) {
+<span class="fc bfc" id="L87" title="All 2 branches covered.">    if (element.getKind() == ElementKind.PACKAGE) {</span>
+<span class="fc" id="L88">      return (PackageElement) element;</span>
+    } else {
+<span class="fc" id="L90">      Element parent = element.getEnclosingElement();</span>
+<span class="pc bpc" id="L91" title="1 of 2 branches missed.">      if (parent != null) {</span>
+<span class="fc" id="L92">        return getPackage(parent);</span>
+      } else {
+<span class="nc" id="L94">        return null;</span>
+      }
+    }
+  }
+
+  /**
+   * Convert the name of a setter to the name of the field.
+   * Strips &quot;set&quot; from the beginning and lowercases the following character.
+   * @param setterName The name of the bean field setter.
+   * @return The name of setter with &quot;set&quot; removed and with a leading lowercase character.
+   */
+  public static String setterNameToVariableName(String setterName) {
+<span class="pc bpc" id="L106" title="1 of 2 branches missed.">    if (setterName == null) {</span>
+<span class="nc" id="L107">      return null;</span>
+    }
+<span class="pc bpc" id="L109" title="1 of 6 branches missed.">    if (setterName.startsWith(&quot;set&quot;) &amp;&amp; setterName.length() &gt; 3 &amp;&amp; Character.isUpperCase(setterName.codePointAt(3))) {</span>
+<span class="fc" id="L110">      setterName = setterName.substring(3);</span>
+    }
+<span class="fc bfc" id="L112" title="All 2 branches covered.">    if (Character.isUpperCase(setterName.codePointAt(0))) {</span>
+<span class="fc" id="L113">      setterName = Character.toString(Character.toLowerCase(setterName.codePointAt(0))) + setterName.substring(setterName.offsetByCodePoints(0, 1));</span>
+    }
+<span class="fc" id="L115">    return setterName;</span>
+  }
+  /**
+   * Convert the name of a getter to the name of the field.
+   * Strips &quot;get&quot; or &quot;is&quot; from the beginning and lowercases the following character.
+   * @param getterName The name of the bean field getter.
+   * @return The name of getter with &quot;get&quot; or &quot;is&quot; removed and with a leading lowercase character.
+   */
+  public static String getterNameToVariableName(String getterName) {
+<span class="pc bpc" id="L124" title="1 of 2 branches missed.">    if (getterName == null) {</span>
+<span class="nc" id="L125">      return null;</span>
+    }
+<span class="pc bpc" id="L127" title="2 of 6 branches missed.">    if (getterName.startsWith(&quot;get&quot;) &amp;&amp; getterName.length() &gt; 3 &amp;&amp; Character.isUpperCase(getterName.codePointAt(3))) {</span>
+<span class="fc" id="L128">      getterName = getterName.substring(3);</span>
+    }
+<span class="pc bpc" id="L130" title="2 of 6 branches missed.">    if (getterName.startsWith(&quot;is&quot;) &amp;&amp; getterName.length() &gt; 2 &amp;&amp; Character.isUpperCase(getterName.codePointAt(2))) {</span>
+<span class="fc" id="L131">      getterName = getterName.substring(2);</span>
+    }
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">    if (Character.isUpperCase(getterName.codePointAt(0))) {</span>
+<span class="fc" id="L134">      getterName = Character.toString(Character.toLowerCase(getterName.codePointAt(0))) + getterName.substring(getterName.offsetByCodePoints(0, 1));</span>
+    }
+<span class="fc" id="L136">    return getterName;</span>
+  }
+
+  static String tidyComment(String comment) {
+<span class="fc bfc" id="L140" title="All 2 branches covered.">    if (comment == null) {</span>
+<span class="fc" id="L141">      return null;</span>
+    }
+<span class="fc" id="L143">    comment = comment.split(&quot;\n&quot;)[0].trim();</span>
+<span class="pc bpc" id="L144" title="1 of 4 branches missed.">    if (comment.startsWith(&quot;The &quot;) || comment.startsWith(&quot;the &quot;)) {</span>
+<span class="fc" id="L145">      comment = comment.substring(4);</span>
+    }
+<span class="fc bfc" id="L147" title="All 2 branches covered.">    if (comment.endsWith(&quot;.&quot;)) {</span>
+<span class="fc" id="L148">      comment = comment.substring(0, comment.length() - 1);</span>
+    }
+<span class="fc" id="L150">    return comment.trim();</span>
+  }
+  
+  private void generateCommentProperties(Set&lt;String&gt; elements, TypeElement element) {
+<span class="fc" id="L154">    Properties commentProps = new Properties();</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">    if (elements.add(element.getQualifiedName().toString())) {</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">      for (Element child : element.getEnclosedElements()) {</span>
+<span class="fc" id="L157">        String childName = child.getSimpleName().toString();</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">        if (child.getKind() == ElementKind.FIELD) {</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">          if (!commentProps.containsKey(childName)) {</span>
+            // Add javadocs on fields, but only if the setter hasn't already written the comment
+<span class="fc" id="L161">            String docComment = tidyComment(processingEnv.getElementUtils().getDocComment(child));</span>
+<span class="pc bpc" id="L162" title="1 of 4 branches missed.">            if (docComment != null &amp;&amp; !docComment.isEmpty()) {</span>
+<span class="fc" id="L163">              commentProps.put(childName, docComment);</span>
+            }
+          }
+
+<span class="fc" id="L167">          DeclaredType parameterClass = null;</span>
+<span class="fc" id="L168">          VariableElement variable = (VariableElement) child;</span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">          if (variable.asType() instanceof DeclaredType) {</span>
+<span class="fc" id="L170">            parameterClass = (DeclaredType) variable.asType();</span>
+          }
+<span class="fc bfc" id="L172" title="All 2 branches covered.">          if (parameterClass != null) {</span>
+<span class="fc" id="L173">            generateCommentProperties(elements, (TypeElement) parameterClass.asElement());</span>
+          }                          
+<span class="fc bfc" id="L175" title="All 2 branches covered.">        } else if (child.getKind() == ElementKind.METHOD) {</span>
+<span class="fc" id="L176">          ExecutableElement method = (ExecutableElement) child;</span>
+<span class="fc bfc" id="L177" title="All 4 branches covered.">          if (method.getParameters().size() == 1 &amp;&amp; childName.startsWith(&quot;set&quot;)) {</span>
+<span class="fc" id="L178">            VariableElement parameter = method.getParameters().get(0);</span>
+<span class="fc" id="L179">            DeclaredType parameterClass = null;</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">            if (parameter.asType() instanceof DeclaredType) {</span>
+<span class="fc" id="L181">              parameterClass = (DeclaredType) parameter.asType();</span>
+            }
+
+<span class="fc" id="L184">            String variableName = setterNameToVariableName(childName);</span>
+<span class="fc" id="L185">            String docComment = tidyComment(processingEnv.getElementUtils().getDocComment(method));</span>
+<span class="pc bpc" id="L186" title="1 of 4 branches missed.">            if (docComment != null &amp;&amp; !docComment.isEmpty()) {</span>
+              // Javadocs on setters take precedence over Javadocs on fields.
+<span class="fc" id="L188">              commentProps.put(variableName, docComment);</span>
+            }
+
+<span class="fc bfc" id="L191" title="All 2 branches covered.">            if (parameterClass != null) {</span>
+<span class="fc" id="L192">              generateCommentProperties(elements, (TypeElement) parameterClass.asElement());</span>
+            }              
+          }
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        } else if (child.getKind() == ElementKind.CLASS) {</span>
+<span class="fc" id="L196">          generateCommentProperties(elements, (TypeElement) child);</span>
+        }
+<span class="fc" id="L198">      }</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">      if (!commentProps.isEmpty()) {</span>
+<span class="fc" id="L200">        writeDocProperties(getPackage(element), element, commentProps);</span>
+      }
+    }
+<span class="fc" id="L203">  }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>

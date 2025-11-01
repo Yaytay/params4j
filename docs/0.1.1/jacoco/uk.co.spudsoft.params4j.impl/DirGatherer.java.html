@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>DirGatherer.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Parameters for Java</a> &gt; <a href="index.source.html" class="el_package">uk.co.spudsoft.params4j.impl</a> &gt; <span class="el_source">DirGatherer.java</span></div><h1>DirGatherer.java</h1><pre class="source lang-java linenums">/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package uk.co.spudsoft.params4j.impl;
+
+import uk.co.spudsoft.params4j.FileType;
+import com.fasterxml.jackson.databind.ObjectReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import uk.co.spudsoft.params4j.ParameterGatherer;
+import uk.co.spudsoft.params4j.Params4JSpi;
+
+/**
+ * ParameterGather that gathers parameters from files in a directory.
+ * 
+ * The files loaded may be property files, or JSON or YAML and will be recognised by their extension (see the @link{uk.co.spudsoft.params4j.impl.FileType} enum for details).
+ * The constructor takes any number of 
+ * 
+ * 
+ * @author jtalbut
+ * 
+ * @param &lt;P&gt; The type of the parameters object.
+ */
+public class DirGatherer&lt;P&gt; implements ParameterGatherer&lt;P&gt; {
+  
+<span class="fc" id="L36">  private static final Logger logger = LoggerFactory.getLogger(DirGatherer.class);</span>
+  
+  private final File dir;
+  private final List&lt;FileType&gt; fileTypes;
+
+  /**
+   * Constructor.
+   * @param dir The directory that is to be scanned and monitored.
+   *            Note that sub directories are not scanned.
+   * @param fileTypes The file types that are to be looked for in the directory.
+   */
+<span class="fc" id="L47">  public DirGatherer(File dir, FileType... fileTypes) {</span>
+<span class="fc" id="L48">    this.dir = dir;</span>
+<span class="fc" id="L49">    this.fileTypes = Arrays.asList(fileTypes).stream().distinct().collect(Collectors.toList());    </span>
+<span class="fc" id="L50">  }</span>
+
+  @Override
+  public P gatherParameters(Params4JSpi spi, P base) throws IOException {
+    
+<span class="fc" id="L55">    Set&lt;File&gt; usedFiles = new HashSet&lt;&gt;();</span>
+<span class="pc bpc" id="L56" title="1 of 2 branches missed.">    if (dir.isDirectory()) {</span>
+<span class="fc" id="L57">      File[] files = dir.listFiles();</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">      if (files != null) {</span>
+<span class="fc" id="L59">        Arrays.sort(files);  // To ensure consistent behaviour across systems</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">        for (FileType type : fileTypes) {</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">          for (File file : files) {</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">            for (String extension : type.getExtensions()) {</span>
+<span class="pc bpc" id="L63" title="1 of 4 branches missed.">              if (file.exists() &amp;&amp; file.getName().endsWith(extension)) {</span>
+<span class="fc" id="L64">                logger.debug(&quot;Reading file {}&quot;, file);</span>
+<span class="fc" id="L65">                usedFiles.add(file);</span>
+                try {
+<span class="fc" id="L67">                  ObjectReader reader = type.getObjectMapper(spi).readerForUpdating(base);</span>
+
+<span class="fc" id="L69">                  try (InputStream stream = new FileInputStream(file)) {</span>
+<span class="fc" id="L70">                    base = reader.readValue(stream);</span>
+                  }
+<span class="nc" id="L72">                } catch (Throwable ex) {</span>
+<span class="nc" id="L73">                  logger.error(&quot;Failed to process file {}: &quot;, file, ex);</span>
+<span class="fc" id="L74">                }</span>
+              }
+<span class="fc" id="L76">            }</span>
+          }
+<span class="fc" id="L78">        }</span>
+<span class="fc bfc" id="L79" title="All 2 branches covered.">        for (File file : files) {</span>
+<span class="pc bpc" id="L80" title="1 of 2 branches missed.">          if (!usedFiles.contains(file)) {</span>
+<span class="nc" id="L81">            logger.trace(&quot;Skipped the file {}, not of recognised type ({})&quot;, file, fileTypes);        </span>
+          }
+        }
+<span class="fc" id="L84">        spi.watch(dir.toPath());</span>
+      } else {
+<span class="nc" id="L86">        logger.debug(&quot;No files in directory \&quot;{}\&quot;&quot;, dir);        </span>
+      }
+<span class="fc" id="L88">    } else {</span>
+<span class="nc" id="L89">      logger.debug(&quot;Config directory \&quot;{}\&quot; is not a directory&quot;, dir);</span>
+    }
+    
+<span class="fc" id="L92">    return base;    </span>
+  }
+
+  @Override
+  public String toString() {
+<span class="fc" id="L97">    return &quot;Dir (&quot; + dir + &quot;)&quot;;</span>
+  }
+  
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
