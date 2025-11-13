@@ -47,7 +47,7 @@
     <jdk.version>17</jdk.version>
     <jackson.version>[2.15.0,)</jackson.version>
     <slf4j.version>[1.7,)</slf4j.version>
-    <logback.version>1.5.20</logback.version>
+    <logback.version>1.5.21</logback.version>
     <junit-jupiter.version>6.0.1</junit-jupiter.version>
     <junit-platform.version>6.0.1</junit-platform.version>
   </properties>
@@ -316,7 +316,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>12.1.1</version>
+            <version>12.1.2</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -432,7 +432,7 @@
       <plugin>
         <groupId>org.owasp</groupId>
         <artifactId>dependency-check-maven</artifactId>
-        <version>12.1.8</version>
+        <version>12.1.9</version>
         <configuration>
           <failBuildOnCVSS>8</failBuildOnCVSS>
           <failOnError>false</failOnError>

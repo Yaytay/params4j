@@ -146,5 +146,12 @@
     "undocumented": false,
     "comment": "how long something should wait",
     "defaultValue": "PT15M"
+  }, {
+    "type": "int",
+    "name": "--value",
+    "canBeEnvVar": true,
+    "undocumented": false,
+    "comment": "Set a value",
+    "defaultValue": null
   }
 ]
