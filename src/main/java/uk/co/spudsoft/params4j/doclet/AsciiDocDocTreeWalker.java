@@ -98,6 +98,8 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     } else if (name.equalsIgnoreCase("ol")) {
       listOrderedStack.poll();
       write("\n");
+    } else if (name.equalsIgnoreCase("em")) {
+      write("_");
     } else if (name.equalsIgnoreCase("a")) {
       write("] ");
     } else if (name.equalsIgnoreCase("table") && tableState == TableState.table) {
@@ -177,6 +179,8 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
       write("! ");
     } else if (name.equalsIgnoreCase("p")) {
       write("\n\n");
+    } else if (name.equalsIgnoreCase("em")) {
+      write("_");
     } else if (name.equalsIgnoreCase("a")) {
       write("link:");
       String attributeValue = findAttribute(node, "href");
