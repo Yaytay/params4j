@@ -54,6 +54,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Boolean> {
   private final DocletEnvironment environment;
   private final AsciiDocOptions options;
   private final Reporter reporter;
+  private final boolean verbose;
 
   private Writer writer;
   private TypeWriter typeWriter;
@@ -64,6 +65,7 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Boolean> {
     this.environment = environment;
     this.options = options;
     this.reporter = reporter;
+    this.verbose = Boolean.getBoolean("uk.co.spudsoft.doclet.verbose");
   }
   
   @Override
@@ -86,7 +88,9 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Boolean> {
   @Override
   @SuppressFBWarnings(value = "PATH_TRAVERSAL_IN", justification = "The point of this class is to write to that file, ensure it is correct")
   public Void visitType(TypeElement e, Boolean p) {
-    reporter.print(Diagnostic.Kind.NOTE, "Visiting Type " + e.getQualifiedName());
+    if (verbose) {
+      reporter.print(Diagnostic.Kind.NOTE, "Visiting Type " + e.getQualifiedName());
+    }
     
     if (include(e)) {  
       File dir = new File(options.getDestDirName());
