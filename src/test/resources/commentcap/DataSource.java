@@ -46,7 +46,7 @@ public class DataSource {
    * The credentials to use for preparing the database (DDL).
    * 
    * <p>
-   * This could be used in some &quot;Java&quot; like this:
+   * This could be used in some &quot;Java&quot; like this:<br>
    * <pre data-lang="java">
    * &#64;Test
    * public void testGetAdminUser() {
@@ -56,7 +56,7 @@ public class DataSource {
    * </pre>
    * or just by calling {@code ds.getAdminUser()}.
    * <p>
-   * Note that entity references work in the &lt;pre&gt; as demonstrated by the &quot;&#64;Test&quot;.
+   * Note that <em>entity</em> references work in the &lt;pre&gt; as demonstrated by the &quot;&#64;Test&quot;.
    * Inside the &lt;pre&gt; only a limited set of named entity references work, but AsciiDoctor will work with any outside of the &lt;pre&gt; &lpar;see: &Hat;&verbar;&copy;&rpar;.
    * <p>
    * If you want to know more about formatting code in Javadocs please see

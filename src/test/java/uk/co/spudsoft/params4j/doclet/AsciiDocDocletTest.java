@@ -127,7 +127,52 @@ public class AsciiDocDocletTest {
     assertThat(output, not(containsString("--help")));
     assertEquals(0, diagListener.getCount(Diagnostic.Kind.ERROR));
     assertEquals(0, diagListener.getCount(Diagnostic.Kind.MANDATORY_WARNING));    
-    assertEquals(3, diagListener.getCount(Diagnostic.Kind.WARNING));
+    assertEquals(4, diagListener.getCount(Diagnostic.Kind.WARNING));
+  }
+
+  /**
+   * Test of init method, of class MarkdownDoclet.
+   */
+  @Test
+  public void testAsciiDocVerbose() throws IOException {
+
+    System.setProperty("uk.co.spudsoft.doclet.verbose", "true");
+    
+    DocumentationTool systemDocumentationTool = ToolProvider.getSystemDocumentationTool();
+    String[] args = new String[]{
+            "--source-path"
+            , "src/test/resources"
+            , "-d"
+            , "target/parameter-docs"
+            , "--include-classes"
+            , "commentcap.Parameters,commentcap.Credentials,commentcap.ProtectedCredentials"
+            , "--include-classes"
+            , "commentcap.DataSource"
+            , "--no-fonts"
+            , "-link"
+            , "https://docs.oracle.com/en/java/javase/20/docs/api/"
+            , "commentcap"
+    };
+    StringWriter writer = new StringWriter();
+    DiagListener diagListener = new DiagListener();
+    DocumentationTool.DocumentationTask task = systemDocumentationTool.getTask(
+            writer
+            , systemDocumentationTool.getStandardFileManager(null, null, StandardCharsets.UTF_8)
+            , diagListener
+            , AsciiDocDoclet.class
+            , Arrays.asList(args)
+            , null
+    );
+    task.call();
+    
+    String output = writer.getBuffer().toString();
+    logger.warn(output);
+    assertThat(output, not(containsString("--help")));
+    assertEquals(0, diagListener.getCount(Diagnostic.Kind.ERROR));
+    assertEquals(0, diagListener.getCount(Diagnostic.Kind.MANDATORY_WARNING));    
+    assertEquals(4, diagListener.getCount(Diagnostic.Kind.WARNING));
+
+    System.clearProperty("uk.co.spudsoft.doclet.verbose");
   }
 
   /**

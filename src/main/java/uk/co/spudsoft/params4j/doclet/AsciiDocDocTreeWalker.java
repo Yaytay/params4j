@@ -100,6 +100,8 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
       write("\n");
     } else if (name.equalsIgnoreCase("em")) {
       write("_");
+    } else if (name.equalsIgnoreCase("br")) {
+      write(" +\n");
     } else if (name.equalsIgnoreCase("a")) {
       write("] ");
     } else if (name.equalsIgnoreCase("table") && tableState == TableState.table) {
