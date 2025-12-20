@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AsciiDocDoclet.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Parameters for Java</a> &gt; <a href="index.source.html" class="el_package">uk.co.spudsoft.params4j.doclet</a> &gt; <span class="el_source">AsciiDocDoclet.java</span></div><h1>AsciiDocDoclet.java</h1><pre class="source lang-java linenums">/*
+ * Copyright (C) 2023 jtalbut
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package uk.co.spudsoft.params4j.doclet;
+
+import java.util.Locale;
+import java.util.Set;
+import javax.lang.model.SourceVersion;
+import javax.tools.Diagnostic;
+import jdk.javadoc.doclet.Doclet;
+import jdk.javadoc.doclet.DocletEnvironment;
+import jdk.javadoc.doclet.Reporter;
+
+/**
+ * This doclet is specifically for the generation of markdown documentation of parameters.
+ *
+ * Although additional classes can be provided it will only record setters and/or fields (preferring setters, but falling back to
+ * fields).
+ * 
+ * Runs through the specified elements in the {@link jdk.javadoc.doclet.DocletEnvironment} and 
+ * uses an {@link uk.co.spudsoft.params4j.doclet.AsciiDocElementVisitor} to walk through the 
+ * Java {@link javax.lang.model.element.Element}.
+ * 
+ * @author njt
+ */
+public class AsciiDocDoclet implements Doclet {
+
+  private final AsciiDocOptions options;
+  private Reporter reporter;
+  private final boolean verbose;
+  
+<span class="fc" id="L45">  public AsciiDocDoclet() {</span>
+<span class="fc" id="L46">    options = new AsciiDocOptions();</span>
+<span class="fc" id="L47">    this.verbose = Boolean.getBoolean(&quot;uk.co.spudsoft.doclet.verbose&quot;);</span>
+<span class="fc" id="L48">  }</span>
+  
+  @Override
+  public void init(Locale locale, Reporter reporter) {
+<span class="fc" id="L52">    this.reporter = reporter;</span>
+<span class="fc" id="L53">  }</span>
+
+  @Override
+  public String getName() {
+<span class="nc" id="L57">    return getClass().getSimpleName();</span>
+  }
+
+  @Override
+  public Set&lt;? extends Option&gt; getSupportedOptions() {
+<span class="fc" id="L62">    return options.getOptions();</span>
+  }
+
+  @Override
+  public SourceVersion getSupportedSourceVersion() {
+<span class="nc" id="L67">    return SourceVersion.RELEASE_11;</span>
+  }
+
+  private static final boolean OK = true;
+
+  @Override
+  public boolean run(DocletEnvironment environment) {
+<span class="fc" id="L74">    environment.getSpecifiedElements()</span>
+<span class="fc" id="L75">            .forEach(e -&gt; {</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">              if (verbose) {</span>
+<span class="fc" id="L77">                reporter.print(Diagnostic.Kind.NOTE, &quot;AsciiDocDoclet: &quot; + e);</span>
+              }
+<span class="fc" id="L79">              e.accept(new AsciiDocElementVisitor(environment, options, reporter), null);</span>
+<span class="fc" id="L80">            });</span>
+<span class="fc" id="L81">    return OK;</span>
+  }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
