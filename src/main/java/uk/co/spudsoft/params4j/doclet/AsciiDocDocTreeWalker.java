@@ -100,8 +100,6 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
       write("\n");
     } else if (name.equalsIgnoreCase("em")) {
       write("_");
-    } else if (name.equalsIgnoreCase("br")) {
-      write(" +\n");
     } else if (name.equalsIgnoreCase("a")) {
       write("] ");
     } else if (name.equalsIgnoreCase("table") && tableState == TableState.table) {
@@ -181,6 +179,8 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
       write("! ");
     } else if (name.equalsIgnoreCase("p")) {
       write("\n\n");
+    } else if (name.equalsIgnoreCase("br")) {
+      write(" +\n");
     } else if (name.equalsIgnoreCase("em")) {
       write("_");
     } else if (name.equalsIgnoreCase("a")) {
