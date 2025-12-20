@@ -127,7 +127,7 @@ public class AsciiDocDocletTest {
     assertThat(output, not(containsString("--help")));
     assertEquals(0, diagListener.getCount(Diagnostic.Kind.ERROR));
     assertEquals(0, diagListener.getCount(Diagnostic.Kind.MANDATORY_WARNING));    
-    assertEquals(4, diagListener.getCount(Diagnostic.Kind.WARNING));
+    assertEquals(3, diagListener.getCount(Diagnostic.Kind.WARNING));
   }
 
   /**
@@ -170,7 +170,7 @@ public class AsciiDocDocletTest {
     assertThat(output, not(containsString("--help")));
     assertEquals(0, diagListener.getCount(Diagnostic.Kind.ERROR));
     assertEquals(0, diagListener.getCount(Diagnostic.Kind.MANDATORY_WARNING));    
-    assertEquals(4, diagListener.getCount(Diagnostic.Kind.WARNING));
+    assertEquals(3, diagListener.getCount(Diagnostic.Kind.WARNING));
 
     System.clearProperty("uk.co.spudsoft.doclet.verbose");
   }
