@@ -121,7 +121,7 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
       }
     }
     mapper.registerModule(new JavaTimeModule());
-    mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+    mapper.setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
     mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
     mapper.setDefaultMergeable(Boolean.TRUE);
     mapper.addHandler(problemHandler);

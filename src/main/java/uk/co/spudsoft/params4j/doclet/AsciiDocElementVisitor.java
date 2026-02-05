@@ -42,7 +42,10 @@ import jdk.javadoc.doclet.Reporter;
 import uk.co.spudsoft.params4j.impl.JavadocCapturer;
 
 /**
- *
+ * {@link ElementVisitor} for generating AsciiDocs from JavaDocs.
+ * 
+ * This is used by the AsciiDocDoclet to walk the Java language elements.
+ * 
  * @author njt
  */
 public class AsciiDocElementVisitor implements ElementVisitor<Void, Void> {

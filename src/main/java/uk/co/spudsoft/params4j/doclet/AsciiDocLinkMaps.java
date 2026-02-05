@@ -33,7 +33,8 @@ import javax.tools.Diagnostic;
 import jdk.javadoc.doclet.Reporter;
 
 /**
- *
+ * Helper class for determining the URL to link to for docs for classes.
+ * 
  * @author njt
  */
 public class AsciiDocLinkMaps {

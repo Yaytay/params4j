@@ -45,7 +45,10 @@ import jdk.javadoc.doclet.DocletEnvironment;
 import jdk.javadoc.doclet.Reporter;
 
 /**
- *
+ * {@link DocTreePathScanner} for generating AsciiDocs from JavaDocs HTML content.
+ * 
+ * This is used by the AsciiDocElementVisitor to handle HTML comments.
+ * 
  * @author njt
  */
 public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
