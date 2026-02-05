@@ -156,7 +156,7 @@
       <plugins>
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.15.0</version>
+          <version>3.13.0</version>
           <configuration>
             <source>${jdk.version}</source>
             <target>${jdk.version}</target>
@@ -174,7 +174,7 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>versions-maven-plugin</artifactId>
-        <version>2.21.0</version>
+        <version>2.18.0</version>
         <executions>
           <execution>
             <id>display-plugin-updates</id>
@@ -278,7 +278,7 @@
             <plugin>
               <groupId>com.h3xstream.findsecbugs</groupId>
               <artifactId>findsecbugs-plugin</artifactId>
-              <version>1.13.0</version>
+              <version>1.14.0</version>
             </plugin>
           </plugins>
         </configuration>
@@ -315,7 +315,7 @@
           <dependency>
             <groupId>com.puppycrawl.tools</groupId>
             <artifactId>checkstyle</artifactId>
-            <version>13.1.0</version>
+            <version>10.21.0</version>
           </dependency>
         </dependencies>
       </plugin>
@@ -431,7 +431,7 @@
       <plugin>
         <groupId>org.owasp</groupId>
         <artifactId>dependency-check-maven</artifactId>
-        <version>12.2.0</version>
+        <version>11.1.1</version>
         <configuration>
           <failBuildOnCVSS>8</failBuildOnCVSS>
           <failOnError>false</failOnError>
@@ -472,13 +472,16 @@
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
-        <version>2.7.1</version>
+        <version>2.5.0</version>
         <executions>
           <execution>
             <id>download-licenses</id>
             <goals>
               <goal>download-licenses</goal>
             </goals>
+            <configuration>
+              <licensesOutputDirectory>${user.home}/.m2/licenses</licensesOutputDirectory>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -553,7 +556,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.12</version>
+        <version>0.8.14</version>
         <reportSets>
           <reportSet>
             <reports>
@@ -635,6 +638,23 @@
                 </configuration>
               </execution>
             </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    <profile>
+      <id>release</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.sonatype.central</groupId>
+            <artifactId>central-publishing-maven-plugin</artifactId>
+            <version>0.9.0</version>
+            <extensions>true</extensions>
+            <configuration>
+              <publishingServerId>central</publishingServerId>
+              <autoPublish>true</autoPublish>
+            </configuration>
           </plugin>
         </plugins>
       </build>

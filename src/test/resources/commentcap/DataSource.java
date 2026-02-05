@@ -1,6 +1,18 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Copyright (C) 2025 jtalbut
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package commentcap;
 
@@ -34,7 +46,7 @@ public class DataSource {
    * The credentials to use for preparing the database (DDL).
    * 
    * <p>
-   * This could be used in some &quot;Java&quot; like this:
+   * This could be used in some &quot;Java&quot; like this:<br>
    * <pre data-lang="java">
    * &#64;Test
    * public void testGetAdminUser() {
@@ -44,7 +56,7 @@ public class DataSource {
    * </pre>
    * or just by calling {@code ds.getAdminUser()}.
    * <p>
-   * Note that entity references work in the &lt;pre&gt; as demonstrated by the &quot;&#64;Test&quot;.
+   * Note that <em>entity</em> references work in the &lt;pre&gt; as demonstrated by the &quot;&#64;Test&quot;.
    * Inside the &lt;pre&gt; only a limited set of named entity references work, but AsciiDoctor will work with any outside of the &lt;pre&gt; &lpar;see: &Hat;&verbar;&copy;&rpar;.
    * <p>
    * If you want to know more about formatting code in Javadocs please see

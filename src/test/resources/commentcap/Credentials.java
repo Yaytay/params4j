@@ -1,10 +1,23 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Copyright (C) 2025 jtalbut
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package commentcap;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import java.util.regex.Pattern;
 import uk.co.spudsoft.params4j.SecretsSerializer;
 
 /**
@@ -18,7 +31,7 @@ public class Credentials {
    */
   protected String username;
   /**
-   * The password.
+   * The password (field; setter has no Javadoc).
    */
   protected String password;
 
@@ -26,6 +39,10 @@ public class Credentials {
    * A property that can be set, but not got
    */
   protected String group;
+  
+  // This should not be included in asciidocs.
+  private static final Pattern VALID_NAME = Pattern.compile("^[-a-zA-Z0-9!#$%&'*+.^_`|~]+$");
+    
   
   /**
    * Constructor.
@@ -55,7 +72,7 @@ public class Credentials {
   }
   
   /**
-   * The username.
+   * The username (getter).
    * @return The username.
    */
   public String getUsername() {
@@ -63,33 +80,25 @@ public class Credentials {
   }
 
   /**
-   * The username.
+   * The username (setter).
    * @param username the username.
    */
   public void setUsername(String username) {
     this.username = username;
   }
 
-  /**
-   * The password.
-   * @return the password.
-   */
   @JsonSerialize(using = SecretsSerializer.class)
   public String getPassword() {
     return password;
   }
 
-  /**
-   * The password.
-   * @param password the password.
-   */
   @JsonSerialize(using = SecretsSerializer.class)
   public void setPassword(String password) {
     this.password = password;
   }
 
   /**
-   * The group.
+   * The group (setter).
    * @param group the group.
    */
   public void setGroup(String group) {

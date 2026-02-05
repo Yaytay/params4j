@@ -53,6 +53,17 @@ import jdk.javadoc.doclet.Reporter;
  */
 public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     
+  private enum TableState {
+    table
+    , caption
+    , header
+    , headerRow
+    , headerCell
+    , body
+    , bodyRow
+    , bodyCell
+  }
+  
   private final DocletEnvironment environment;  
   private final Writer writer;
   private final Reporter reporter;
@@ -64,6 +75,8 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   
   private boolean inPara;
   private boolean inSource;
+  
+  private TableState tableState;
   
   @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "The writer should be considered dedicated to this purpose whilst this walker is in operation.")  
   public AsciiDocDocTreeWalker(DocletEnvironment environment, AsciiDocOptions options, Writer writer, Reporter reporter, TreePath path) {
@@ -88,8 +101,32 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     } else if (name.equalsIgnoreCase("ol")) {
       listOrderedStack.poll();
       write("\n");
+    } else if (name.equalsIgnoreCase("em")) {
+      write("_");
     } else if (name.equalsIgnoreCase("a")) {
       write("] ");
+    } else if (name.equalsIgnoreCase("table") && tableState == TableState.table) {
+      tableState = null;
+      write("\n!===\n");
+    } else if (name.equalsIgnoreCase("caption") && tableState == TableState.caption) {
+      tableState = TableState.table;
+    } else if (name.equalsIgnoreCase("thead") && tableState == TableState.header) {
+      tableState = TableState.table;
+      write("\n");
+    } else if (name.equalsIgnoreCase("tr") && tableState == TableState.headerRow) {
+      tableState = TableState.header;
+      write("\n");
+    } else if (name.equalsIgnoreCase("th") && tableState == TableState.headerCell) {
+      tableState = TableState.headerRow;
+      write(" ");
+    } else if (name.equalsIgnoreCase("tbody") && tableState == TableState.body) {
+      tableState = TableState.table;
+    } else if (name.equalsIgnoreCase("tr") && tableState == TableState.bodyRow) {
+      tableState = TableState.body;
+      write("\n");
+    } else if (name.equalsIgnoreCase("td") && tableState == TableState.bodyCell) {
+      write("\n");
+      tableState = TableState.bodyRow;
     } else if (name.equalsIgnoreCase("pre") || name.equalsIgnoreCase("code")) {
       if (inSource) {
         inSource = false;
@@ -124,8 +161,31 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
       } else {
         write("* ");
       }
+    } else if (name.equalsIgnoreCase("table")) {
+      tableState = TableState.table;
+      write("\n\n!===\n");
+    } else if (name.equalsIgnoreCase("caption") && tableState == TableState.table) {
+      tableState = TableState.caption;
+    } else if (name.equalsIgnoreCase("thead") && tableState == TableState.table) {
+      tableState = TableState.header;
+    } else if (name.equalsIgnoreCase("tr") && tableState == TableState.header) {
+      tableState = TableState.headerRow;
+    } else if (name.equalsIgnoreCase("th") && tableState == TableState.headerRow) {
+      tableState = TableState.headerCell;
+      write("! ");
+    } else if (name.equalsIgnoreCase("tbody") && tableState == TableState.table) {
+      tableState = TableState.body;
+    } else if (name.equalsIgnoreCase("tr") && tableState == TableState.body) {
+      tableState = TableState.bodyRow;
+    } else if (name.equalsIgnoreCase("td") && tableState == TableState.bodyRow) {
+      tableState = TableState.bodyCell;
+      write("! ");
     } else if (name.equalsIgnoreCase("p")) {
       write("\n\n");
+    } else if (name.equalsIgnoreCase("br")) {
+      write(" +\n");
+    } else if (name.equalsIgnoreCase("em")) {
+      write("_");
     } else if (name.equalsIgnoreCase("a")) {
       write("link:");
       String attributeValue = findAttribute(node, "href");
@@ -153,6 +213,14 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     }
     return super.visitStartElement(node, p);
   }
+
+  @Override
+  public Void visitAttribute(AttributeTree node, Void p) {
+    if (tableState == null) {
+      return super.visitAttribute(node, p);
+    }
+    return null;
+  }
   
   String findAttribute(StartElementTree node, String requiredAttribute) {
     for (DocTree attribute : node.getAttributes()) {
@@ -168,12 +236,14 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
 
   @Override
   public Void visitText(TextTree node, Void p) {
-    String text = node.getBody();
-    if (!inPara) {
-      text = text.stripLeading();
+    if ((tableState != TableState.table) && (tableState != TableState.caption)) {
+      String text = node.getBody();
+      if (!inPara || tableState != null) {
+        text = text.stripLeading();
+      }
+
+      write(text);
     }
-            
-    write(text);
     return super.visitText(node, p);
   }
 

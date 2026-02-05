@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2025 jtalbut
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package commentcap;
 
 import java.io.File;
@@ -16,22 +32,6 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/*
- * Copyright (C) 2022 jtalbut
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
 
 /**
  *
@@ -46,7 +46,15 @@ public class TestDocs {
   
   public TestDocs() {
     Params4J<Parameters> params4j = Params4J.<Parameters>factory().withConstructor(() -> new Parameters()).create();
-    docs = params4j.getDocumentation(new Parameters(), "--", null, Arrays.asList(Pattern.compile(".*\\.Html.*")));    
+    docs = params4j.getDocumentation(new Parameters()
+            , "--"
+            , Arrays.asList(
+                    Pattern.compile("java\\.lang\\.String")
+                    , Pattern.compile(".*\\.Pattern")
+                    , Pattern.compile(".*\\.Class")
+            )
+            , Arrays.asList(Pattern.compile(".*\\.Html.*"))
+    );    
   }
   
   public String usage() {

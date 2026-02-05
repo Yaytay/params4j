@@ -68,4 +68,8 @@ public class SystemPropertiesGatherer<P> implements ParameterGatherer<P> {
        
   }
 
+  @Override
+  public String toString() {
+    return "System properties";
+  }
 }

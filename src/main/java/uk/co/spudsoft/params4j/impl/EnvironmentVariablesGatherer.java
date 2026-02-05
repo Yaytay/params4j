@@ -89,4 +89,8 @@ public class EnvironmentVariablesGatherer<P> implements ParameterGatherer<P> {
     }
   }
 
+  @Override
+  public String toString() {
+    return "Environment variables";
+  }
 }

@@ -114,6 +114,27 @@ public class JavadocCapturer extends AbstractProcessor {
     }
     return setterName;
   }
+  /**
+   * Convert the name of a getter to the name of the field.
+   * Strips "get" or "is" from the beginning and lowercases the following character.
+   * @param getterName The name of the bean field getter.
+   * @return The name of getter with "get" or "is" removed and with a leading lowercase character.
+   */
+  public static String getterNameToVariableName(String getterName) {
+    if (getterName == null) {
+      return null;
+    }
+    if (getterName.startsWith("get") && getterName.length() > 3 && Character.isUpperCase(getterName.codePointAt(3))) {
+      getterName = getterName.substring(3);
+    }
+    if (getterName.startsWith("is") && getterName.length() > 2 && Character.isUpperCase(getterName.codePointAt(2))) {
+      getterName = getterName.substring(2);
+    }
+    if (Character.isUpperCase(getterName.codePointAt(0))) {
+      getterName = Character.toString(Character.toLowerCase(getterName.codePointAt(0))) + getterName.substring(getterName.offsetByCodePoints(0, 1));
+    }
+    return getterName;
+  }
 
   static String tidyComment(String comment) {
     if (comment == null) {
@@ -142,7 +163,7 @@ public class JavadocCapturer extends AbstractProcessor {
               commentProps.put(childName, docComment);
             }
           }
-          
+
           DeclaredType parameterClass = null;
           VariableElement variable = (VariableElement) child;
           if (variable.asType() instanceof DeclaredType) {

@@ -1,6 +1,18 @@
 /*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ * Copyright (C) 2025 jtalbut
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 package commentcap;
 
@@ -52,6 +64,9 @@ public class Parameters {
   private Map<String, Credentials> logins;
   // An array parameter
   private List<String> names;
+  
+  // A value that has a table describing options
+  private int value;
 
   /**
    * alien value that cannot be documented further in this codebase
@@ -251,6 +266,48 @@ public class Parameters {
    */
   public void setEntry(Map.Entry<String, Integer> entry) {
     this.entry = entry;
+  }
+  
+  /**
+   * Set a value.
+   * 
+   * Recommended Values 
+   * <table class="striped">
+   *   <caption>Table of recommended values</caption>
+   *   <thead>
+   *    <tr>
+   *      <th scope="col">Value</th>
+   *      <th scope="col">When to Use It</th>
+   *      <th scope="col">Notes</th>
+   *    </tr>
+   *   </thead>
+   *   <tbody>
+   *     <tr>
+   *       <td>8</td>
+   *       <td>When you want to</td>
+   *       <td>Please don't think these notes are useful</td>
+   *     </tr>
+   *     <tr>
+   *       <td>16</td>
+   *       <td>If it seems like a good idea</td>
+   *       <td>This is just a test table</td>
+   *     </tr>
+   *     <tr>
+   *       <td>32</td>
+   *       <td>Thursdays</td>
+   *       <td>I hope you like the table format</td>
+   *     </tr>
+   *     <tr>
+   *       <td>64</td>
+   *       <td>Never</td>
+   *       <td></td>
+   *     </tr>
+   *   </tbody>
+   * </table>
+   * 
+   */
+  public void setValue(int value) {
+    this.value = value;
   }
 
 }

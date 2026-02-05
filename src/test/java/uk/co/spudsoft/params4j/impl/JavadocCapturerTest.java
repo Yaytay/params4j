@@ -113,7 +113,7 @@ public class JavadocCapturerTest {
     try ( InputStream stream = cls.getResourceAsStream("/commentcap/Parameters-doc.properties")) {
       props.load(stream);
     }
-    assertThat(props.size(), equalTo(11));
+    assertThat(props.size(), equalTo(12));
     assertThat(props.get("auditDataSource"), equalTo("datasource used for recording activity"));
     assertThat(props.get("baseConfigPath"), equalTo("path to the root of the configuration files"));
     assertThat(props.get("logins"), equalTo("login for a system"));
@@ -129,9 +129,9 @@ public class JavadocCapturerTest {
     List<ConfigurationProperty> docs = (List<ConfigurationProperty>) testDocsClass.getMethod("getDocs").invoke(object);
     assertNotNull(docs);
     for (ConfigurationProperty cp : docs) {
-      logger.trace("Configuration property: {}", OBJECT_MAPPER.writeValueAsString(cp));
+      logger.trace("Configuration property: {}", cp);
     }
-    assertThat(docs, hasSize(21));
+    assertThat(docs, hasSize(22));
     // Convert from array to map because the order isn't stable with reflection
     Map<String, ConfigurationProperty> docsMap = docs.stream().collect(Collectors.toMap(cp -> cp.name, cp -> cp));
     

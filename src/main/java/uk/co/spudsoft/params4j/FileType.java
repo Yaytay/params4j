@@ -83,7 +83,11 @@ public enum FileType {
     this.extensions = Collections.unmodifiableList(extensions);
     this.objectMapGetter = objectMapGetter;
   }
-  
-  
+
+  @Override
+  public String toString() {
+    return name() + " (" + extensions + ')';
+  }
+    
   
 }
