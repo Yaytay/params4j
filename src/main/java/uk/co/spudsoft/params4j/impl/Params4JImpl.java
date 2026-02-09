@@ -390,27 +390,40 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
     Properties classDocProperties = loadDocProperties(docProperties, clazz);
     Set<String> propsDone = new HashSet<>();
     for (Method method : clazz.getMethods()) {
-      if (method.getParameters().length == 1 && method.getName().startsWith("set") && ((method.getModifiers() & Modifier.PRIVATE) == 0)) {
-        Parameter parameter = method.getParameters()[0];
-        
-        Class<?> fieldType = parameter.getType();
-        String fieldName = JavadocCapturer.setterNameToVariableName(method.getName());
-        Object defaultValue = getValue(defaultInstance, method.getName());
+      if (method.getParameters().length == 1 
+              && method.getName().startsWith("set") 
+              && ((method.getModifiers() & Modifier.PRIVATE) == 0)) {
+        try {
+          Parameter parameter = method.getParameters()[0];
 
-        propsDone.add(fieldName);
-        documentField(properties
-                , docProperties
-                , classDocProperties
-                , prefix
-                , propertyStates
-                , terminalClasses
-                , undocumentedClasses
-                , method
-                , fieldName
-                , fieldType
-                , defaultValue
-                , () -> (ParameterizedType) parameter.getParameterizedType()
-        );
+          Class<?> fieldType = parameter.getType();
+          String fieldName = JavadocCapturer.setterNameToVariableName(method.getName());
+          Object defaultValue = getValue(defaultInstance, method.getName());
+
+          propsDone.add(fieldName);
+
+          Type paramType = parameter.getParameterizedType();
+          documentField(properties
+                  , docProperties
+                  , classDocProperties
+                  , prefix
+                  , propertyStates
+                  , terminalClasses
+                  , undocumentedClasses
+                  , method
+                  , fieldName
+                  , fieldType
+                  , defaultValue
+                  , () -> {
+                    if (paramType instanceof ParameterizedType pt) {
+                      return pt;
+                    }
+                    return null;
+                  }
+          );
+        } catch (Throwable ex) {
+          logger.warn("Failed to document setter method {}", method);
+        }
       }
     }
 
@@ -420,26 +433,30 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
       Object defaultValue = getValue(defaultInstance, field);
 
       if (!propsDone.contains(fieldName) && ((field.getModifiers() & Modifier.PRIVATE) == 0)) {
-        documentField(properties
-                , docProperties
-                , classDocProperties
-                , prefix
-                , propertyStates
-                , terminalClasses
-                , undocumentedClasses
-                , field
-                , fieldName
-                , fieldType
-                , defaultValue
-                , () -> {
-                  Type genericType = field.getGenericType();
-                  if (genericType instanceof ParameterizedType) {
-                    return (ParameterizedType) genericType;                    
-                  } else {
-                    return null;
+        try {
+          documentField(properties
+                  , docProperties
+                  , classDocProperties
+                  , prefix
+                  , propertyStates
+                  , terminalClasses
+                  , undocumentedClasses
+                  , field
+                  , fieldName
+                  , fieldType
+                  , defaultValue
+                  , () -> {
+                    Type genericType = field.getGenericType();
+                    if (genericType instanceof ParameterizedType) {
+                      return (ParameterizedType) genericType;                    
+                    } else {
+                      return null;
+                    }
                   }
-                }
-        );
+          );
+        } catch (Throwable ex) {
+          logger.warn("Failed to field {}", field);
+        }
       }
     }
     
@@ -456,26 +473,30 @@ public final class Params4JImpl<P> implements Params4J<P>, Params4JSpi {
           Object defaultValue = getValue(defaultInstance, method.getName());
 
           propsDone.add(fieldName);
-          documentField(properties
-                  , docProperties
-                  , classDocProperties
-                  , prefix
-                  , propertyStates
-                  , terminalClasses
-                  , undocumentedClasses
-                  , method
-                  , fieldName
-                  , fieldType
-                  , defaultValue
-                  , () -> {
-                    Type genericType = method.getGenericReturnType();
-                    if (genericType instanceof ParameterizedType) {
-                      return (ParameterizedType) genericType;             
-                    } else {
-                      return null;
+          try {
+            documentField(properties
+                    , docProperties
+                    , classDocProperties
+                    , prefix
+                    , propertyStates
+                    , terminalClasses
+                    , undocumentedClasses
+                    , method
+                    , fieldName
+                    , fieldType
+                    , defaultValue
+                    , () -> {
+                      Type genericType = method.getGenericReturnType();
+                      if (genericType instanceof ParameterizedType) {
+                        return (ParameterizedType) genericType;             
+                      } else {
+                        return null;
+                      }
                     }
-                  }
-          );
+            );
+          } catch (Throwable ex) {
+            logger.warn("Failed to document getter method {}", method);
+          }
         }
       }
     }    
