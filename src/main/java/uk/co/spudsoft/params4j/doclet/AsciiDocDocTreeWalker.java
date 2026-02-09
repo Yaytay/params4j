@@ -78,6 +78,14 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
   
   private TableState tableState;
   
+  /**
+   * Constructor.
+   * @param environment The DocletEnvironment, provided by the Doclet processor, via the Doclet.
+   * @param options Options found in the pom configuration.
+   * @param writer The Writer to use for output.
+   * @param reporter Doclet diagnostics reporter - the only mechanism for logging issues.
+   * @param path The path to work from.
+   */
   @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "The writer should be considered dedicated to this purpose whilst this walker is in operation.")  
   public AsciiDocDocTreeWalker(DocletEnvironment environment, AsciiDocOptions options, Writer writer, Reporter reporter, TreePath path) {
     this.environment = environment;
@@ -87,6 +95,9 @@ public class AsciiDocDocTreeWalker extends DocTreePathScanner<Void, Void> {
     this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());
   }
   
+  /**
+   * Scan from the specified path.
+   */
   public void scan() {
     dc = environment.getDocTrees().getDocCommentTree(path);
     scan(new DocTreePath(path, dc), null);    

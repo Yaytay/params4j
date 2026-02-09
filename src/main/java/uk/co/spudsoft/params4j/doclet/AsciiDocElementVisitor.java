@@ -64,6 +64,12 @@ public class AsciiDocElementVisitor implements ElementVisitor<Void, Boolean> {
   private final Set<String> fields = new HashSet<>();
   private final Map<String, String> capturedDocs = new HashMap<>();
   
+  /**
+   * Constructor.
+   * @param environment The DocletEnvironment, provided by the Doclet processor, via the Doclet.
+   * @param options Options found in the pom configuration.
+   * @param reporter Doclet diagnostics reporter - the only mechanism for logging issues.
+   */
   public AsciiDocElementVisitor(DocletEnvironment environment, AsciiDocOptions options, Reporter reporter) {
     this.environment = environment;
     this.options = options;

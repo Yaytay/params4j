@@ -20,7 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
+ * Map of HTML entity references to their symbol.
  * @author njt
  */
 public class HtmlEntities {
@@ -48,6 +48,11 @@ public class HtmlEntities {
   private HtmlEntities() {
   }
   
+  /**
+   * Get the symbol for a known HTML entity reference.
+   * @param ref the entity reference being looked up.
+   * @return the symbol for the given HTML entity reference, if known.
+   */
   public static String lookupEntity(String ref) {
     return ENTITIES.get(ref);
   }

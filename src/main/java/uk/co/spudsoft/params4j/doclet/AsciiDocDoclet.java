@@ -42,6 +42,9 @@ public class AsciiDocDoclet implements Doclet {
   private Reporter reporter;
   private final boolean verbose;
   
+  /**
+   * Constructor.
+   */
   public AsciiDocDoclet() {
     options = new AsciiDocOptions();
     this.verbose = Boolean.getBoolean("uk.co.spudsoft.doclet.verbose");

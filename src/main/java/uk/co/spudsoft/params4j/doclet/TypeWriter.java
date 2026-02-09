@@ -49,6 +49,12 @@ public class TypeWriter {
   private final Set<String> includedClasses;
   private final AsciiDocLinkMaps linkMaps;
   
+  /**
+   * Write a ReferenceTree (link) in the current contenxt.
+   * @param environment The DocletEnvironment, provided by the Doclet processor, via the Doclet.
+   * @param currentPath The current path, for child processing.
+   * @param refTree The ReferenceTree to output.
+   */
   public void writeReferenceTree(DocletEnvironment environment, DocTreePath currentPath, ReferenceTree refTree) {
     Element element = environment.getDocTrees().getElement(new DocTreePath(currentPath, refTree));
     if (element instanceof ExecutableElement) {      
@@ -104,6 +110,10 @@ public class TypeWriter {
   }
   
   
+  /**
+   * Write a DeclaredType (class) in the current contenxt.
+   * @param declaredType The DeclaredType to output.
+   */
   public void writeDeclaredType(DeclaredType declaredType) {
     
     TypeElement typeElement = (TypeElement) declaredType.asElement();    
@@ -144,6 +154,13 @@ public class TypeWriter {
     }
   }      
   
+  /**
+   * Constructor.
+   * @param writer The Writer to use for output.
+   * @param reporter Doclet diagnostics reporter - the only mechanism for logging issues.
+   * @param includedClasses Classes to include.
+   * @param linkMaps Details of classes for which we have already found documentation.
+   */
   @SuppressFBWarnings(value = "EI_EXPOSE_REP2", justification = "Objects are not POJOs and may be accessed (and modified) during the life of this object")
   public TypeWriter(Writer writer, Reporter reporter, Set<String> includedClasses, AsciiDocLinkMaps linkMaps) {
     super();
@@ -153,6 +170,11 @@ public class TypeWriter {
     this.linkMaps = linkMaps;
   }
 
+  /**
+   * Get the name of the package for a given element, which may be null.
+   * @param elem The element whose package is required.
+   * @return the name of the package for a given element (if any), may be null.
+   */
   public static String getPackage(Element elem) {
     while (elem != null && !(elem instanceof PackageElement)) {
       elem = elem.getEnclosingElement();
