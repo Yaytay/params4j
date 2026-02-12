@@ -65,7 +65,10 @@ public class EnvironmentVariablesGatherer<P> implements ParameterGatherer<P> {
   public EnvironmentVariablesGatherer(Map<String, String> map,  String namePrefix, boolean toLowerCase) {
     this.map = new HashMap<>();
     for (Entry<String, String> entry : map.entrySet()) {
-      String key = entry.getKey().replaceAll("_", ".");
+    String key = entry.getKey()
+        .replace("__", "\u0000") // temporary placeholder for double underscore
+        .replace("_", ".")       // now safely turn remaining single underscores into dots
+        .replace("\u0000", "_"); // restore doubles as single underscores
       if (toLowerCase) {
         key = key.toLowerCase();
       }
