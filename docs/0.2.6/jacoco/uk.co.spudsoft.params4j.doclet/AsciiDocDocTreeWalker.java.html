@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AsciiDocDocTreeWalker.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Parameters for Java</a> &gt; <a href="index.source.html" class="el_package">uk.co.spudsoft.params4j.doclet</a> &gt; <span class="el_source">AsciiDocDocTreeWalker.java</span></div><h1>AsciiDocDocTreeWalker.java</h1><pre class="source lang-java linenums">/*
+ * Copyright (C) 2023 jtalbut
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see &lt;http://www.gnu.org/licenses/&gt;.
+ */
+package uk.co.spudsoft.params4j.doclet;
+
+import com.sun.source.doctree.AttributeTree;
+import com.sun.source.doctree.AuthorTree;
+import com.sun.source.doctree.DocCommentTree;
+import com.sun.source.doctree.DocTree;
+import com.sun.source.doctree.EndElementTree;
+import com.sun.source.doctree.EntityTree;
+import com.sun.source.doctree.LinkTree;
+import com.sun.source.doctree.LiteralTree;
+import com.sun.source.doctree.ParamTree;
+import com.sun.source.doctree.ReferenceTree;
+import com.sun.source.doctree.ReturnTree;
+import com.sun.source.doctree.SeeTree;
+import com.sun.source.doctree.StartElementTree;
+import com.sun.source.doctree.TextTree;
+import com.sun.source.util.DocTreePath;
+import com.sun.source.util.DocTreePathScanner;
+import com.sun.source.util.TreePath;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.io.IOException;
+import java.io.Writer;
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.tools.Diagnostic;
+import jdk.javadoc.doclet.DocletEnvironment;
+import jdk.javadoc.doclet.Reporter;
+
+/**
+ * {@link DocTreePathScanner} for generating AsciiDocs from JavaDocs HTML content.
+ * 
+ * This is used by the AsciiDocElementVisitor to handle HTML comments.
+ * 
+ * @author njt
+ */
+public class AsciiDocDocTreeWalker extends DocTreePathScanner&lt;Void, Void&gt; {
+    
+<span class="fc" id="L56">  private enum TableState {</span>
+<span class="fc" id="L57">    table</span>
+<span class="fc" id="L58">    , caption</span>
+<span class="fc" id="L59">    , header</span>
+<span class="fc" id="L60">    , headerRow</span>
+<span class="fc" id="L61">    , headerCell</span>
+<span class="fc" id="L62">    , body</span>
+<span class="fc" id="L63">    , bodyRow</span>
+<span class="fc" id="L64">    , bodyCell</span>
+  }
+  
+  private final DocletEnvironment environment;  
+  private final Writer writer;
+  private final Reporter reporter;
+  private final TreePath path;
+  private DocCommentTree dc;
+  private final TypeWriter typeWriter;
+  
+<span class="fc" id="L74">  private final Queue&lt;Boolean&gt; listOrderedStack = new ArrayDeque&lt;&gt;();</span>
+  
+  private boolean inPara;
+  private boolean inSource;
+  
+  private TableState tableState;
+  
+  /**
+   * Constructor.
+   * @param environment The DocletEnvironment, provided by the Doclet processor, via the Doclet.
+   * @param options Options found in the pom configuration.
+   * @param writer The Writer to use for output.
+   * @param reporter Doclet diagnostics reporter - the only mechanism for logging issues.
+   * @param path The path to work from.
+   */
+  @SuppressFBWarnings(value = &quot;EI_EXPOSE_REP2&quot;, justification = &quot;The writer should be considered dedicated to this purpose whilst this walker is in operation.&quot;)  
+<span class="fc" id="L90">  public AsciiDocDocTreeWalker(DocletEnvironment environment, AsciiDocOptions options, Writer writer, Reporter reporter, TreePath path) {</span>
+<span class="fc" id="L91">    this.environment = environment;</span>
+<span class="fc" id="L92">    this.writer = writer;</span>
+<span class="fc" id="L93">    this.reporter = reporter;</span>
+<span class="fc" id="L94">    this.path = path;</span>
+<span class="fc" id="L95">    this.typeWriter = new TypeWriter(writer, reporter, options.getIncludeClasses(), options.getLinkMaps());</span>
+<span class="fc" id="L96">  }</span>
+  
+  /**
+   * Scan from the specified path.
+   */
+  public void scan() {
+<span class="fc" id="L102">    dc = environment.getDocTrees().getDocCommentTree(path);</span>
+<span class="fc" id="L103">    scan(new DocTreePath(path, dc), null);    </span>
+<span class="fc" id="L104">  }</span>
+
+  @Override
+  public Void visitEndElement(EndElementTree node, Void p) {
+<span class="fc" id="L108">    String name = node.getName().toString();</span>
+<span class="fc bfc" id="L109" title="All 2 branches covered.">    if (name.equalsIgnoreCase(&quot;ul&quot;)) {</span>
+<span class="fc" id="L110">      listOrderedStack.poll();</span>
+<span class="fc" id="L111">      write(&quot;\n&quot;);</span>
+<span class="fc bfc" id="L112" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;ol&quot;)) {</span>
+<span class="fc" id="L113">      listOrderedStack.poll();</span>
+<span class="fc" id="L114">      write(&quot;\n&quot;);</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;em&quot;)) {</span>
+<span class="fc" id="L116">      write(&quot;_&quot;);</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;a&quot;)) {</span>
+<span class="fc" id="L118">      write(&quot;] &quot;);</span>
+<span class="pc bpc" id="L119" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;table&quot;) &amp;&amp; tableState == TableState.table) {</span>
+<span class="fc" id="L120">      tableState = null;</span>
+<span class="fc" id="L121">      write(&quot;\n!===\n&quot;);</span>
+<span class="pc bpc" id="L122" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;caption&quot;) &amp;&amp; tableState == TableState.caption) {</span>
+<span class="fc" id="L123">      tableState = TableState.table;</span>
+<span class="pc bpc" id="L124" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;thead&quot;) &amp;&amp; tableState == TableState.header) {</span>
+<span class="fc" id="L125">      tableState = TableState.table;</span>
+<span class="fc" id="L126">      write(&quot;\n&quot;);</span>
+<span class="fc bfc" id="L127" title="All 4 branches covered.">    } else if (name.equalsIgnoreCase(&quot;tr&quot;) &amp;&amp; tableState == TableState.headerRow) {</span>
+<span class="fc" id="L128">      tableState = TableState.header;</span>
+<span class="fc" id="L129">      write(&quot;\n&quot;);</span>
+<span class="pc bpc" id="L130" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;th&quot;) &amp;&amp; tableState == TableState.headerCell) {</span>
+<span class="fc" id="L131">      tableState = TableState.headerRow;</span>
+<span class="fc" id="L132">      write(&quot; &quot;);</span>
+<span class="pc bpc" id="L133" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;tbody&quot;) &amp;&amp; tableState == TableState.body) {</span>
+<span class="fc" id="L134">      tableState = TableState.table;</span>
+<span class="pc bpc" id="L135" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;tr&quot;) &amp;&amp; tableState == TableState.bodyRow) {</span>
+<span class="fc" id="L136">      tableState = TableState.body;</span>
+<span class="fc" id="L137">      write(&quot;\n&quot;);</span>
+<span class="pc bpc" id="L138" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;td&quot;) &amp;&amp; tableState == TableState.bodyCell) {</span>
+<span class="fc" id="L139">      write(&quot;\n&quot;);</span>
+<span class="fc" id="L140">      tableState = TableState.bodyRow;</span>
+<span class="pc bpc" id="L141" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;pre&quot;) || name.equalsIgnoreCase(&quot;code&quot;)) {</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">      if (inSource) {</span>
+<span class="fc" id="L143">        inSource = false;</span>
+<span class="fc" id="L144">        write(&quot;\n----\n&quot;);</span>
+      }
+    } else {
+<span class="nc" id="L147">      write(node.toString());</span>
+<span class="nc" id="L148">      write(&quot; &quot;);</span>
+    }
+<span class="fc" id="L150">    return super.visitEndElement(node, p);</span>
+  }
+  
+  @Override
+  public Void visitLink(LinkTree node, Void p) {
+<span class="fc" id="L155">    scan(node.getReference(), null);</span>
+
+<span class="fc" id="L157">    ReferenceTree refTree = node.getReference();</span>
+<span class="fc" id="L158">    typeWriter.writeReferenceTree(environment, this.getCurrentPath(), refTree);</span>
+<span class="fc" id="L159">    return super.visitLink(node, p);</span>
+  }
+
+  @Override
+  public Void visitStartElement(StartElementTree node, Void p) {
+<span class="fc" id="L164">    String name = node.getName().toString();</span>
+<span class="fc bfc" id="L165" title="All 2 branches covered.">    if (name.equalsIgnoreCase(&quot;ul&quot;)) {</span>
+<span class="fc" id="L166">      listOrderedStack.add(Boolean.FALSE);</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;ol&quot;)) {</span>
+<span class="fc" id="L168">      listOrderedStack.add(Boolean.TRUE);      </span>
+<span class="fc bfc" id="L169" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;li&quot;)) {</span>
+<span class="pc bpc" id="L170" title="1 of 4 branches missed.">      if (!listOrderedStack.isEmpty() &amp;&amp; listOrderedStack.peek()) {</span>
+<span class="fc" id="L171">        write(&quot;. &quot;);        </span>
+      } else {
+<span class="fc" id="L173">        write(&quot;* &quot;);</span>
+      }
+<span class="fc bfc" id="L175" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;table&quot;)) {</span>
+<span class="fc" id="L176">      tableState = TableState.table;</span>
+<span class="fc" id="L177">      write(&quot;\n\n!===\n&quot;);</span>
+<span class="pc bpc" id="L178" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;caption&quot;) &amp;&amp; tableState == TableState.table) {</span>
+<span class="fc" id="L179">      tableState = TableState.caption;</span>
+<span class="pc bpc" id="L180" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;thead&quot;) &amp;&amp; tableState == TableState.table) {</span>
+<span class="fc" id="L181">      tableState = TableState.header;</span>
+<span class="fc bfc" id="L182" title="All 4 branches covered.">    } else if (name.equalsIgnoreCase(&quot;tr&quot;) &amp;&amp; tableState == TableState.header) {</span>
+<span class="fc" id="L183">      tableState = TableState.headerRow;</span>
+<span class="pc bpc" id="L184" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;th&quot;) &amp;&amp; tableState == TableState.headerRow) {</span>
+<span class="fc" id="L185">      tableState = TableState.headerCell;</span>
+<span class="fc" id="L186">      write(&quot;! &quot;);</span>
+<span class="pc bpc" id="L187" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;tbody&quot;) &amp;&amp; tableState == TableState.table) {</span>
+<span class="fc" id="L188">      tableState = TableState.body;</span>
+<span class="pc bpc" id="L189" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;tr&quot;) &amp;&amp; tableState == TableState.body) {</span>
+<span class="fc" id="L190">      tableState = TableState.bodyRow;</span>
+<span class="pc bpc" id="L191" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;td&quot;) &amp;&amp; tableState == TableState.bodyRow) {</span>
+<span class="fc" id="L192">      tableState = TableState.bodyCell;</span>
+<span class="fc" id="L193">      write(&quot;! &quot;);</span>
+<span class="fc bfc" id="L194" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;p&quot;)) {</span>
+<span class="fc" id="L195">      write(&quot;\n\n&quot;);</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;br&quot;)) {</span>
+<span class="fc" id="L197">      write(&quot; +\n&quot;);</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;em&quot;)) {</span>
+<span class="fc" id="L199">      write(&quot;_&quot;);</span>
+<span class="fc bfc" id="L200" title="All 2 branches covered.">    } else if (name.equalsIgnoreCase(&quot;a&quot;)) {</span>
+<span class="fc" id="L201">      write(&quot;link:&quot;);</span>
+<span class="fc" id="L202">      String attributeValue = findAttribute(node, &quot;href&quot;);</span>
+<span class="pc bpc" id="L203" title="1 of 2 branches missed.">      if (attributeValue != null) {</span>
+<span class="fc" id="L204">        write(attributeValue);</span>
+      }
+<span class="fc" id="L206">      write(&quot;[&quot;);</span>
+<span class="fc" id="L207">      return null;</span>
+<span class="pc bpc" id="L208" title="1 of 4 branches missed.">    } else if (name.equalsIgnoreCase(&quot;pre&quot;) || name.equalsIgnoreCase(&quot;code&quot;)) {</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">      if (!inSource) {</span>
+<span class="fc" id="L210">        inSource = true;</span>
+<span class="fc" id="L211">        write(&quot;\n[source&quot;);</span>
+<span class="fc" id="L212">        String attributeValue = findAttribute(node, &quot;data-lang&quot;);</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        if (attributeValue != null) {</span>
+<span class="fc" id="L214">          write(&quot;,&quot;);</span>
+<span class="fc" id="L215">          write(attributeValue);</span>
+        }
+<span class="fc" id="L217">        write(&quot;]\n&quot;);</span>
+<span class="fc" id="L218">        write(&quot;----\n&quot;);</span>
+<span class="fc" id="L219">        return null;</span>
+      }      
+    } else {
+<span class="nc" id="L222">      reporter.print(Diagnostic.Kind.WARNING, new DocTreePath(path, dc), &quot;Unrecognised HTML tag (&quot; + name + &quot;).&quot;);</span>
+<span class="nc" id="L223">      write(node.toString());</span>
+    }
+<span class="fc" id="L225">    return super.visitStartElement(node, p);</span>
+  }
+
+  @Override
+  public Void visitAttribute(AttributeTree node, Void p) {
+<span class="pc bpc" id="L230" title="1 of 2 branches missed.">    if (tableState == null) {</span>
+<span class="nc" id="L231">      return super.visitAttribute(node, p);</span>
+    }
+<span class="fc" id="L233">    return null;</span>
+  }
+  
+  String findAttribute(StartElementTree node, String requiredAttribute) {
+<span class="pc bpc" id="L237" title="1 of 2 branches missed.">    for (DocTree attribute : node.getAttributes()) {</span>
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">      if (attribute instanceof AttributeTree) {</span>
+<span class="fc" id="L239">        AttributeTree attributeTree = (AttributeTree) attribute;</span>
+<span class="pc bpc" id="L240" title="1 of 2 branches missed.">        if (attributeTree.getName().toString().equalsIgnoreCase(requiredAttribute)) {</span>
+<span class="fc" id="L241">          return attributeTree.getValue().toString();</span>
+        }
+      }
+<span class="nc" id="L244">    }</span>
+<span class="nc" id="L245">    return null;</span>
+  }
+
+  @Override
+  public Void visitText(TextTree node, Void p) {
+<span class="fc bfc" id="L250" title="All 4 branches covered.">    if ((tableState != TableState.table) &amp;&amp; (tableState != TableState.caption)) {</span>
+<span class="fc" id="L251">      String text = node.getBody();</span>
+<span class="fc bfc" id="L252" title="All 4 branches covered.">      if (!inPara || tableState != null) {</span>
+<span class="fc" id="L253">        text = text.stripLeading();</span>
+      }
+
+<span class="fc" id="L256">      write(text);</span>
+    }
+<span class="fc" id="L258">    return super.visitText(node, p);</span>
+  }
+
+  @Override
+  public Void visitLiteral(LiteralTree node, Void p) {
+<span class="fc" id="L263">    write(&quot;`+&quot;);</span>
+<span class="fc" id="L264">    super.visitLiteral(node, p);</span>
+<span class="fc" id="L265">    write(&quot;+`&quot;);</span>
+<span class="fc" id="L266">    return null;</span>
+  }
+
+<span class="fc" id="L269">  private static final Pattern NUMERIC_ENTITY = Pattern.compile(&quot;&amp;#([0-9]{1,6});&quot;);</span>
+<span class="fc" id="L270">  private static final Pattern TEXT_ENTITY = Pattern.compile(&quot;&amp;([a-zA-Z]{1,6});&quot;);</span>
+  
+  @Override
+  public Void visitEntity(EntityTree node, Void p) {
+<span class="fc" id="L274">    String entityRef = node.toString();</span>
+    
+    try {
+<span class="fc" id="L277">      Matcher matcher = NUMERIC_ENTITY.matcher(entityRef);</span>
+<span class="fc bfc" id="L278" title="All 2 branches covered.">      if (matcher.matches()) {</span>
+<span class="fc" id="L279">        String ref = matcher.group(1);</span>
+<span class="fc" id="L280">        int code = Integer.parseInt(ref);</span>
+<span class="fc" id="L281">        write(Character.toString(code));</span>
+<span class="fc" id="L282">        return null;</span>
+      }
+<span class="fc" id="L284">      matcher = TEXT_ENTITY.matcher(entityRef);</span>
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">      if (matcher.matches()) {</span>
+<span class="fc" id="L286">        String ref = matcher.group(1).toLowerCase();        </span>
+<span class="fc" id="L287">        String character = HtmlEntities.lookupEntity(ref);</span>
+<span class="fc bfc" id="L288" title="All 2 branches covered.">        if (character != null) {</span>
+<span class="fc" id="L289">          write(character);</span>
+<span class="fc" id="L290">          return null;</span>
+        }
+      }
+<span class="nc" id="L293">    } catch (Throwable ex) {</span>
+<span class="nc" id="L294">      reporter.print(Diagnostic.Kind.ERROR, new DocTreePath(path, dc), &quot;Failed to process entity: &quot; + node.toString());</span>
+<span class="fc" id="L295">    }</span>
+    
+<span class="fc" id="L297">    write(node.toString());</span>
+<span class="fc" id="L298">    return null;</span>
+  }
+  
+  @Override
+  public Void visitSee(SeeTree node, Void p) {
+<span class="fc" id="L303">    write(&quot;\n\nSee: &quot;);</span>
+<span class="fc" id="L304">    return super.visitSee(node, p);</span>
+  }
+
+  @Override
+  public Void visitParam(ParamTree node, Void p) {
+<span class="fc" id="L309">    return null;</span>
+  }
+
+  @Override
+  public Void visitReturn(ReturnTree node, Void p) {
+<span class="fc" id="L314">    return null;</span>
+  }
+
+  @Override
+  public Void visitAuthor(AuthorTree node, Void p) {
+<span class="fc" id="L319">    return null;</span>
+  }
+
+  private void write(String s) {
+<span class="pc bpc" id="L323" title="1 of 2 branches missed.">    if (s != null) {</span>
+<span class="fc bfc" id="L324" title="All 2 branches covered.">      inPara = !s.endsWith(&quot;\n&quot;);</span>
+      try {
+<span class="fc" id="L326">        writer.write(s);</span>
+<span class="nc" id="L327">      } catch (IOException ex) {</span>
+<span class="nc" id="L328">        reporter.print(Diagnostic.Kind.ERROR, new DocTreePath(path, dc), &quot;Failed to write: &quot; + ex.getMessage());</span>
+<span class="fc" id="L329">      }</span>
+    }
+<span class="fc" id="L331">  }  </span>
+ 
+  
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.14.202510111229</span></div></body></html>
