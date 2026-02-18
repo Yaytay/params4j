@@ -47,9 +47,9 @@
     <jdk.version>17</jdk.version>
     <jackson.version>[2.15.0,)</jackson.version>
     <slf4j.version>[1.7,)</slf4j.version>
-    <logback.version>1.5.29</logback.version>
-    <junit-jupiter.version>6.0.2</junit-jupiter.version>
-    <junit-platform.version>6.0.2</junit-platform.version>
+    <logback.version>1.5.32</logback.version>
+    <junit-jupiter.version>6.0.3</junit-jupiter.version>
+    <junit-platform.version>6.0.3</junit-platform.version>
   </properties>
   
   <dependencies>
@@ -228,6 +228,22 @@
             <goals>
               <goal>parse-version</goal>
             </goals>
+          </execution>
+          <execution>
+            <id>attach-artifacts</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attach-artifact</goal>
+            </goals>
+            <configuration>
+              <artifacts>
+                <artifact>
+                  <file>${project.build.directory}/params4j*-doclet.jar</file>
+                  <type>jar</type>
+                  <classifier>doclet</classifier>
+                </artifact>
+              </artifacts>
+            </configuration>
           </execution>
         </executions>
       </plugin>
@@ -527,30 +543,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-project-info-reports-plugin</artifactId>
         <version>3.9.0</version>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>build-helper-maven-plugin</artifactId>
-        <version>3.6.1</version>
-        <executions>
-          <execution>
-            <id>attach-artifacts</id>
-            <phase>package</phase>
-            <goals>
-              <goal>attach-artifact</goal>
-            </goals>
-            <configuration>
-              <artifacts>
-                <artifact>
-                  <file>${project.build.directory}/params4j*-doclet.jar</file>
-                  <type>jar</type>
-                  <classifier>doclet</classifier>
-                </artifact>
-              </artifacts>
-            </configuration>
-          </execution>
-        </executions>
       </plugin>
 
       <plugin>
