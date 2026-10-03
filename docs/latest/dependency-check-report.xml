@@ -4,22 +4,22 @@
           xsi:schemaLocation="https://jeremylong.github.io/DependencyCheck/dependency-check.4.1.xsd
                               https://dependency-check.github.io/DependencyCheck/dependency-check.4.1.xsd">
     <scanInfo>
-        <engineVersion>12.2.2</engineVersion>
+        <engineVersion>13.0.0</engineVersion>
         <dataSource>
             <name>NVD API Last Checked</name>
-            <timestamp>2026-07-26T07:08:00Z</timestamp>
+            <timestamp>2026-10-03T11:00:53Z</timestamp>
         </dataSource>
         <dataSource>
             <name>NVD API Last Modified</name>
-            <timestamp>2026-07-26T05:16:23Z</timestamp>
+            <timestamp>2026-10-03T10:16:38Z</timestamp>
         </dataSource>
     </scanInfo>
     <projectInfo>
         <name>Parameters for Java</name>
         <groupID>uk.co.spudsoft</groupID>
         <artifactID>params4j</artifactID>
-        <version>0.2.9</version>
-        <reportDate>2026-07-26T07:08:21.163978482Z</reportDate>
+        <version>0.2.10</version>
+        <reportDate>2026-10-03T11:01:13.453441419Z</reportDate>
         <credits>This product uses the NVD API but is not endorsed or certified by the NVD. This report contains data retrieved from the National Vulnerability Database: https://nvd.nist.gov, Github Advisory Database (via NPM Audit API): https://github.com/advisories/, and the RetireJS community.</credits>
     </projectInfo>
     <dependencies>
@@ -36,7 +36,7 @@
                 <projectReference>Parameters for Java:compile</projectReference>
             </projectReferences>
             <includedBy>
-                <reference>pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.1</reference>
+                <reference>pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3</reference>
             </includedBy>
             <evidenceCollected>
                 <evidence type="vendor" confidence="HIGH">
@@ -234,18 +234,18 @@
             </identifiers>
         </dependency>
         <dependency isVirtual="false">
-            <fileName>jackson-core-2.22.1.jar</fileName>
-            <filePath>/home/runner/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.22.1/jackson-core-2.22.1.jar</filePath>
-            <md5>09e866bcd73613665ef49f5086704fb1</md5>
-            <sha1>da7ffb60088d7e8f37ecdd3b617520971cc7b9bf</sha1>
-            <sha256>941ff029bcdb93e83d209ce516c1a7fb8bbac07d0a2fa122f5bf194b2cd7b4f4</sha256>
+            <fileName>jackson-core-2.22.3.jar</fileName>
+            <filePath>/home/runner/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.22.3/jackson-core-2.22.3.jar</filePath>
+            <md5>75691eef4483b7eb0e1c43e08dcb6573</md5>
+            <sha1>8695aab38355c65b60e242ec62edf13c52916d88</sha1>
+            <sha256>8a501126a385b25841915d839508f8a66e2a0dbc8a6709d055ef3b3e852b094c</sha256>
             <description>Core Jackson processing abstractions (aka Streaming API), implementation for JSON</description>
             <license>The Apache Software License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0.txt</license>
             <projectReferences>
                 <projectReference>Parameters for Java:compile</projectReference>
             </projectReferences>
             <includedBy>
-                <reference>pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.1</reference>
+                <reference>pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3</reference>
             </includedBy>
             <evidenceCollected>
                 <evidence type="vendor" confidence="HIGH">
@@ -466,50 +466,50 @@
                 <evidence type="version" confidence="HIGH">
                     <source>file</source>
                     <name>version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGH">
                     <source>Manifest</source>
                     <name>Bundle-Version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGH">
                     <source>Manifest</source>
                     <name>Implementation-Version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGHEST">
                     <source>pom</source>
                     <name>version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
             </evidenceCollected>
             <identifiers>
                 <package confidence="HIGH">
-                    <id>pkg:maven/com.fasterxml.jackson.core/jackson-core@2.22.1</id>
+                    <id>pkg:maven/com.fasterxml.jackson.core/jackson-core@2.22.3</id>
                 </package>
                 <vulnerabilityIds confidence="HIGHEST">
-                    <id>cpe:2.3:a:fasterxml:jackson-core:2.22.1:*:*:*:*:*:*:*</id>
-                    <url>https://nvd.nist.gov/vuln/search#/nvd/home?sortOrder=3&amp;sortDirection=2&amp;cpeFilterMode=applicability&amp;resultType=records&amp;cpeName=cpe%3A2.3%3Aa%3Afasterxml%3Ajackson-core%3A2.22.1%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A</url>
+                    <id>cpe:2.3:a:fasterxml:jackson-core:2.22.3:*:*:*:*:*:*:*</id>
+                    <url>https://nvd.nist.gov/vuln/search#/nvd/home?sortOrder=3&amp;sortDirection=2&amp;cpeFilterMode=applicability&amp;resultType=records&amp;cpeName=cpe%3A2.3%3Aa%3Afasterxml%3Ajackson-core%3A2.22.3%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A</url>
                 </vulnerabilityIds>
                 <vulnerabilityIds confidence="LOW">
-                    <id>cpe:2.3:a:fasterxml:jackson-modules-java8:2.22.1:*:*:*:*:*:*:*</id>
+                    <id>cpe:2.3:a:fasterxml:jackson-modules-java8:2.22.3:*:*:*:*:*:*:*</id>
                 </vulnerabilityIds>
             </identifiers>
         </dependency>
         <dependency isVirtual="false">
-            <fileName>jackson-databind-2.22.1.jar</fileName>
-            <filePath>/home/runner/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.22.1/jackson-databind-2.22.1.jar</filePath>
-            <md5>df2dcf8d581836d48aae7387311cba93</md5>
-            <sha1>9e2fb91831cce9cb9262909cd76647508949f232</sha1>
-            <sha256>7dcd7e53bec1f56c7ad278bd1ca0840bebcc595d61ce44d6a8439abb75b965b2</sha256>
+            <fileName>jackson-databind-2.22.3.jar</fileName>
+            <filePath>/home/runner/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.22.3/jackson-databind-2.22.3.jar</filePath>
+            <md5>e1fbe6bbbb606fad49068fd2670a5208</md5>
+            <sha1>d0d4b2cdb0a1440ac02178fc2ff01dfb05cd06a8</sha1>
+            <sha256>556db5439e206114346043f68d200497dc96a0bca62a360a81784092ebd0e0a9</sha256>
             <description>General data-binding functionality for Jackson: works on core streaming API</description>
             <license>The Apache Software License, Version 2.0: https://www.apache.org/licenses/LICENSE-2.0.txt</license>
             <projectReferences>
                 <projectReference>Parameters for Java:compile</projectReference>
             </projectReferences>
             <includedBy>
-                <reference>pkg:maven/uk.co.spudsoft/params4j@0.2.9</reference>
+                <reference>pkg:maven/uk.co.spudsoft/params4j@0.2.10</reference>
             </includedBy>
             <evidenceCollected>
                 <evidence type="vendor" confidence="HIGH">
@@ -700,47 +700,47 @@
                 <evidence type="version" confidence="HIGH">
                     <source>file</source>
                     <name>version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGH">
                     <source>Manifest</source>
                     <name>Bundle-Version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGH">
                     <source>Manifest</source>
                     <name>Implementation-Version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGHEST">
                     <source>pom</source>
                     <name>version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
             </evidenceCollected>
             <identifiers>
                 <package confidence="HIGH">
-                    <id>pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.1</id>
+                    <id>pkg:maven/com.fasterxml.jackson.core/jackson-databind@2.22.3</id>
                 </package>
                 <vulnerabilityIds confidence="HIGHEST">
-                    <id>cpe:2.3:a:fasterxml:jackson-core:2.22.1:*:*:*:*:*:*:*</id>
-                    <url>https://nvd.nist.gov/vuln/search#/nvd/home?sortOrder=3&amp;sortDirection=2&amp;cpeFilterMode=applicability&amp;resultType=records&amp;cpeName=cpe%3A2.3%3Aa%3Afasterxml%3Ajackson-core%3A2.22.1%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A</url>
+                    <id>cpe:2.3:a:fasterxml:jackson-core:2.22.3:*:*:*:*:*:*:*</id>
+                    <url>https://nvd.nist.gov/vuln/search#/nvd/home?sortOrder=3&amp;sortDirection=2&amp;cpeFilterMode=applicability&amp;resultType=records&amp;cpeName=cpe%3A2.3%3Aa%3Afasterxml%3Ajackson-core%3A2.22.3%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A</url>
                 </vulnerabilityIds>
                 <vulnerabilityIds confidence="HIGHEST">
-                    <id>cpe:2.3:a:fasterxml:jackson-databind:2.22.1:*:*:*:*:*:*:*</id>
-                    <url>https://nvd.nist.gov/vuln/search#/nvd/home?sortOrder=3&amp;sortDirection=2&amp;cpeFilterMode=applicability&amp;resultType=records&amp;cpeName=cpe%3A2.3%3Aa%3Afasterxml%3Ajackson-databind%3A2.22.1%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A</url>
+                    <id>cpe:2.3:a:fasterxml:jackson-databind:2.22.3:*:*:*:*:*:*:*</id>
+                    <url>https://nvd.nist.gov/vuln/search#/nvd/home?sortOrder=3&amp;sortDirection=2&amp;cpeFilterMode=applicability&amp;resultType=records&amp;cpeName=cpe%3A2.3%3Aa%3Afasterxml%3Ajackson-databind%3A2.22.3%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A</url>
                 </vulnerabilityIds>
                 <vulnerabilityIds confidence="LOW">
-                    <id>cpe:2.3:a:fasterxml:jackson-modules-java8:2.22.1:*:*:*:*:*:*:*</id>
+                    <id>cpe:2.3:a:fasterxml:jackson-modules-java8:2.22.3:*:*:*:*:*:*:*</id>
                 </vulnerabilityIds>
             </identifiers>
         </dependency>
         <dependency isVirtual="false">
-            <fileName>jackson-dataformat-yaml-2.22.1.jar</fileName>
-            <filePath>/home/runner/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.22.1/jackson-dataformat-yaml-2.22.1.jar</filePath>
-            <md5>8348dc064a58fb2ae67371764b634812</md5>
-            <sha1>af5fde2414e4a8d2617e7890f7068c26b5b66a33</sha1>
-            <sha256>cc3a0e540791a9a1cbcd7584767b84572ffda0b72823856558f47dea69ae8ed1</sha256>
+            <fileName>jackson-dataformat-yaml-2.22.3.jar</fileName>
+            <filePath>/home/runner/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-yaml/2.22.3/jackson-dataformat-yaml-2.22.3.jar</filePath>
+            <md5>ba1c8448785cea71b8cc68275d0e542b</md5>
+            <sha1>520097fe76cde11c7448c622e8cb6e07714c8c7c</sha1>
+            <sha256>2bcbc3b9abaefbeba11409b9e30ec35ed7071a61a47c8c2a9c688e40e45b90f9</sha256>
             <description>Support for reading and writing YAML-encoded data via Jackson abstractions.
   </description>
             <license>https://www.apache.org/licenses/LICENSE-2.0.txt</license>
@@ -748,18 +748,18 @@
                 <projectReference>Parameters for Java:compile</projectReference>
             </projectReferences>
             <includedBy>
-                <reference>pkg:maven/uk.co.spudsoft/params4j@0.2.9</reference>
+                <reference>pkg:maven/uk.co.spudsoft/params4j@0.2.10</reference>
             </includedBy>
             <relatedDependencies>
                 <relatedDependency>
-                    <fileName>jackson-dataformat-properties-2.22.1.jar</fileName>
-                    <filePath>/home/runner/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-properties/2.22.1/jackson-dataformat-properties-2.22.1.jar</filePath>
-                    <sha256>fa5d38105e93260f8f9074ff944bf0db61926758573ee121112c439990987da1</sha256>
-                    <sha1>a7e9c52d89847b646f57fe5348c197efd43807c5</sha1>
-                    <md5>1dcbf1581c1911698033a824622d475b</md5>
+                    <fileName>jackson-dataformat-properties-2.22.3.jar</fileName>
+                    <filePath>/home/runner/.m2/repository/com/fasterxml/jackson/dataformat/jackson-dataformat-properties/2.22.3/jackson-dataformat-properties-2.22.3.jar</filePath>
+                    <sha256>ffa35beeebdab281dce9bfd196f21c1270c4d7becf9e32055443bc0cefe3047f</sha256>
+                    <sha1>33ae86465c866ce8961703acd4ee01bb0c948172</sha1>
+                    <md5>022dce77db90fd13d9475e4ab942ed36</md5>
                     <identifiers>
                         <package>
-                            <id>pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-properties@2.22.1</id>
+                            <id>pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-properties@2.22.3</id>
                         </package>
                     </identifiers>
                 </relatedDependency>
@@ -943,47 +943,47 @@
                 <evidence type="version" confidence="HIGH">
                     <source>file</source>
                     <name>version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGH">
                     <source>Manifest</source>
                     <name>Bundle-Version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGH">
                     <source>Manifest</source>
                     <name>Implementation-Version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGHEST">
                     <source>pom</source>
                     <name>version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
             </evidenceCollected>
             <identifiers>
                 <package confidence="HIGH">
-                    <id>pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml@2.22.1</id>
+                    <id>pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml@2.22.3</id>
                 </package>
                 <vulnerabilityIds confidence="HIGHEST">
-                    <id>cpe:2.3:a:fasterxml:jackson-dataformat-xml:2.22.1:*:*:*:*:*:*:*</id>
-                    <url>https://nvd.nist.gov/vuln/search#/nvd/home?sortOrder=3&amp;sortDirection=2&amp;cpeFilterMode=applicability&amp;resultType=records&amp;cpeName=cpe%3A2.3%3Aa%3Afasterxml%3Ajackson-dataformat-xml%3A2.22.1%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A</url>
+                    <id>cpe:2.3:a:fasterxml:jackson-dataformat-xml:2.22.3:*:*:*:*:*:*:*</id>
+                    <url>https://nvd.nist.gov/vuln/search#/nvd/home?sortOrder=3&amp;sortDirection=2&amp;cpeFilterMode=applicability&amp;resultType=records&amp;cpeName=cpe%3A2.3%3Aa%3Afasterxml%3Ajackson-dataformat-xml%3A2.22.3%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A%3A%2A</url>
                 </vulnerabilityIds>
             </identifiers>
         </dependency>
         <dependency isVirtual="false">
-            <fileName>jackson-datatype-jsr310-2.22.1.jar</fileName>
-            <filePath>/home/runner/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.22.1/jackson-datatype-jsr310-2.22.1.jar</filePath>
-            <md5>4dd3e0a2be3f88d720f9214954ed59b6</md5>
-            <sha1>3377a0589c1b0e62bbe245ac8e9f56fa7d7b8bb9</sha1>
-            <sha256>85da45b7e5e565418963ff8f0dcb184365b0557c15468933f4318dde5c3ce845</sha256>
+            <fileName>jackson-datatype-jsr310-2.22.3.jar</fileName>
+            <filePath>/home/runner/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.22.3/jackson-datatype-jsr310-2.22.3.jar</filePath>
+            <md5>1f14fa9b9779d0545287bba2bfb927df</md5>
+            <sha1>8d54f48cfe4865bdfa245b8a90fb15b56c8a4a3c</sha1>
+            <sha256>ec7052ee48c9d873bb8148338a643f02cf89c01d035dd219411473030d6d2b22</sha256>
             <description>Add-on module to support JSR-310 (Java 8 Date &amp; Time API) data types.</description>
             <license>http://www.apache.org/licenses/LICENSE-2.0.txt</license>
             <projectReferences>
                 <projectReference>Parameters for Java:compile</projectReference>
             </projectReferences>
             <includedBy>
-                <reference>pkg:maven/uk.co.spudsoft/params4j@0.2.9</reference>
+                <reference>pkg:maven/uk.co.spudsoft/params4j@0.2.10</reference>
             </includedBy>
             <evidenceCollected>
                 <evidence type="vendor" confidence="HIGH">
@@ -1194,30 +1194,30 @@
                 <evidence type="version" confidence="HIGH">
                     <source>file</source>
                     <name>version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGH">
                     <source>Manifest</source>
                     <name>Bundle-Version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGH">
                     <source>Manifest</source>
                     <name>Implementation-Version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
                 <evidence type="version" confidence="HIGHEST">
                     <source>pom</source>
                     <name>version</name>
-                    <value>2.22.1</value>
+                    <value>2.22.3</value>
                 </evidence>
             </evidenceCollected>
             <identifiers>
                 <package confidence="HIGH">
-                    <id>pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.22.1</id>
+                    <id>pkg:maven/com.fasterxml.jackson.datatype/jackson-datatype-jsr310@2.22.3</id>
                 </package>
                 <vulnerabilityIds confidence="LOW">
-                    <id>cpe:2.3:a:fasterxml:jackson-modules-java8:2.22.1:*:*:*:*:*:*:*</id>
+                    <id>cpe:2.3:a:fasterxml:jackson-modules-java8:2.22.3:*:*:*:*:*:*:*</id>
                 </vulnerabilityIds>
             </identifiers>
         </dependency>
@@ -1233,7 +1233,7 @@
                 <projectReference>Parameters for Java:compile</projectReference>
             </projectReferences>
             <includedBy>
-                <reference>pkg:maven/com.github.spotbugs/spotbugs-annotations@4.10.3</reference>
+                <reference>pkg:maven/com.github.spotbugs/spotbugs-annotations@4.10.4</reference>
             </includedBy>
             <evidenceCollected>
                 <evidence type="vendor" confidence="HIGH">
@@ -1340,7 +1340,7 @@
                 <projectReference>Parameters for Java:compile</projectReference>
             </projectReferences>
             <includedBy>
-                <reference>pkg:maven/uk.co.spudsoft/params4j@0.2.9</reference>
+                <reference>pkg:maven/uk.co.spudsoft/params4j@0.2.10</reference>
             </includedBy>
             <evidenceCollected>
                 <evidence type="vendor" confidence="HIGH">
@@ -1497,7 +1497,7 @@
                 <projectReference>Parameters for Java:compile</projectReference>
             </projectReferences>
             <includedBy>
-                <reference>pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml@2.22.1</reference>
+                <reference>pkg:maven/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml@2.22.3</reference>
             </includedBy>
             <evidenceCollected>
                 <evidence type="vendor" confidence="HIGH">
@@ -1722,18 +1722,18 @@
             </identifiers>
         </dependency>
         <dependency isVirtual="false">
-            <fileName>spotbugs-annotations-4.10.3.jar</fileName>
-            <filePath>/home/runner/.m2/repository/com/github/spotbugs/spotbugs-annotations/4.10.3/spotbugs-annotations-4.10.3.jar</filePath>
-            <md5>76375030a07aec3ce0c94f853d490fc6</md5>
-            <sha1>683f9df1d9a2ccca7770d5fe0ff56338b928f731</sha1>
-            <sha256>3fabaf088f8cd10803cc87dba4666cf874bdcd2e07ad154ed3fe403647ce3f2a</sha256>
+            <fileName>spotbugs-annotations-4.10.4.jar</fileName>
+            <filePath>/home/runner/.m2/repository/com/github/spotbugs/spotbugs-annotations/4.10.4/spotbugs-annotations-4.10.4.jar</filePath>
+            <md5>472925cb4e5451c8f7a1aeeefe286622</md5>
+            <sha1>7eb4c58212378becfb6ea6d236ec24a2352a316e</sha1>
+            <sha256>28fa4befaddce5d7b79b07c68e7c12fa27c5d9282c4229528717971606661ea3</sha256>
             <description>Annotations the SpotBugs tool supports</description>
             <license>GNU LESSER GENERAL PUBLIC LICENSE, Version 2.1: https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html</license>
             <projectReferences>
                 <projectReference>Parameters for Java:compile</projectReference>
             </projectReferences>
             <includedBy>
-                <reference>pkg:maven/uk.co.spudsoft/params4j@0.2.9</reference>
+                <reference>pkg:maven/uk.co.spudsoft/params4j@0.2.10</reference>
             </includedBy>
             <evidenceCollected>
                 <evidence type="vendor" confidence="HIGH">
@@ -1989,22 +1989,22 @@
                 <evidence type="version" confidence="HIGH">
                     <source>file</source>
                     <name>version</name>
-                    <value>4.10.3</value>
+                    <value>4.10.4</value>
                 </evidence>
                 <evidence type="version" confidence="HIGH">
                     <source>Manifest</source>
                     <name>Bundle-Version</name>
-                    <value>4.10.3</value>
+                    <value>4.10.4</value>
                 </evidence>
                 <evidence type="version" confidence="HIGHEST">
                     <source>pom</source>
                     <name>version</name>
-                    <value>4.10.3</value>
+                    <value>4.10.4</value>
                 </evidence>
             </evidenceCollected>
             <identifiers>
                 <package confidence="HIGH">
-                    <id>pkg:maven/com.github.spotbugs/spotbugs-annotations@4.10.3</id>
+                    <id>pkg:maven/com.github.spotbugs/spotbugs-annotations@4.10.4</id>
                 </package>
             </identifiers>
         </dependency>
